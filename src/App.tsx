@@ -15,7 +15,7 @@ function App() {
         <section className="Body-section"> {/* Info */}
           <Info />
         </section>
-        <section className="Body-section"> {/* Graph Stack */}
+        <section className="Body-section stack"> {/* Graph Stack */}
           <Stack />
         </section>
       </main>

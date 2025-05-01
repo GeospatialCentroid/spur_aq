@@ -14,6 +14,8 @@
 
 .App-body { /* Container for the meat and potatos */
   flex: 1;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   padding-left: 2rem;
   padding-right: 2rem;
@@ -21,11 +23,15 @@
 
 .Body-section { /* Info */ /* Graph Stack */
   /* background-color: #f1f1f1; */
-  margin-bottom: 1.5rem;
-  flex: 1;
+  margin-bottom: 1rem;
   width: 100%;
   align-self: center;
   box-shadow: #282c34;
+}
+.stack { /* Graph Stack */
+  flex: 1;
+  min-height: fit-content;
+  background-color: #f1f1f1;
 }
 
 .App-footer { /* Footer */

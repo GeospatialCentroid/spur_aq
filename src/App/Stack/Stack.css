@@ -1,5 +1,51 @@
-.Graph-stack-section {
+.graph-card {
+  position: relative;
   width: 100%;
-  background-color: red;
+  height: 200px;            /* or auto / flex item sized as needed */
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: .25rem;
+  overflow: hidden;
+}
 
+/* top 25%: delete button */
+.delete-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2.5rem;            /* fix the width */
+  height: 25%;              /* top quarter */
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-top-right-radius: .25rem;
+}
+
+/* bottom 75%: drag handle */
+.drag-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 2.5rem;
+  height: 75%;
+  background-color: #eeeeee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  border-bottom-right-radius: .25rem;
+}
+
+
+
+/* opacity tweaks while dragging */
+.sortable-chosen .delete-btn,
+.sortable-ghost   .delete-btn,
+.sortable-chosen .drag-handle,
+.sortable-ghost   .drag-handle {
+  opacity: 0.6;
 }
