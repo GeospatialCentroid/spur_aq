@@ -1,0 +1,14 @@
+/* Red menu */
+.graph-menu {
+    background-color: red;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+}
+
+@media (min-width: 768px) {
+    .graph-menu {
+        flex: 0 0 35%;
+    }
+}

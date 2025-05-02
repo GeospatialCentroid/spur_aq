@@ -1,0 +1,15 @@
+/* Blue chart */
+.graph-chart {
+    background-color: blue;
+    flex: 1 1 65%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0;
+}
+
+@media (min-width: 768px) {
+    .graph-chart {
+        flex: 1;
+    }
+}

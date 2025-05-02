@@ -1,9 +1,9 @@
-// Stack.tsx
+// src/App/Stack/Stack.tsx
 import React, { useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import './Stack.css';
 import Graph from './Graph/Graph';
-import { Plus, GripVertical, X } from 'react-bootstrap-icons';
+import { Plus } from 'react-bootstrap-icons';
 
 interface GraphItem { id: number }
 
@@ -19,8 +19,7 @@ const Stack: React.FC = () => {
   };
 
   return (
-    <div className="container-fluid py-4 d-flex flex-column">
-
+    <div className="container-fluid py-4 d-flex flex-column stack-container">
       <ReactSortable
         list={graphs}
         setList={setGraphs}
@@ -29,28 +28,16 @@ const Stack: React.FC = () => {
         animation={150}
         handle=".drag-handle"
       >
-{graphs.map(item => (
-  <div key={item.id} data-id={item.id} className="graph-card">
-    <button
-      className="delete-btn"
-      onClick={() => removeGraph(item.id)}
-      aria-label="Remove graph"
-    >
-      <X />
-    </button>
-
-    <span className="drag-handle">
-      <GripVertical />
-    </span>
-
-    <Graph id={item.id} />
-  </div>
-))}
+        {graphs.map(item => (
+          <div key={item.id} className="graph-wrapper">
+            <Graph id={item.id} onRemove={() => removeGraph(item.id)} />
+          </div>
+        ))}
       </ReactSortable>
 
       <button
         type="button"
-        className="btn btn-outline-primary align-self-center mt-3"
+        className="btn btn-outline-primary align-self-center mt-4"
         onClick={addGraph}
       >
         <Plus /> Add Graph
