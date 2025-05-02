@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // src/App/Stack/Graph/Components/Menu/ExpandToggle.tsx
 import React, { useState } from 'react';
 import './ExpandToggle.css';
@@ -15,3 +16,6 @@ const ExpandToggle: React.FC = () => {
 };
 
 export default ExpandToggle;
+=======
+import React from 'react';
+>>>>>>> 109625fd710ed2f1da22c0818b3b36a61a34e628
