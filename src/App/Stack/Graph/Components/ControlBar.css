@@ -1,6 +1,6 @@
 /* Green control bar */
 .graph-control-bar {
-    background-color: green;
+    /* background-color: green; */
     width: 100%;
     height: 45px;
     display: flex;

@@ -1,9 +1,62 @@
+// src/App/Stack/Graph/Components/Chart/DomainSlider.tsx
 import React from 'react';
+import { Range, getTrackBackground } from 'react-range';
 import './DomainSlider.css';
 
-const DomainSlider: React.FC = () => (
-    <div className="DomainSlider">
-        Domain Slider Place Holder
+interface DomainSliderProps {
+  domain: [number, number];
+  selection: [number, number];
+  onChange: (range: [number, number]) => void;
+}
+
+export default function DomainSlider({
+  domain,
+  selection,
+  onChange,
+}: DomainSliderProps) {
+  const STEP = 1;
+
+  return (
+    // <-- New outer wrapper for background, padding, etc.
+    <div className="domain-slider-wrapper">
+      {/* This inner div holds the actual Range so you can control padding */}
+      <div className="domain-slider">
+        <Range
+          values={selection}
+          step={STEP}
+          min={domain[0]}
+          max={domain[1]}
+          draggableTrack
+          onChange={(vals) => onChange([vals[0], vals[1]])}
+          renderTrack={({ props, children }) => (
+            <div
+              {...props}
+              className="slider-track"
+              style={{
+                background: getTrackBackground({
+                  values: selection,
+                  colors: ['#ddd', '#548BF4', '#ddd'],
+                  min: domain[0],
+                  max: domain[1],
+                }),
+              }}
+            >
+              {children}
+            </div>
+          )}
+          renderThumb={({ props, index }) => (
+            <div
+              {...props}
+              className="slider-handle"
+              role="slider"
+              aria-label={`Handle ${index + 1}`}
+              aria-valuemin={domain[0]}
+              aria-valuemax={domain[1]}
+              aria-valuenow={selection[index]}
+            />
+          )}
+        />
+      </div>
     </div>
-);
-export default DomainSlider;
+  );
+}
