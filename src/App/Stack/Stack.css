@@ -14,7 +14,6 @@
 .graph-wrapper {
   width: 100%;
   height: 250px;
-  /* force height here instead of in .graph */
   margin-bottom: 1rem;
 }
 
@@ -25,11 +24,5 @@
 }
 
 .stack-container {
-  min-height: 100vh;
-}
-
-.graph-wrapper {
-  width: 100%;
-  height: 250px;
-  margin-bottom: 1rem;
+  min-height: 75vh;
 }

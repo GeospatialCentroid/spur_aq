@@ -25,7 +25,7 @@ const D3Chart: React.FC<D3ChartProps> = ({ id, selection }) => {
             .append('circle')
             .attr('cx', xScale(mid))
             .attr('cy', height / 2 - 10)
-            .attr('r', 10)
+            .attr('r', 20)
             .attr('fill', 'steelblue');
         svg
             .append('text')

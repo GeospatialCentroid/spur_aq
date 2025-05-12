@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 ## `SPUR AQ`
-=======
->>>>>>> 109625fd710ed2f1da22c0818b3b36a61a34e628
 ### `For initial setup: npm install`
 ### `npm start`
 Runs the app in the development mode.\
@@ -12,7 +9,6 @@ See the section about [running tests](https://facebook.github.io/create-react-ap
 ### `npm run build`
 Builds the app for production to the `build` folder.\
 It correctly bundles React in production mode and optimizes the build for the best performance.
-<<<<<<< HEAD
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
 ### `File Structure`
@@ -38,6 +34,3 @@ src/App/Stack/Graph/Components/ControlBar
 src/App/Stack/Graph/Components/Menu
 ------ExpandToggle.tsx
 ------ExpandToggle.css
-=======
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
->>>>>>> 109625fd710ed2f1da22c0818b3b36a61a34e628

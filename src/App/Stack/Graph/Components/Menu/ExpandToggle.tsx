@@ -1,17 +1,17 @@
 // src/App/Stack/Graph/Components/Menu/ExpandToggle.tsx
-import React, { useState } from 'react';
+import React from 'react';
 import './ExpandToggle.css';
 
-const ExpandToggle: React.FC = () => {
-    const [expanded, setExpanded] = useState(false);
+interface ExpandToggleProps {
+    expanded: boolean;
+    onToggle: () => void;
+    className?: string;
+}
 
-    const toggle = () => setExpanded(prev => !prev);
-
+export default function ExpandToggle({ expanded, onToggle }: ExpandToggleProps) {
     return (
-        <button className="expand-toggle btn btn-sm btn-secondary" onClick={toggle}>
-            {expanded ? 'Collapse Menu ▲' : 'Expand Menu ▼'}
+        <button className="expand-toggle" onClick={onToggle}>
+            {expanded ? '<<' : '>>'}
         </button>
     );
-};
-
-export default ExpandToggle;
+}

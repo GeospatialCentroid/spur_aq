@@ -1,4 +1,15 @@
 .expand-toggle {
-    width: 100%;
-    margin-bottom: 0.5rem;
-}
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    /* transform: rotate(180deg); */
+    height: 100%;
+    width: 45px;
+    padding: 0.5rem;
+    border: none;
+    background-color: #ccc;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  

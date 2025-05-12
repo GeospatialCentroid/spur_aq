@@ -1,0 +1,65 @@
+[
+{
+"id": 1,
+"name": "Spur AQ",
+"description": "Spur AQ station Description",
+"lat": "39.783660",
+"lng": "-104.974191",
+"children": [
+{
+"id": 3,
+"name": "2b_205a",
+"start_date": "2025-04-01T16:11:06Z",
+"end_date": "2025-04-04T16:11:07Z",
+"description": "This is the ozone monitor description",
+"measurements": [
+{
+"id": 1,
+"name": "first measure",
+"alias": "o3",
+"units": 2,
+"min": 0,
+"max": 10000,
+"description": "Ozone (O3) is a highly reactive gas composed of three oxygen atoms."
+},
+{
+"id": 2,
+"name": "second measure",
+"alias": "second measure alias",
+"units": 1,
+"min": 0,
+"max": 0,
+"description": "second measure description"
+}
+]
+}
+]
+},
+{
+"id": 2,
+"name": "CoAgMET",
+"description": "asdf",
+"lat": "39.783642",
+"lng": "-104.740247",
+"children": [
+{
+"id": 4,
+"name": "MET",
+"start_date": "2025-04-09T22:36:15Z",
+"end_date": "2025-04-09T22:36:14Z",
+"description": "This station is managed by CoAgMET",
+"measurements": [
+{
+"id": 3,
+"name": "Wind Direction",
+"alias": "Wind Direction Alias",
+"units": 3,
+"min": 0,
+"max": 0,
+"description": "Wind can be strong"
+}
+]
+}
+]
+}
+]

@@ -17,7 +17,6 @@ export default function DomainSlider({
   const STEP = 1;
 
   return (
-    // <-- New outer wrapper for background, padding, etc.
     <div className="domain-slider-wrapper">
       {/* This inner div holds the actual Range so you can control padding */}
       <div className="domain-slider">
