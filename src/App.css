@@ -17,21 +17,22 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding-left: 2rem;
-  padding-right: 2rem;
 }
 
 .Body-section { /* Info */ /* Graph Stack */
   /* background-color: #f1f1f1; */
-  margin-bottom: 1rem;
+  /* margin-bottom: 1rem; */
   width: 100%;
   align-self: center;
   box-shadow: #282c34;
+  margin: 0;
+  padding: 0;
 }
 .stack { /* Graph Stack */
   flex: 1;
   min-height: fit-content;
   background-color: #f1f1f1;
+  box-shadow: #282c34;
 }
 
 .App-footer { /* Footer */

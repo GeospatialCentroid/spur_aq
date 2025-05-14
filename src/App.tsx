@@ -27,14 +27,14 @@ function App() {
 
       <main className="App-body">
         {/* To view config response */}
-        {/* {config && (
+        {config && (
           <section className="Body-section">
             <h2>Loaded Config</h2>
             <pre style={{ textAlign: 'left', backgroundColor: '#f5f5f5', padding: '1em' }}>
               {JSON.stringify(config, null, 2)}
             </pre>
           </section>
-        )} */}
+        )}
 
         <section className="Body-section">
           <Info />
