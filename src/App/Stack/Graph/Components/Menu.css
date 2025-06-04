@@ -21,3 +21,9 @@
   gap: 1rem; /* space between buttons */
   margin-top: 1rem;
 }
+
+.dt-button-group {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
