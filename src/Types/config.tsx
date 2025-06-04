@@ -1,4 +1,4 @@
-// Types/config.ts
+// types/config.ts
 import { Instrument } from './instrument';
 
 export interface Station {

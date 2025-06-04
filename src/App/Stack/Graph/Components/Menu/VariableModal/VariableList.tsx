@@ -1,7 +1,7 @@
 // src/App/Stack/Graph/Components/Menu/VariableModal/VariableList.tsx
 
 import React from 'react';
-import { Station } from '../../../../../../Types/config';
+import { Station } from '../../../../../../types/config';
 
 interface VariableListProps {
   stations: Station[];
