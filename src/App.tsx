@@ -5,8 +5,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Info from './App/Info/Info';
 import Stack from './App/Stack/Stack';
-import { Config } from './Types/config';
-import { ConfigProvider } from './context/ConfigContext'; // ✅ Import the provider
+import { Config } from './types/config';
+import { ConfigProvider } from './context/ConfigContext';
 
 function App() {
   const [config, setConfig] = useState<Config | null>(null);
@@ -38,12 +38,12 @@ function App() {
 
         <main className="App-body">
           {/* Optional: raw JSON preview */}
-          <section className="Body-section">
+          {/* <section className="Body-section">
             <h2>Loaded Config</h2>
             <pre style={{ textAlign: 'left', backgroundColor: '#f5f5f5', padding: '1em' }}>
               {JSON.stringify(config, null, 2)}
             </pre>
-          </section>
+          </section> */}
 
           <section className="Body-section">
             <Info />

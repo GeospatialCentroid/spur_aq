@@ -1,7 +1,7 @@
 // src/context/ConfigContext.tsx
 
 import React, { createContext, useContext } from 'react';
-import { Config } from '../Types/config';
+import { Config } from '../types/config';
 
 interface ConfigContextType {
   config: Config | null;

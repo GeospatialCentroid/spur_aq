@@ -1,23 +1,36 @@
-import { useState } from 'react';
-import DateTimePicker from 'react-datetime-picker';
-import 'react-datetime-picker/dist/DateTimePicker.css';
-import 'react-calendar/dist/Calendar.css';
-import 'react-clock/dist/Clock.css';
+//src\App\Stack\Graph\Components\Menu\DateSelector.tsx
+import { useEffect, useRef } from 'react';
+import $ from 'jquery';
+import 'jquery-datetimepicker';
+import 'jquery-datetimepicker/build/jquery.datetimepicker.min.css';
 import './DateSelector.css';
 
-type ValuePiece = Date | null;
-type Value = ValuePiece | [ValuePiece, ValuePiece];
-
 export default function DTPicker() {
-  const [value, onChange] = useState<Value>(new Date());
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const input = inputRef.current;
+    if (input) {
+      $(input).datetimepicker({
+        format: 'Y-m-d H:i',
+        step: 15,
+        onChangeDateTime: function (currentDateTime: Date) {
+          console.log('Selected:', currentDateTime);
+        }
+      });
+    }
+
+    return () => {
+      if (input) {
+        $(input).datetimepicker('destroy');
+      }
+    };
+  }, []);
+
 
   return (
     <div className="dtpicker-container">
-      <DateTimePicker
-        onChange={onChange}
-        value={value}
-        className="custom-dtpicker"
-      />
+      <input ref={inputRef} type="text" className="custom-dtpicker" />
     </div>
   );
 }
