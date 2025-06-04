@@ -1,8 +1,9 @@
-//src/models/measurement.tsx
-// models/measurement.ts
-
 export interface Measurement {
-  Description: string;
-  MinMax: [number, number];
-  Alias: string;
+  id: number;
+  name: string;
+  alias: string;
+  units: number;
+  min: number;
+  max: number;
+  description: string;
 }

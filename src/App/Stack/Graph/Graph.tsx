@@ -5,6 +5,7 @@ import Menu from './Components/Menu';
 import ControlBar from './Components/ControlBar';
 import Chart from './Components/Chart';
 import ExpandToggle from './Components/Menu/ExpandToggle';
+import { useConfig } from '../../../context/ConfigContext';
 
 interface GraphProps {
   id: number;
@@ -13,10 +14,13 @@ interface GraphProps {
 
 const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
   const [menuExpanded, setMenuExpanded] = useState(true);
+  const { config } = useConfig();
+
+  if (!config) return null;
 
   return (
     <div className="graph">
-      {menuExpanded && <Menu />}
+      {menuExpanded && <Menu/>}
       <ExpandToggle
         expanded={menuExpanded}
         onToggle={() => setMenuExpanded(!menuExpanded)}

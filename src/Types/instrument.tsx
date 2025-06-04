@@ -1,8 +1,10 @@
-//src/models/instrument.tsx
 import { Measurement } from './measurement';
 
 export interface Instrument {
-  Measurements: Measurement[];
-  FromDT: string;
-  ToDT: string;
+  id: number;
+  name: string;
+  start_date: string;
+  end_date: string;
+  description: string;
+  measurements: Measurement[];
 }

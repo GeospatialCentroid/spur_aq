@@ -6,6 +6,7 @@
     border: 1px solid #ccc;
     border-radius: 1rem;
     overflow: hidden;
+    margin-bottom: 2rem;
 }
 
 .graph>* {

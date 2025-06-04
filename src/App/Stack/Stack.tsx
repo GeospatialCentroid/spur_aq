@@ -5,7 +5,9 @@ import './Stack.css';
 import Graph from './Graph/Graph';
 import { Plus } from 'react-bootstrap-icons';
 
-interface GraphItem { id: number }
+interface GraphItem {
+  id: number;
+}
 
 const Stack: React.FC = () => {
   const [graphs, setGraphs] = useState<GraphItem[]>([]);
@@ -30,7 +32,10 @@ const Stack: React.FC = () => {
       >
         {graphs.map(item => (
           <div key={item.id} className="graph-wrapper">
-            <Graph id={item.id} onRemove={() => removeGraph(item.id)} />
+            <Graph
+              id={item.id}
+              onRemove={() => removeGraph(item.id)}
+            />
           </div>
         ))}
       </ReactSortable>

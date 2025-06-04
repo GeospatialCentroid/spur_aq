@@ -1,1 +1,72 @@
-import React from "react";
+.dtpicker-container {
+  position: relative;
+  display: inline-block;
+  overflow: visible;
+}
+
+.custom-dtpicker {
+  width: 100%;
+  background-color: #fff;
+  border-radius: 1rem;
+}
+
+.custom-dtpicker .react-datetime-picker__inputGroup {
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.react-datetime-picker__calendar {
+  position: absolute !important;
+  top: 100% !important;
+  bottom: auto !important;
+  left: 0 !important;
+  z-index: 10;
+  background: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  min-width: 100%;
+}
+
+.react-calendar {
+  font-size: 0.85rem;
+  padding: 0.25rem;
+}
+
+.react-calendar__tile {
+  padding: 0.25rem 0.3rem !important;
+  max-width: 2.2rem;
+  line-height: 1.2rem;
+}
+
+.react-calendar__month-view__weekdays {
+  font-size: 0.75rem;
+}
+
+.react-calendar__month-view__days {
+  row-gap: 0.25rem;
+}
+
+.react-calendar__navigation button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.react-datetime-picker__wrapper {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.react-datetime-picker__clock {
+  position: absolute !important;
+  top: 100% !important;
+  bottom: auto !important;
+  left: 0 !important;
+  margin-top: 0.5rem;
+  z-index: 10;
+  background: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 1rem;
+}

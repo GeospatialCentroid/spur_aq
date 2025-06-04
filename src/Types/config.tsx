@@ -1,13 +1,13 @@
-//src/models/config.tsx
+// Types/config.ts
 import { Instrument } from './instrument';
 
-export interface Config {
-  Info: {
-    About: string;
-    Map: string;
-    LatestReadings: string;
-  };
-  Menu: {
-    Instruments: Record<string, Instrument>; // Or Instrument[] if unkeyed
-  };
+export interface Station {
+  id: number;
+  name: string;
+  description: string;
+  lat: string;
+  lng: string;
+  children: Instrument[];
 }
+
+export type Config = Station[];
