@@ -9,11 +9,13 @@ interface GraphItem {
   id: number;
 }
 
+let nextGraphId = 1; // Stable, incrementing ID outside the component
+
 const Stack: React.FC = () => {
   const [graphs, setGraphs] = useState<GraphItem[]>([]);
 
   const addGraph = () => {
-    setGraphs(g => [...g, { id: Date.now() }]);
+    setGraphs(g => [...g, { id: nextGraphId++ }]);
   };
 
   const removeGraph = (id: number) => {
@@ -24,7 +26,7 @@ const Stack: React.FC = () => {
     <div className="container-fluid py-4 d-flex flex-column stack-container">
       <ReactSortable
         list={graphs}
-        setList={setGraphs}
+        setList={(newState) => setGraphs([...newState])}
         tag="div"
         className="graph-stack flex-grow-1"
         animation={150}

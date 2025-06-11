@@ -6,10 +6,10 @@ import VariableSelector from './Menu/VariableSelector';
 
 interface MenuProps {
   className?: string;
-  firstDate: string;
-  onFirstDateChange: (date: string) => void;
-  secondDate: string;
-  onSecondDateChange: (date: string) => void;
+  fromDate: string;
+  onFromDateChange: (date: string) => void;
+  toDate: string;
+  onToDateChange: (date: string) => void;
   firstVariable: string;
   onFirstVariableChange: (label: string) => void;
   secondVariable: string;
@@ -18,10 +18,10 @@ interface MenuProps {
 
 const Menu: React.FC<MenuProps> = ({
   className = '',
-  firstDate,
-  onFirstDateChange,
-  secondDate,
-  onSecondDateChange,
+  fromDate,
+  onFromDateChange: onFirstDateChange,
+  toDate,
+  onToDateChange: onSecondDateChange,
   firstVariable,
   onFirstVariableChange,
   secondVariable,
@@ -31,8 +31,8 @@ const Menu: React.FC<MenuProps> = ({
     <div className={`graph-menu ${className}`}>
       <div className="menu-content">
         <div className="dt-button-group">
-          <DateSelector value={firstDate} onChange={onFirstDateChange} />
-          <DateSelector value={secondDate} onChange={onSecondDateChange} />
+          <DateSelector value={fromDate} onChange={onFirstDateChange} />
+          <DateSelector value={toDate} onChange={onSecondDateChange} />
         </div>
         <div className="variable-button-group">
           <VariableSelector value={firstVariable} onChange={onFirstVariableChange} />
