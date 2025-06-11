@@ -1,4 +1,3 @@
-// src/App/Stack/Graph/Graph.tsx
 import React, { useEffect, useState } from 'react';
 import './Graph.css';
 import Menu from './Components/Menu';
@@ -11,12 +10,40 @@ interface GraphProps {
   id: number;
   onRemove: () => void;
 }
+// Helper methods:
+
+//Returns midnight 7 days ago from the users current time
+function getStartOfTodayOneWeekAgo(): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 7);
+  d.setHours(0, 0, 0, 0);
+  return d.toISOString();
+}
+//Returns the UTC Time at this very moment
+function getNow(): string {
+  return new Date().toISOString();
+}
+//Builds and returns the API Url from user selections
+function buildApiUrl(
+  stationId: number,
+  variableNames: string[],
+  instrumentId: number,
+  startDate: string,
+  endDate: string
+): string {
+  const baseUrl = 'http://129.82.30.72:8001/stations/';
+  const encodedStart = encodeURIComponent(startDate);
+  const encodedEnd = encodeURIComponent(endDate);
+  const variablePath = variableNames.join(',');
+  return `${baseUrl}/measurement/${stationId}/measurements/${variablePath}/${instrumentId}/?start=${encodedStart}&end=${encodedEnd}`;
+}
 
 const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
   const [menuExpanded, setMenuExpanded] = useState(true);
   const { config } = useConfig();
-  const [fromDate, setFromDate] = useState<string>('');
-  const [toDate, setSecondDate] = useState<string>('');
+
+  const [fromDate, setFromDate] = useState<string>(getStartOfTodayOneWeekAgo());
+  const [toDate, setSecondDate] = useState<string>(getNow());
   const [firstVariable, setFirstVariable] = useState<string>('');
   const [secondVariable, setSecondVariable] = useState<string>('');
 
@@ -26,6 +53,17 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
       console.log(`Graph ${id}: removed`);
     };
   }, [id]);
+
+  useEffect(() => {
+    if (!firstVariable && !secondVariable) return;
+    const variables = [firstVariable, secondVariable].filter(Boolean);
+    const stationId = 5;     // Replace with real value if needed
+    const instrumentId = 1;  // Replace with real value if needed
+
+    const url = buildApiUrl(stationId, variables, instrumentId, fromDate, toDate);
+    console.log(`Graph ${id}: API URL = ${url}`);
+    // You can optionally fetch here
+  }, [firstVariable, secondVariable, fromDate, toDate, id]);
 
   const handleFromDateChange = (date: string) => {
     console.log(`Graph ${id}: fromDate set to ${date}`);

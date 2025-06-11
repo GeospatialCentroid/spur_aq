@@ -1,4 +1,4 @@
-//src\App\Stack\Graph\Components\Menu\DateSelector.tsx
+// src/App/Stack/Graph/Components/Menu/DateSelector.tsx
 import React, { useEffect, useRef } from 'react';
 import $ from 'jquery';
 import 'jquery-datetimepicker';
@@ -8,7 +8,6 @@ import './DateSelector.css';
 ;(window as any).$ = $;
 ;(window as any).jQuery = $;
 
-
 interface DateSelectorProps {
   value: string;
   onChange: (newDate: string) => void;
@@ -16,6 +15,7 @@ interface DateSelectorProps {
 
 export default function DateSelector({ value, onChange }: DateSelectorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     const input = inputRef.current;
     if (input) {
@@ -30,6 +30,13 @@ export default function DateSelector({ value, onChange }: DateSelectorProps) {
           }
         },
       });
+
+      // If no valid date was passed in, set a default starting date
+      if (!value) {
+        const defaultDate = new Date();
+        input.value = formatDateForPicker(defaultDate);
+        onChange(defaultDate.toISOString());
+      }
     }
 
     return () => {
@@ -45,12 +52,7 @@ export default function DateSelector({ value, onChange }: DateSelectorProps) {
 
     if (value) {
       const d = new Date(value);
-      const yyyy = d.getFullYear();
-      const MM = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      const hh = String(d.getHours()).padStart(2, '0');
-      const mm = String(d.getMinutes()).padStart(2, '0');
-      input.value = `${yyyy}-${MM}-${dd} ${hh}:${mm}`;
+      input.value = formatDateForPicker(d);
     } else {
       input.value = '';
     }
@@ -61,4 +63,14 @@ export default function DateSelector({ value, onChange }: DateSelectorProps) {
       <input ref={inputRef} type="text" className="custom-dtpicker" />
     </div>
   );
+}
+
+// Helper to format Date to "YYYY-MM-DD HH:mm"
+function formatDateForPicker(date: Date): string {
+  const yyyy = date.getFullYear();
+  const MM = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const hh = String(date.getHours()).padStart(2, '0');
+  const mm = String(date.getMinutes()).padStart(2, '0');
+  return `${yyyy}-${MM}-${dd} ${hh}:${mm}`;
 }
