@@ -14,10 +14,16 @@ type SelectedItem = {
   units?: string;
 };
 
+interface SelectedVariable {
+  name: string;
+  stationId: number;
+  instrumentId: number;
+}
+
 interface VariableModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirmSelection?: (label: string) => void;
+  onConfirmSelection?: (variable: SelectedVariable) => void;
 }
 
 const VariableModal: React.FC<VariableModalProps> = ({
@@ -32,9 +38,24 @@ const VariableModal: React.FC<VariableModalProps> = ({
   if (!isOpen || !config) return null;
 
   const handleConfirm = () => {
-    if (selected?.type === 'measurement' && selected.alias) {
-      onConfirmSelection?.(selected.alias);
-      onClose();
+    if (selected?.type === 'measurement' && selectedKey) {
+      const label = selected.alias || selected.name;
+
+      const parts = selectedKey.split(':');
+      if (parts.length === 3) {
+        const stationId = parseInt(parts[0], 10);
+        const instrumentId = parseInt(parts[1], 10);
+
+        onConfirmSelection?.({
+          name: label,
+          stationId,
+          instrumentId,
+        });
+
+        onClose();
+      } else {
+        console.warn('Invalid selectedKey format:', selectedKey);
+      }
     }
   };
 
@@ -50,8 +71,9 @@ const VariableModal: React.FC<VariableModalProps> = ({
 
   const renderHeaderText = () => {
     if (!selected) return null;
-    if (selected.type === 'measurement' && selected.alias) {
-      return `${selected.alias}${selected.units ? ` (${selected.units})` : ''}`;
+    if (selected.type === 'measurement') {
+      const label = selected.alias || selected.name;
+      return `${label}${selected.units ? ` (${selected.units})` : ''}`;
     }
     return selected.name;
   };
@@ -76,6 +98,7 @@ const VariableModal: React.FC<VariableModalProps> = ({
             </button>
           </div>
         </div>
+
         <div className="modal-body">
           <div className="variableList">
             <VariableList
@@ -88,7 +111,7 @@ const VariableModal: React.FC<VariableModalProps> = ({
           {selected ? (
             <VariableDescription
               type={selected.type}
-              description={selected.description} // ✅ full description text now passed
+              description={selected.description}
               onConfirm={selected.type === 'measurement' ? handleConfirm : undefined}
               onCancel={selected.type === 'measurement' ? handleCancel : undefined}
             />

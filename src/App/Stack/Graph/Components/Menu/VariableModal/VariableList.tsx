@@ -57,26 +57,31 @@ const VariableList: React.FC<VariableListProps> = ({ stations, onSelect, selecte
                   {instrument.name}
                 </div>
                 <ul>
-                  {instrument.measurements.map((m) => (
-                    <li
-                      key={m.id}
-                      className={`selectable measurement ${selectedKey === `measurement-${m.id}` ? 'selected' : ''}`}
-                      onClick={() =>
-                        onSelect(
-                          {
-                            type: 'measurement',
-                            name: m.name,
-                            description: m.description,
-                            alias: m.alias,
-                            units: m.units?.toString(),
-                          },
-                          `measurement-${m.id}`
-                        )
-                      }
-                    >
-                      {m.name} ({m.alias})
-                    </li>
-                  ))}
+                  {instrument.measurements.map((m) => {
+                    const measurementKey = `${station.id}:${instrument.id}:${m.name}`;
+                    const isSelected = selectedKey === measurementKey;
+
+                    return (
+                      <li
+                        key={m.id}
+                        className={`selectable measurement ${isSelected ? 'selected' : ''}`}
+                        onClick={() =>
+                          onSelect(
+                            {
+                              type: 'measurement',
+                              name: m.name,
+                              description: m.description,
+                              alias: m.alias,
+                              units: m.units?.toString(),
+                            },
+                            measurementKey
+                          )
+                        }
+                      >
+                        {m.alias || m.name}
+                      </li>
+                    );
+                  })}
                 </ul>
               </li>
             ))}

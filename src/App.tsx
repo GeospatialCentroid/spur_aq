@@ -21,6 +21,12 @@ function App() {
       .catch(error => console.error('Error fetching config:', error));
   }, []);
 
+  useEffect(() => {
+    if (config) {
+      console.log('Loaded Config:', config);
+    }
+  }, [config]);
+
   if (!config) {
     return (
       <div className="App-loading">
@@ -37,14 +43,6 @@ function App() {
         </header>
 
         <main className="App-body">
-          {/* Optional: raw JSON preview */}
-          {/* <section className="Body-section">
-            <h2>Loaded Config</h2>
-            <pre style={{ textAlign: 'left', backgroundColor: '#f5f5f5', padding: '1em' }}>
-              {JSON.stringify(config, null, 2)}
-            </pre>
-          </section> */}
-
           <section className="Body-section">
             <Info />
           </section>

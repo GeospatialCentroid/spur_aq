@@ -10,20 +10,42 @@ interface GraphProps {
   id: number;
   onRemove: () => void;
 }
-// Helper methods:
 
-//Returns midnight 7 days ago from the users current time
+type SelectedVariable = {
+  name: string;
+  stationId: number;
+  instrumentId: number;
+};
+
+type VariableGroup = {
+  stationId: number;
+  instrumentId: number;
+  variableNames: string[];
+};
+
+// Utility functions
 function getStartOfTodayOneWeekAgo(): string {
   const d = new Date();
   d.setDate(d.getDate() - 7);
   d.setHours(0, 0, 0, 0);
   return d.toISOString();
 }
-//Returns the UTC Time at this very moment
+
 function getNow(): string {
   return new Date().toISOString();
 }
-//Builds and returns the API Url from user selections
+
+function formatDateForUrl(dateString: string): string {
+  const d = new Date(dateString);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+}
+
 function buildApiUrl(
   stationId: number,
   variableNames: string[],
@@ -31,11 +53,29 @@ function buildApiUrl(
   startDate: string,
   endDate: string
 ): string {
-  const baseUrl = 'http://129.82.30.72:8001/stations/';
-  const encodedStart = encodeURIComponent(startDate);
-  const encodedEnd = encodeURIComponent(endDate);
+  const baseUrl = 'http://129.82.30.72:8001';
+  const encodedStart = encodeURIComponent(formatDateForUrl(startDate));
+  const encodedEnd = encodeURIComponent(formatDateForUrl(endDate));
   const variablePath = variableNames.join(',');
-  return `${baseUrl}/measurement/${stationId}/measurements/${variablePath}/${instrumentId}/?start=${encodedStart}&end=${encodedEnd}`;
+  return `${baseUrl}/measurement/${instrumentId}/measurements/${variablePath}/60/?start=${encodedStart}&end=${encodedEnd}`;
+}
+
+function groupVariablesByInstrument(vars: SelectedVariable[]): VariableGroup[] {
+  const map = new Map<string, VariableGroup>();
+
+  vars.forEach((v) => {
+    const key = `${v.stationId}:${v.instrumentId}`;
+    if (!map.has(key)) {
+      map.set(key, {
+        stationId: v.stationId,
+        instrumentId: v.instrumentId,
+        variableNames: [],
+      });
+    }
+    map.get(key)!.variableNames.push(v.name);
+  });
+
+  return Array.from(map.values());
 }
 
 const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
@@ -43,10 +83,10 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
   const { config } = useConfig();
 
   const [fromDate, setFromDate] = useState<string>(getStartOfTodayOneWeekAgo());
-  const [toDate, setSecondDate] = useState<string>(getNow());
-  const [firstVariable, setFirstVariable] = useState<string>('');
-  const [secondVariable, setSecondVariable] = useState<string>('');
+  const [toDate, setToDate] = useState<string>(getNow());
+  const [variables, setVariables] = useState<SelectedVariable[]>([]);
 
+  // Lifecycle log
   useEffect(() => {
     console.log(`Graph ${id}: created`);
     return () => {
@@ -54,17 +94,19 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
     };
   }, [id]);
 
+  // Generate one URL per compatible group of variables
   useEffect(() => {
-    if (!firstVariable && !secondVariable) return;
-    const variables = [firstVariable, secondVariable].filter(Boolean);
-    const stationId = 5;     // Replace with real value if needed
-    const instrumentId = 1;  // Replace with real value if needed
+    if (variables.length === 0) return;
 
-    const url = buildApiUrl(stationId, variables, instrumentId, fromDate, toDate);
-    console.log(`Graph ${id}: API URL = ${url}`);
-    // You can optionally fetch here
-  }, [firstVariable, secondVariable, fromDate, toDate, id]);
+    const groups = groupVariablesByInstrument(variables);
+    groups.forEach((group, index) => {
+      const url = buildApiUrl(group.stationId, group.variableNames, group.instrumentId, fromDate, toDate);
+      console.log(`Graph ${id}: URL #${index + 1} = ${url}`);
+      // Optionally: fetch(url) here
+    });
+  }, [variables, fromDate, toDate, id]);
 
+  // Handlers
   const handleFromDateChange = (date: string) => {
     console.log(`Graph ${id}: fromDate set to ${date}`);
     setFromDate(date);
@@ -72,17 +114,22 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
 
   const handleToDateChange = (date: string) => {
     console.log(`Graph ${id}: toDate set to ${date}`);
-    setSecondDate(date);
+    setToDate(date);
   };
 
-  const handleFirstVariableChange = (value: string) => {
-    console.log(`Graph ${id}: firstVariable set to ${value}`);
-    setFirstVariable(value);
+  const handleVariableChange = (index: number, value: SelectedVariable) => {
+    setVariables((prev) => {
+      const updated = [...prev];
+      updated[index] = value;
+      return updated;
+    });
   };
 
-  const handleSecondVariableChange = (value: string) => {
-    console.log(`Graph ${id}: secondVariable set to ${value}`);
-    setSecondVariable(value);
+  const addVariable = () => {
+    setVariables((prev) => [
+      ...prev,
+      { name: '', stationId: 0, instrumentId: 0 },
+    ]);
   };
 
   if (!config) return null;
@@ -92,13 +139,12 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
       {menuExpanded && (
         <Menu
           fromDate={fromDate}
-          onFromDateChange={handleFromDateChange}
           toDate={toDate}
+          onFromDateChange={handleFromDateChange}
           onToDateChange={handleToDateChange}
-          firstVariable={firstVariable}
-          onFirstVariableChange={handleFirstVariableChange}
-          secondVariable={secondVariable}
-          onSecondVariableChange={handleSecondVariableChange}
+          variables={variables}
+          onVariableChange={handleVariableChange}
+          onAddVariable={addVariable}
         />
       )}
       <ExpandToggle

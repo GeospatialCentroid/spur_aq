@@ -1,11 +1,17 @@
-//src\App\Stack\Graph\Components\Menu\VariableSelector.tsx
+// src/App/Stack/Graph/Components/Menu/VariableSelector.tsx
 import React, { useState } from 'react';
 import VariableModal from './VariableModal/VariableModal';
 import './VariableSelector.css';
 
+interface SelectedVariable {
+  name: string;
+  stationId: number;
+  instrumentId: number;
+}
+
 interface VariableSelectorProps {
-  value: string;
-  onChange: (newLabel: string) => void;
+  value: SelectedVariable | null;
+  onChange: (variable: SelectedVariable) => void;
 }
 
 const VariableSelector: React.FC<VariableSelectorProps> = ({
@@ -17,15 +23,15 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
 
-  const handleConfirmSelection = (label: string) => {
-    onChange(label);
+  const handleConfirmSelection = (variable: SelectedVariable) => {
+    onChange(variable);
     closeModal();
   };
 
   return (
     <>
       <button className="variable-select-button" onClick={openModal}>
-        {value || 'Select Variable'}
+        {value?.name || 'Select Variable'}
       </button>
 
       <VariableModal

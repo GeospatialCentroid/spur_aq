@@ -16,14 +16,37 @@
 }
 
 .variable-button-group {
-  display: flex;
-  justify-content: center;
-  gap: 1rem; /* space between buttons */
-  margin-top: 1rem;
+    margin: .5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
 }
+
+.variable-button-group {
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 0.5rem;
+}
+
+
 
 .dt-button-group {
     display: flex;
     justify-content: center;
     gap: 1rem;
+}
+
+.add-variable-button {
+    margin-top: 0.5rem;
+    padding: 0.4rem 1rem;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
 }
