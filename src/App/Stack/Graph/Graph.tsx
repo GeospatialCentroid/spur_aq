@@ -51,13 +51,14 @@ function buildApiUrl(
   variableNames: string[],
   instrumentId: number,
   startDate: string,
-  endDate: string
+  endDate: string,
+  interval: string
 ): string {
   const baseUrl = 'http://129.82.30.72:8001';
   const encodedStart = encodeURIComponent(formatDateForUrl(startDate));
   const encodedEnd = encodeURIComponent(formatDateForUrl(endDate));
   const variablePath = variableNames.join(',');
-  return `${baseUrl}/measurement/${instrumentId}/measurements/${variablePath}/60/?start=${encodedStart}&end=${encodedEnd}`;
+  return `${baseUrl}/measurement/${instrumentId}/measurements/${variablePath}/${interval}/?start=${encodedStart}&end=${encodedEnd}`;
 }
 
 function groupVariablesByInstrument(vars: SelectedVariable[]): VariableGroup[] {
@@ -85,8 +86,8 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
   const [fromDate, setFromDate] = useState<string>(getStartOfTodayOneWeekAgo());
   const [toDate, setToDate] = useState<string>(getNow());
   const [variables, setVariables] = useState<SelectedVariable[]>([]);
+  const [interval, setInterval] = useState<string>('60'); // Default to 60 minutes
 
-  // Lifecycle log
   useEffect(() => {
     console.log(`Graph ${id}: created`);
     return () => {
@@ -94,19 +95,17 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
     };
   }, [id]);
 
-  // Generate one URL per compatible group of variables
   useEffect(() => {
     if (variables.length === 0) return;
 
     const groups = groupVariablesByInstrument(variables);
     groups.forEach((group, index) => {
-      const url = buildApiUrl(group.stationId, group.variableNames, group.instrumentId, fromDate, toDate);
+      const url = buildApiUrl(group.stationId, group.variableNames, group.instrumentId, fromDate, toDate, interval);
       console.log(`Graph ${id}: URL #${index + 1} = ${url}`);
-      // Optionally: fetch(url) here
+      // Optional: fetch(url) here
     });
-  }, [variables, fromDate, toDate, id]);
+  }, [variables, fromDate, toDate, interval, id]);
 
-  // Handlers
   const handleFromDateChange = (date: string) => {
     console.log(`Graph ${id}: fromDate set to ${date}`);
     setFromDate(date);
@@ -132,6 +131,11 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
     ]);
   };
 
+  const handleIntervalChange = (newInterval: string) => {
+    console.log(`Graph ${id}: interval set to ${newInterval}`);
+    setInterval(newInterval);
+  };
+
   if (!config) return null;
 
   return (
@@ -145,6 +149,8 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
           variables={variables}
           onVariableChange={handleVariableChange}
           onAddVariable={addVariable}
+          interval={interval}
+          onIntervalChange={handleIntervalChange}
         />
       )}
       <ExpandToggle

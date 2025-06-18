@@ -20,6 +20,8 @@ interface MenuProps {
   variables: SelectedVariable[];
   onVariableChange: (index: number, v: SelectedVariable) => void;
   onAddVariable: () => void;
+  interval: string;
+  onIntervalChange: (interval: string) => void;
 }
 
 const Menu: React.FC<MenuProps> = ({
@@ -31,6 +33,8 @@ const Menu: React.FC<MenuProps> = ({
   variables,
   onVariableChange,
   onAddVariable,
+  interval,
+  onIntervalChange,
 }) => {
   return (
     <div className={`graph-menu ${className}`}>
@@ -38,6 +42,21 @@ const Menu: React.FC<MenuProps> = ({
         <div className="dt-button-group">
           <DateSelector value={fromDate} onChange={onFromDateChange} />
           <DateSelector value={toDate} onChange={onToDateChange} />
+
+          <label className="interval-select-label">
+            Interval:
+            <select
+              className="interval-select"
+              value={interval}
+              onChange={(e) => onIntervalChange(e.target.value)}
+            >
+              <option value="1">1 minute</option>
+              <option value="5">5 minutes</option>
+              <option value="10">10 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="60">60 minutes</option>
+            </select>
+          </label>
         </div>
 
         <div className="variable-button-group">

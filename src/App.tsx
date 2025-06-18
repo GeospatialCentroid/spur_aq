@@ -5,7 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import Info from './App/Info/Info';
 import Stack from './App/Stack/Stack';
-import { Config } from './types/config';
+import { Config } from './Types/config';
 import { ConfigProvider } from './context/ConfigContext';
 
 function App() {
