@@ -1,4 +1,14 @@
-// src/App.tsx
+// File: src/App.tsx
+
+/**
+ * Top-level React component for the SPUR Air Quality application.
+ *
+ * Responsibilities:
+ * - Fetches configuration data from a remote API endpoint on initial load.
+ * - Provides configuration to the application via React Context (`ConfigProvider`).
+ * - Renders header, info panel, data stack, and footer components.
+ */
+
 import React, { useEffect, useState } from 'react';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -29,7 +39,7 @@ function App() {
 
   if (!config) {
     return (
-      <div className="App-loading">
+      <div className="app-loading">
         <h2>Loading configuration...</h2>
       </div>
     );
@@ -37,22 +47,22 @@ function App() {
 
   return (
     <ConfigProvider config={config}>
-      <div className="App">
-        <header className="App-header">
+      <div className="app">
+        <header className="app-header">
           <h1>SPUR Air Quality</h1>
         </header>
 
-        <main className="App-body">
-          <section className="Body-section">
+        <main className="app-body">
+          <section className="body-section">
             <Info />
           </section>
 
-          <section className="Body-section stack">
+          <section className="body-section stack">
             <Stack />
           </section>
         </main>
 
-        <footer className="App-footer">
+        <footer className="app-footer">
           <p>© {new Date().getFullYear()} SPUR. All rights reserved.</p>
         </footer>
       </div>

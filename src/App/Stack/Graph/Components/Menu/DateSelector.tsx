@@ -1,21 +1,41 @@
-// src/App/Stack/Graph/Components/Menu/DateSelector.tsx
+// File: src/App/Stack/Graph/Components/Menu/DateSelector.tsx
+
+/**
+ * DateSelector component
+ *
+ * - Wraps a jQuery datetimepicker input inside a React component.
+ * - Allows the user to pick a date/time which is converted to an ISO string.
+ * - Supports two-way binding with external state via `value` and `onChange`.
+ */
+
 import React, { useEffect, useRef } from 'react';
 import $ from 'jquery';
 import 'jquery-datetimepicker';
 import 'jquery-datetimepicker/build/jquery.datetimepicker.min.css';
-
 import './DateSelector.css';
+
+// Expose jQuery to global scope (required for datetimepicker plugin to work)
 ;(window as any).$ = $;
 ;(window as any).jQuery = $;
 
+/**
+ * Props for the DateSelector component.
+ *
+ * @property value - The current ISO date string.
+ * @property onChange - Callback triggered when the user selects a new date/time.
+ */
 interface DateSelectorProps {
   value: string;
   onChange: (newDate: string) => void;
 }
 
+/**
+ * Renders a date/time picker using jQuery's datetimepicker inside a React component.
+ */
 export default function DateSelector({ value, onChange }: DateSelectorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Initialize the jQuery datetimepicker on mount
   useEffect(() => {
     const input = inputRef.current;
     if (input) {
@@ -31,7 +51,7 @@ export default function DateSelector({ value, onChange }: DateSelectorProps) {
         },
       });
 
-      // If no valid date was passed in, set a default starting date
+      // If no value is provided, default to the current date/time
       if (!value) {
         const defaultDate = new Date();
         input.value = formatDateForPicker(defaultDate);
@@ -39,6 +59,7 @@ export default function DateSelector({ value, onChange }: DateSelectorProps) {
       }
     }
 
+    // Cleanup on unmount
     return () => {
       if (input) {
         $(input).datetimepicker('destroy');
@@ -46,6 +67,7 @@ export default function DateSelector({ value, onChange }: DateSelectorProps) {
     };
   }, [onChange]);
 
+  // Keep input field in sync with external value prop
   useEffect(() => {
     const input = inputRef.current;
     if (!input) return;
@@ -65,7 +87,10 @@ export default function DateSelector({ value, onChange }: DateSelectorProps) {
   );
 }
 
-// Helper to format Date to "YYYY-MM-DD HH:mm"
+/**
+ * Helper function to format a Date object into "YYYY-MM-DD HH:mm"
+ * for display in the input field.
+ */
 function formatDateForPicker(date: Date): string {
   const yyyy = date.getFullYear();
   const MM = String(date.getMonth() + 1).padStart(2, '0');

@@ -1,8 +1,24 @@
-// src/App/Stack/Graph/Components/Menu/VariableModal/VariableList.tsx
+// File: src/App/Stack/Graph/Components/Menu/VariableModal/VariableList.tsx
+
+/**
+ * VariableList component
+ *
+ * - Renders a hierarchical selection list of stations, instruments, and measurements.
+ * - Allows users to click any item to select it.
+ * - Each selection updates parent state through the `onSelect` callback.
+ * - Highlights the currently selected item based on a unique `selectedKey`.
+ */
 
 import React from 'react';
 import { Station } from '../../../../../../Types/config';
 
+/**
+ * Props for the VariableList component.
+ *
+ * @property stations - Array of stations, each with instruments and measurements.
+ * @property onSelect - Callback invoked when a station, instrument, or measurement is clicked.
+ * @property selectedKey - Optional unique key used to highlight the currently selected item.
+ */
 interface VariableListProps {
   stations: Station[];
   onSelect: (
@@ -18,11 +34,15 @@ interface VariableListProps {
   selectedKey?: string;
 }
 
+/**
+ * Renders the station → instrument → measurement hierarchy as a nested interactive list.
+ */
 const VariableList: React.FC<VariableListProps> = ({ stations, onSelect, selectedKey }) => {
   return (
     <div>
       {stations.map((station) => (
         <div key={station.id} style={{ marginBottom: '1rem' }}>
+          {/* Station Level */}
           <div
             className={`selectable station ${selectedKey === `station-${station.id}` ? 'selected' : ''}`}
             onClick={() =>
@@ -38,9 +58,11 @@ const VariableList: React.FC<VariableListProps> = ({ stations, onSelect, selecte
           >
             {station.name}
           </div>
+
           <ul>
             {station.children.map((instrument) => (
               <li key={instrument.id}>
+                {/* Instrument Level */}
                 <div
                   className={`selectable instrument ${selectedKey === `instrument-${instrument.id}` ? 'selected' : ''}`}
                   onClick={() =>
@@ -56,6 +78,7 @@ const VariableList: React.FC<VariableListProps> = ({ stations, onSelect, selecte
                 >
                   {instrument.name}
                 </div>
+
                 <ul>
                   {instrument.measurements.map((m) => {
                     const measurementKey = `${station.id}:${instrument.id}:${m.name}`;

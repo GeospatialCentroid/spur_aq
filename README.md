@@ -12,25 +12,14 @@ It correctly bundles React in production mode and optimizes the build for the be
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
 ### `File Structure`
-src/App/Stack/
----Stack.tsx
----Stack.css
-src/App/Stack/Graph/
-----Graph.tsx
-----Graph.css
-src/App/Stack/Graph/Components
------Chart.tsx
------Chart.css
------ControlBar.tsx
------Menu.tsx
-src/App/Stack/Graph/Components/Chart
-------D3Chart.tsx
-------D3Chart.css
-src/App/Stack/Graph/Components/ControlBar
-------CloseButton.tsx
-------CloseButton.css
-------DragHandle.tsx
-------DragHandle.css
-src/App/Stack/Graph/Components/Menu
-------ExpandToggle.tsx
-------ExpandToggle.css
+*/
+-/node_modules
+-/public
+-/src
+-.env
+-.gitignore
+-desktop.ini
+-package-lock.json
+-package.json
+-README.md
+-tsconfig.json

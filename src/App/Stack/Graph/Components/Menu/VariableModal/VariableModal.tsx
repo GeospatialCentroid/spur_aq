@@ -1,4 +1,13 @@
-// src/App/Stack/Graph/Components/Menu/VariableModal.tsx
+// File: src/App/Stack/Graph/Components/Menu/VariableModal.tsx
+
+/**
+ * VariableModal component
+ *
+ * - Displays a modal UI for selecting a measurement variable from available stations and instruments.
+ * - Integrates with the shared configuration context to list all available options.
+ * - Shows descriptions and allows confirmation only when a measurement is selected.
+ * - Sends the final selection back to the parent through `onConfirmSelection`.
+ */
 
 import React, { useState } from 'react';
 import './VariableModal.css';
@@ -6,6 +15,15 @@ import VariableList from './VariableList';
 import VariableDescription from './VariableDescription';
 import { useConfig } from '../../../../../../context/ConfigContext';
 
+/**
+ * Metadata representing a selected item in the hierarchy.
+ *
+ * @property type - Indicates the type of item selected (station, instrument, or measurement).
+ * @property name - The name of the item.
+ * @property description - Description of the item.
+ * @property alias - Optional shorthand or display name.
+ * @property units - Optional units of measurement (for measurements).
+ */
 type SelectedItem = {
   type: 'station' | 'instrument' | 'measurement';
   name: string;
@@ -14,12 +32,26 @@ type SelectedItem = {
   units?: string;
 };
 
+/**
+ * Final structure representing a confirmed variable selection.
+ *
+ * @property name - Variable display name or alias.
+ * @property stationId - ID of the station containing the variable.
+ * @property instrumentId - ID of the instrument recording the variable.
+ */
 interface SelectedVariable {
   name: string;
   stationId: number;
   instrumentId: number;
 }
 
+/**
+ * Props for the VariableModal component.
+ *
+ * @property isOpen - Controls whether the modal is currently visible.
+ * @property onClose - Callback to close the modal.
+ * @property onConfirmSelection - Optional callback invoked with selected variable when confirmed.
+ */
 interface VariableModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -31,12 +63,17 @@ const VariableModal: React.FC<VariableModalProps> = ({
   onClose,
   onConfirmSelection,
 }) => {
-  const { config } = useConfig();
-  const [selected, setSelected] = useState<SelectedItem | null>(null);
-  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const { config } = useConfig(); // Station/instrument/measurement data
+  const [selected, setSelected] = useState<SelectedItem | null>(null); // Currently highlighted item
+  const [selectedKey, setSelectedKey] = useState<string | null>(null); // Key in format "stationId:instrumentId:measurementName"
 
+  // If modal is closed or config isn't ready, don't render anything
   if (!isOpen || !config) return null;
 
+  /**
+   * Handles the confirm action — only valid if a measurement is selected.
+   * Parses the composite selectedKey and constructs the final SelectedVariable.
+   */
   const handleConfirm = () => {
     if (selected?.type === 'measurement' && selectedKey) {
       const label = selected.alias || selected.name;
@@ -59,16 +96,25 @@ const VariableModal: React.FC<VariableModalProps> = ({
     }
   };
 
+  /**
+   * Clears selection and key when canceling.
+   */
   const handleCancel = () => {
     setSelected(null);
     setSelectedKey(null);
   };
 
+  /**
+   * Updates selection state when an item is clicked in the list.
+   */
   const handleSelect = (item: SelectedItem, key: string) => {
     setSelected(item);
     setSelectedKey(key);
   };
 
+  /**
+   * Returns formatted display string for the header based on selection.
+   */
   const renderHeaderText = () => {
     if (!selected) return null;
     if (selected.type === 'measurement') {
@@ -81,6 +127,7 @@ const VariableModal: React.FC<VariableModalProps> = ({
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        {/* Modal Header */}
         <div className="modal-header">
           <div className="modal-header-section left">
             <h2>Select a Variable</h2>
@@ -99,6 +146,7 @@ const VariableModal: React.FC<VariableModalProps> = ({
           </div>
         </div>
 
+        {/* Modal Body */}
         <div className="modal-body">
           <div className="variableList">
             <VariableList
