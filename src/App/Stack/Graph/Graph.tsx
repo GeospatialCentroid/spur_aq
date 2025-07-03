@@ -17,23 +17,27 @@ import Chart from './Components/Chart';
 import ExpandToggle from './Components/Menu/ExpandToggle';
 import { useConfig } from '../../../context/ConfigContext';
 
+/** Props for the Graph component */
 interface GraphProps {
   id: number;
   onRemove: () => void;
 }
 
+/** User-selected variable (station, instrument, and variable name) */
 type SelectedVariable = {
   name: string;
   stationId: number;
   instrumentId: number;
 };
 
+/** Groups variables by instrument for efficient API requests */
 type VariableGroup = {
   stationId: number;
   instrumentId: number;
   variableNames: string[];
 };
 
+/** Utility: Get ISO string for midnight one week ago today */
 function getStartOfTodayOneWeekAgo(): string {
   const d = new Date();
   d.setDate(d.getDate() - 7);
@@ -41,10 +45,12 @@ function getStartOfTodayOneWeekAgo(): string {
   return d.toISOString();
 }
 
+/** Utility: Get ISO string for current time */
 function getNow(): string {
   return new Date().toISOString();
 }
 
+/** Utility: Format a date for the API URL */
 function formatDateForUrl(dateString: string): string {
   const d = new Date(dateString);
   const yyyy = d.getFullYear();
@@ -56,6 +62,7 @@ function formatDateForUrl(dateString: string): string {
   return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 }
 
+/** Utility: Build a fully encoded API URL for measurements */
 function buildApiUrl(
   stationId: number,
   variableNames: string[],
@@ -71,6 +78,7 @@ function buildApiUrl(
   return `${baseUrl}/measurement/${instrumentId}/measurements/${variablePath}/${interval}/?start=${encodedStart}&end=${encodedEnd}`;
 }
 
+/** Utility: Group selected variables by station/instrument pair */
 function groupVariablesByInstrument(vars: SelectedVariable[]): VariableGroup[] {
   const map = new Map<string, VariableGroup>();
 
@@ -89,6 +97,7 @@ function groupVariablesByInstrument(vars: SelectedVariable[]): VariableGroup[] {
   return Array.from(map.values());
 }
 
+/** Main component representing one full graph unit */
 const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
   const [menuExpanded, setMenuExpanded] = useState(true);
   const { config } = useConfig();
@@ -102,11 +111,16 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
   const [yMax, setYMax] = useState(10);
   const [chartData, setChartData] = useState<any[]>([]);
 
+  // Track lifecycle for logging
   useEffect(() => {
     console.log(`Graph ${id}: created`);
     return () => console.log(`Graph ${id}: removed`);
   }, [id]);
 
+  /**
+   * Trigger API fetch when variables, dates, or interval change.
+   * Skips fetch if any variable is incomplete.
+   */
   useEffect(() => {
     if (
       variables.length === 0 ||
@@ -151,7 +165,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
     });
   }, [variables, fromDate, toDate, interval, id]);
 
-
+  // --- Event Handlers ---
   const handleFromDateChange = (date: string) => setFromDate(date);
   const handleToDateChange = (date: string) => setToDate(date);
   const handleIntervalChange = (newInterval: string) => setInterval(newInterval);
@@ -171,6 +185,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
     ]);
   };
 
+  // --- Render ---
   if (!config) return null;
 
   return (
