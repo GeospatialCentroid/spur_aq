@@ -18,34 +18,55 @@ import './Chart.css';
  *
  * @property id - Unique identifier used to fetch and render data for this specific chart.
  * @property className - Optional additional CSS class for layout styling.
+ * @property fromDate - Start of the time range (ISO string).
+ * @property toDate - End of the time range (ISO string).
+ * @property interval - Time interval in minutes.
+ * @property yDomain - Y-axis min and max values based on data.
  */
 interface ChartProps {
   id: number;
+  fromDate: string;
+  toDate: string;
+  interval: string;
+  yDomain: [number, number];
   className?: string;
 }
 
 /**
  * Renders a chart and domain slider for the given graph ID.
  */
-const Chart: React.FC<ChartProps> = ({ id, className = '' }) => {
-  // Placeholder full domain range (e.g., timestamp or data index)
-  const fullDomain: [number, number] = [0, 10];
+const Chart: React.FC<ChartProps> = ({
+  id,
+  fromDate,
+  toDate,
+  interval,
+  yDomain,
+  className = '',
+}) => {
+  // Example domain in "data index" space — this would typically be derived from data
+  const fullDomain: [number, number] = [0, 100];
 
-  // Selected subdomain range controlled by the user
-  const [selection, setSelection] = useState<[number, number]>([1, 3]);
+  // Selection state within the domain
+  const [selection, setSelection] = useState<[number, number]>([10, 40]);
 
   return (
     <div className={`graph-chart ${className}`}>
-      {/* Visualization of data based on selected domain */}
-      <D3Chart id={id} selection={selection} />
-
-      {/* Slider to control which part of the domain is selected */}
+      <div className="chart-body">
+        <D3Chart
+          id={id}
+          fromDate={fromDate}
+          toDate={toDate}
+          interval={interval}
+          yDomain={yDomain}
+        />
+      </div>
       <DomainSlider
         domain={fullDomain}
         selection={selection}
         onChange={setSelection}
       />
     </div>
+
   );
 };
 

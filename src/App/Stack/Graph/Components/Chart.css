@@ -1,12 +1,24 @@
 /* Blue chart */
 .graph-chart {
-    background-color: blue;
-    flex: 1 1 65%;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 0;
+  background-color: blue;
+  flex: 1 1 65%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  min-height: 250px; /* Ensures enough space to see axes */
 }
+.chart-body {
+  flex: 1 1 auto;
+  position: relative;
+}
+
+.d3-chart {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 
 @media (min-width: 768px) {
     .graph-chart {

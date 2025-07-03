@@ -56,9 +56,6 @@ type VariableGroup = {
 
 // --- Utility Functions ---
 
-/**
- * Returns an ISO string for the start of today, one week ago.
- */
 function getStartOfTodayOneWeekAgo(): string {
   const d = new Date();
   d.setDate(d.getDate() - 7);
@@ -66,16 +63,10 @@ function getStartOfTodayOneWeekAgo(): string {
   return d.toISOString();
 }
 
-/**
- * Returns the current date and time as an ISO string.
- */
 function getNow(): string {
   return new Date().toISOString();
 }
 
-/**
- * Formats a date string to match the expected API query format: "YYYY-MM-DD HH:mm:ss".
- */
 function formatDateForUrl(dateString: string): string {
   const d = new Date(dateString);
   const yyyy = d.getFullYear();
@@ -87,9 +78,6 @@ function formatDateForUrl(dateString: string): string {
   return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 }
 
-/**
- * Constructs a full API URL to request measurement data.
- */
 function buildApiUrl(
   stationId: number,
   variableNames: string[],
@@ -105,9 +93,6 @@ function buildApiUrl(
   return `${baseUrl}/measurement/${instrumentId}/measurements/${variablePath}/${interval}/?start=${encodedStart}&end=${encodedEnd}`;
 }
 
-/**
- * Groups variables by their station and instrument to avoid duplicate API calls.
- */
 function groupVariablesByInstrument(vars: SelectedVariable[]): VariableGroup[] {
   const map = new Map<string, VariableGroup>();
 
@@ -129,26 +114,22 @@ function groupVariablesByInstrument(vars: SelectedVariable[]): VariableGroup[] {
 // --- Graph Component ---
 
 const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
-  const [menuExpanded, setMenuExpanded] = useState(true); // Toggle menu visibility
-  const { config } = useConfig(); // Access station/instrument/measurement metadata
+  const [menuExpanded, setMenuExpanded] = useState(true);
+  const { config } = useConfig();
 
-  // Time range state
   const [fromDate, setFromDate] = useState<string>(getStartOfTodayOneWeekAgo());
   const [toDate, setToDate] = useState<string>(getNow());
-
-  // Variable selection and interval state
   const [variables, setVariables] = useState<SelectedVariable[]>([]);
-  const [interval, setInterval] = useState<string>('60'); // default: hourly
+  const [interval, setInterval] = useState<string>('60');
 
-  // Debug log on mount/unmount
+  const [yMin, setYMin] = useState(0);
+  const [yMax, setYMax] = useState(10);
+
   useEffect(() => {
     console.log(`Graph ${id}: created`);
-    return () => {
-      console.log(`Graph ${id}: removed`);
-    };
+    return () => console.log(`Graph ${id}: removed`);
   }, [id]);
 
-  // When variables, dates, or interval change, build and log API request URLs
   useEffect(() => {
     if (variables.length === 0) return;
 
@@ -163,21 +144,18 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
         interval
       );
       console.log(`Graph ${id}: URL #${index + 1} = ${url}`);
-      // Future: fetch(url).then(...)
+
+      // Simulated data range for demo purposes
+      const mockMin = -5;
+      const mockMax = 120;
+      setYMin(mockMin);
+      setYMax(mockMax);
     });
   }, [variables, fromDate, toDate, interval, id]);
 
-  // --- Handlers ---
-
-  const handleFromDateChange = (date: string) => {
-    console.log(`Graph ${id}: fromDate set to ${date}`);
-    setFromDate(date);
-  };
-
-  const handleToDateChange = (date: string) => {
-    console.log(`Graph ${id}: toDate set to ${date}`);
-    setToDate(date);
-  };
+  const handleFromDateChange = (date: string) => setFromDate(date);
+  const handleToDateChange = (date: string) => setToDate(date);
+  const handleIntervalChange = (newInterval: string) => setInterval(newInterval);
 
   const handleVariableChange = (index: number, value: SelectedVariable) => {
     setVariables((prev) => {
@@ -194,18 +172,10 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
     ]);
   };
 
-  const handleIntervalChange = (newInterval: string) => {
-    console.log(`Graph ${id}: interval set to ${newInterval}`);
-    setInterval(newInterval);
-  };
-
-  // Skip rendering if config hasn't loaded yet
   if (!config) return null;
 
-  // --- Render JSX ---
   return (
     <div className="graph">
-      {/* Menu allows user to select time range, variables, and interval */}
       {menuExpanded && (
         <Menu
           fromDate={fromDate}
@@ -220,16 +190,19 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
         />
       )}
 
-      {/* Toggle to collapse or expand the menu */}
       <ExpandToggle
         expanded={menuExpanded}
         onToggle={() => setMenuExpanded(!menuExpanded)}
       />
 
-      {/* Renders the actual graph visualization */}
-      <Chart id={id} />
+      <Chart
+        id={id}
+        fromDate={fromDate}
+        toDate={toDate}
+        interval={interval}
+        yDomain={[yMin, yMax]}
+      />
 
-      {/* Renders close and drag controls */}
       <ControlBar onRemove={onRemove} />
     </div>
   );

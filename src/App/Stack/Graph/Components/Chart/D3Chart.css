@@ -1,6 +1,14 @@
 .d3-chart {
     background-color: #f0f0f0;
     border: 1px solid #ccc;
+    display: block;
     width: 100%;
-    height: 90%;
+    height: 100%;
+}
+
+.graph-chart {
+    width: 100%;
+    height: 300px;
+    /* You can adjust this based on your layout needs */
+    position: relative;
 }
