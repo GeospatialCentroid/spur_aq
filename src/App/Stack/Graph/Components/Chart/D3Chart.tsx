@@ -184,12 +184,12 @@ const D3Chart: React.FC<D3ChartProps> = ({
     });
 
     /** Add chart title */
-    svg.append('text')
-      .attr('x', width / 2)
-      .attr('y', 20)
-      .attr('text-anchor', 'middle')
-      .attr('font-size', '14px')
-      .text(`Chart #${id}`);
+    // svg.append('text')
+    //   .attr('x', width / 2)
+    //   .attr('y', 20)
+    //   .attr('text-anchor', 'middle')
+    //   .attr('font-size', '14px')
+    //   .text(`Chart #${id}`);
   }, [id, fromDate, toDate, interval, yDomain, data]);
 
   return (
