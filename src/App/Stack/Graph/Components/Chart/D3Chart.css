@@ -12,3 +12,9 @@
     /* You can adjust this based on your layout needs */
     position: relative;
 }
+
+.subtick-axis .tick line {
+  stroke: #999;
+  stroke-opacity: 0.75;
+  shape-rendering: crispEdges;
+}

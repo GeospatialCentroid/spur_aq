@@ -37,76 +37,102 @@ const D3Chart: React.FC<D3ChartProps> = ({
     const svg = d3.select(ref.current);
     svg.selectAll('*').remove(); // Clear previous chart contents
 
-    // Ensure parent element is available
     const container = ref.current?.parentElement;
     if (!container) return;
 
-    // Get actual pixel dimensions of the container
     const width = container.clientWidth;
     const height = container.clientHeight;
 
-    // Chart margins (space around axes)
     const margin = { top: 30, right: 20, bottom: 50, left: 60 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    // Parse date range from props
     const start = new Date(fromDate);
     const end = new Date(toDate);
 
-    // X Scale: time-based
     const xScale = d3.scaleTime()
       .domain([start, end])
       .range([0, innerWidth]);
 
-    // Y Scale: linear numeric range, padded 10% above max
     const yScale = d3.scaleLinear()
       .domain([Math.min(0, yDomain[0]), yDomain[1] * 1.1])
       .nice()
       .range([innerHeight, 0]);
 
-    // Main group to apply margin offset
     const g = svg.append('g')
       .attr('transform', `translate(${margin.left},${margin.top})`);
 
-    // Determine total duration in minutes
     const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
 
-    // Dynamically select appropriate time interval for x-axis ticks
+    // Determine labeled tick interval
     let tickInterval: d3.TimeInterval;
     if (durationMinutes <= 60) {
-      tickInterval = d3.timeMinute.every(1)!;        // Up to 1 hour
+      tickInterval = d3.timeMinute.every(1)!;
     } else if (durationMinutes <= 6 * 60) {
-      tickInterval = d3.timeMinute.every(15)!;       // Up to 6 hours
+      tickInterval = d3.timeMinute.every(15)!;
     } else if (durationMinutes <= 24 * 60) {
-      tickInterval = d3.timeHour.every(1)!;          // Up to 1 day
+      tickInterval = d3.timeHour.every(1)!;
     } else if (durationMinutes <= 3 * 24 * 60) {
-      tickInterval = d3.timeHour.every(6)!;          // Up to 3 days
+      tickInterval = d3.timeHour.every(6)!;
     } else if (durationMinutes <= 14 * 24 * 60) {
-      tickInterval = d3.timeDay.every(1)!;           // Up to 2 weeks
+      tickInterval = d3.timeDay.every(1)!;
     } else if (durationMinutes <= 45 * 24 * 60) {
-      tickInterval = d3.timeWeek.every(1)!;          // Up to 1.5 months
+      tickInterval = d3.timeWeek.every(1)!;
     } else if (durationMinutes <= 365 * 24 * 60) {
-      tickInterval = d3.timeMonth.every(1)!;         // Up to 1 year
+      tickInterval = d3.timeMonth.every(1)!;
     } else {
-      tickInterval = d3.timeYear.every(1)!;          // More than a year
+      tickInterval = d3.timeYear.every(1)!;
+    }
+
+    // Determine subtick interval (smaller ticks with no labels)
+    let subTickInterval: d3.TimeInterval | null = null;
+    if (durationMinutes > 365 * 24 * 60) {
+      subTickInterval = d3.timeMonth.every(1);        // Under years: months
+    } else if (durationMinutes > 45 * 24 * 60) {
+      subTickInterval = d3.timeDay.every(1);          // Under months: days
+    } else if (durationMinutes > 14 * 24 * 60) {
+      subTickInterval = d3.timeDay.every(1);          // Under weeks: days
+    } else if (durationMinutes > 6 * 60) {
+      subTickInterval = d3.timeHour.every(1);         // Under days: hours
+    } else if (durationMinutes > 60) {
+      subTickInterval = d3.timeMinute.every(15);      // Under 6 hours: 15 min
+    } else {
+      subTickInterval = d3.timeMinute.every(1);       // Under 1 hour: 1 min
     }
 
 
-    // Create X Axis with formatted ticks
+    // Main x-axis
     const xAxis = d3.axisBottom(xScale)
       .ticks(tickInterval)
       .tickFormat((domainValue: Date | d3.NumberValue) => {
         const d = domainValue instanceof Date ? domainValue : new Date(+domainValue);
-        return d3.timeFormat('%m/%d %H:%M')(d);
+        if (durationMinutes > 365 * 24 * 60) {
+          return d3.timeFormat('%Y')(d); // e.g., 2024
+        } else if (durationMinutes > 45 * 24 * 60) {
+          return d3.timeFormat('%b %Y')(d); // Jan 2024
+        } else {
+          return d3.timeFormat('%m/%d %H:%M')(d);
+        }
       });
 
-    // Append and position x-axis
     const xAxisGroup = g.append('g')
       .attr('transform', `translate(0,${innerHeight})`)
       .call(xAxis);
 
-    // Format x-axis ticks to split date and time into two lines
+    // Add subticks below primary ticks
+    if (subTickInterval) {
+      const subAxis = d3.axisBottom(xScale)
+        .ticks(subTickInterval)
+        .tickSize(4)
+        .tickFormat(() => '');
+
+      g.append('g')
+        .attr('transform', `translate(0,${innerHeight})`)
+        .attr('class', 'subtick-axis')
+        .call(subAxis);
+    }
+
+    // Split main tick labels into two lines
     xAxisGroup.selectAll('.tick text')
       .each(function (d) {
         const self = d3.select(this);
@@ -115,19 +141,18 @@ const D3Chart: React.FC<D3ChartProps> = ({
         self.text(null);
         self.append('tspan')
           .attr('x', 0)
-          .attr('dy', '0.6em') // push date line down
+          .attr('dy', '0.6em')
           .text(datePart);
         self.append('tspan')
           .attr('x', 0)
-          .attr('dy', '1.2em') // push time line below
+          .attr('dy', '1.2em')
           .text(timePart);
       });
 
-    // Create and append Y Axis
     const yAxis = d3.axisLeft(yScale).ticks(6);
     g.append('g').call(yAxis);
 
-    // Add chart title
+    // Chart title
     svg.append('text')
       .attr('x', width / 2)
       .attr('y', 20)
@@ -140,7 +165,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
     <svg
       ref={ref}
       className="d3-chart"
-      style={{ width: '100%', height: '100%' }} // fully fills parent container
+      style={{ width: '100%', height: '100%' }}
     />
   );
 };
