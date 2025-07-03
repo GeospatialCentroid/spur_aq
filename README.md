@@ -87,3 +87,91 @@ root
 ├── reportWebVitals.ts
 └── setupTests.ts
 ```
+
+# React + D3 Commenting Style Guide
+
+This guide outlines the preferred commenting style for components using **React + D3**, focused on clarity, structure, and maintainability.
+
+---
+
+## 1. Top-Level Component Comment Block
+
+Use a `/** ... */` block at the top of each component or file to explain:
+
+- What the component does
+- Key behaviors or features
+- External libraries or dependencies used (e.g. D3.js)
+
+```ts
+/**
+ * D3Chart component
+ *
+ * - Uses D3.js to render a time series chart inside an SVG element.
+ * - Dynamically creates x and y axes based on props.
+ * - Designed to be reused across Graphs with different configurations.
+ */
+```
+
+---
+
+## 2. Props Interface Documentation
+
+Use `@property` tags inside a `/** ... */` block to annotate each prop in a component’s props interface:
+
+```ts
+interface D3ChartProps {
+  /**
+   * @property id - Unique identifier for the chart (used in label/title).
+   */
+  id: number;
+
+  /**
+   * @property fromDate - Start time (ISO string) for the X-axis.
+   */
+  fromDate: string;
+
+  /**
+   * @property interval - Time step in minutes used for tick spacing.
+   */
+  interval: string;
+}
+```
+
+---
+
+## 3. Section-Level Comments
+
+Use section comments (`//` or `/** ... */`) to explain groups of logic, especially when:
+
+- Calculating layout dimensions
+- Creating D3 scales or axes
+- Managing lifecycle logic in `useEffect`
+
+```ts
+// Calculate dimensions based on container and margins
+const innerWidth = width - margin.left - margin.right;
+```
+
+---
+
+## 4. Inline Comments
+
+For critical logic or expressions that may be non-obvious, use `//` comments inline or above the line:
+
+```ts
+.attr('dy', '1.2em') // Push the second line of the tick label down
+```
+
+---
+
+## Summary
+
+| Element            | Style                                       |
+|--------------------|---------------------------------------------|
+| Top-level comment  | `/** */` with high-level purpose and notes |
+| Prop doc           | `@property` inside `interface` block       |
+| Section comment    | `//` or `/** */` above major logic blocks  |
+| Inline comment     | `//` for complex or significant lines      |
+
+This structure supports both **readability** and **scalability** in collaborative, data-driven React applications.
+
