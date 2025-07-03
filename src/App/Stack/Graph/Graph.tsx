@@ -108,8 +108,8 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
   const [interval, setInterval] = useState<string>('60');
 
   const [yMin, setYMin] = useState(0);
-  const [yMax, setYMax] = useState(10);
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [yMax, setYMax] = useState(1);
+  const [chartData, setChartData] = useState<{ [key: string]: string }[]>([]);
 
   // Track lifecycle for logging
   useEffect(() => {
@@ -148,17 +148,31 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
         const data = await response.json();
-
         console.log(`Graph ${id}: Data received`, data);
+
+        // Data is already in merged form: [{ datetime, col9, col10, ... }]
         setChartData(data);
 
-        const values = Object.values(data).flatMap((series: any) =>
-          Array.isArray(series) ? series.map((d: any) => d.value) : []
-        );
+        // Compute min and max from all column values (excluding datetime)
+        const values: number[] = [];
+        data.forEach((row: { [key: string]: string }) => {
+          Object.entries(row).forEach(([key, val]) => {
+            if (key !== 'datetime') {
+              const num = parseFloat(val);
+              if (!isNaN(num)) values.push(num);
+            }
+          });
+        });
+
         const min = Math.min(...values);
         const max = Math.max(...values);
-        setYMin(min);
-        setYMax(max);
+        if (!isFinite(min) || !isFinite(max)) {
+          setYMin(0);
+          setYMax(1);
+        } else {
+          setYMin(min);
+          setYMax(max);
+        }
       } catch (error) {
         console.error(`Graph ${id}: Failed to fetch data`, error);
       }
@@ -215,6 +229,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
         toDate={toDate}
         interval={interval}
         yDomain={[yMin, yMax]}
+        chartData={chartData}
       />
 
       <ControlBar onRemove={onRemove} />
