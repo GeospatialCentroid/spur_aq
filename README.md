@@ -1,5 +1,7 @@
 # `SPUR AQ`
 The codebase for the frontend of the Colorado State University SPUR Campus' Air Quality Data Visualization Site
+
+---
 ## `Basic Commands`
 #### `npm install`
 Installs packages necessary for the project
@@ -14,6 +16,7 @@ Builds the app for production to the `build` folder.\
 It correctly bundles React in production mode and optimizes the build for the best performance.
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
+---
 ## `File Structure`
 
 ```
@@ -88,11 +91,10 @@ root
 └── setupTests.ts
 ```
 
+---
 # React + D3 Commenting Style Guide
 
 This guide outlines the preferred commenting style for components using **React + D3**, focused on clarity, structure, and maintainability.
-
----
 
 ## 1. Top-Level Component Comment Block
 
@@ -112,7 +114,6 @@ Use a `/** ... */` block at the top of each component or file to explain:
  */
 ```
 
----
 
 ## 2. Props Interface Documentation
 
@@ -137,7 +138,6 @@ interface D3ChartProps {
 }
 ```
 
----
 
 ## 3. Section-Level Comments
 
@@ -152,7 +152,6 @@ Use section comments (`//` or `/** ... */`) to explain groups of logic, especial
 const innerWidth = width - margin.left - margin.right;
 ```
 
----
 
 ## 4. Inline Comments
 
@@ -162,7 +161,6 @@ For critical logic or expressions that may be non-obvious, use `//` comments inl
 .attr('dy', '1.2em') // Push the second line of the tick label down
 ```
 
----
 
 ## Summary
 
