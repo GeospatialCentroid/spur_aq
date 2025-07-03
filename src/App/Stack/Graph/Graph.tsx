@@ -17,44 +17,22 @@ import Chart from './Components/Chart';
 import ExpandToggle from './Components/Menu/ExpandToggle';
 import { useConfig } from '../../../context/ConfigContext';
 
-/**
- * Props for the Graph component.
- *
- * @property id - Unique identifier for this Graph instance.
- * @property onRemove - Callback to remove this Graph from the stack.
- */
 interface GraphProps {
   id: number;
   onRemove: () => void;
 }
 
-/**
- * Represents a single user-selected measurement variable.
- *
- * @property name - The variable name (e.g., "PM2.5").
- * @property stationId - ID of the station the variable comes from.
- * @property instrumentId - ID of the instrument recording the variable.
- */
 type SelectedVariable = {
   name: string;
   stationId: number;
   instrumentId: number;
 };
 
-/**
- * A grouping of variables by instrument to optimize API calls.
- *
- * @property stationId - Shared station ID for the group.
- * @property instrumentId - Shared instrument ID.
- * @property variableNames - Array of variable names for this group.
- */
 type VariableGroup = {
   stationId: number;
   instrumentId: number;
   variableNames: string[];
 };
-
-// --- Utility Functions ---
 
 function getStartOfTodayOneWeekAgo(): string {
   const d = new Date();
@@ -111,8 +89,6 @@ function groupVariablesByInstrument(vars: SelectedVariable[]): VariableGroup[] {
   return Array.from(map.values());
 }
 
-// --- Graph Component ---
-
 const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
   const [menuExpanded, setMenuExpanded] = useState(true);
   const { config } = useConfig();
@@ -124,6 +100,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
 
   const [yMin, setYMin] = useState(0);
   const [yMax, setYMax] = useState(10);
+  const [chartData, setChartData] = useState<any[]>([]);
 
   useEffect(() => {
     console.log(`Graph ${id}: created`);
@@ -131,10 +108,16 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
   }, [id]);
 
   useEffect(() => {
-    if (variables.length === 0) return;
+    if (
+      variables.length === 0 ||
+      variables.some(v => !v.name || v.stationId === 0 || v.instrumentId === 0)
+    ) {
+      return;
+    }
 
     const groups = groupVariablesByInstrument(variables);
-    groups.forEach((group, index) => {
+
+    groups.forEach(async (group, index) => {
       const url = buildApiUrl(
         group.stationId,
         group.variableNames,
@@ -145,13 +128,29 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
       );
       console.log(`Graph ${id}: URL #${index + 1} = ${url}`);
 
-      // Simulated data range for demo purposes
-      const mockMin = -5;
-      const mockMax = 120;
-      setYMin(mockMin);
-      setYMax(mockMax);
+      try {
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+        const data = await response.json();
+
+        console.log(`Graph ${id}: Data received`, data);
+        setChartData(data);
+
+        const values = Object.values(data).flatMap((series: any) =>
+          Array.isArray(series) ? series.map((d: any) => d.value) : []
+        );
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        setYMin(min);
+        setYMax(max);
+      } catch (error) {
+        console.error(`Graph ${id}: Failed to fetch data`, error);
+      }
     });
   }, [variables, fromDate, toDate, interval, id]);
+
 
   const handleFromDateChange = (date: string) => setFromDate(date);
   const handleToDateChange = (date: string) => setToDate(date);
