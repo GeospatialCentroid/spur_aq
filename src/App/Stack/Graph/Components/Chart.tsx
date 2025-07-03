@@ -1,28 +1,19 @@
 // File: src/App/Stack/Graph/Components/Chart.tsx
 
 /**
- * Chart component that displays a graph visualization and a domain slider.
- *
- * - Wraps a D3Chart component for rendering data.
- * - Wraps a DomainSlider component to allow user to adjust the x-axis (time or value) range.
- * - Maintains internal state for the selected range within the full domain.
+ * Chart component wrapping the D3 chart and domain slider.
+ * 
+ * - Accepts time range, interval, Y-axis domain, and the merged chart data from the Graph.
+ * - Converts the raw row-based data into a column-oriented format for the D3 chart.
+ * - Displays a domain slider (currently static) and the D3Chart for rendering.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import D3Chart from './Chart/D3Chart';
 import DomainSlider from './Chart/DomainSlider';
 import './Chart.css';
 
-/**
- * Props for the Chart component.
- *
- * @property id - Unique identifier used to fetch and render data for this specific chart.
- * @property className - Optional additional CSS class for layout styling.
- * @property fromDate - Start of the time range (ISO string).
- * @property toDate - End of the time range (ISO string).
- * @property interval - Time interval in minutes.
- * @property yDomain - Y-axis min and max values based on data.
- */
+/** Props for Chart component */
 interface ChartProps {
   id: number;
   fromDate: string;
@@ -30,11 +21,9 @@ interface ChartProps {
   interval: string;
   yDomain: [number, number];
   className?: string;
+  chartData: { [key: string]: string }[]; // New merged row-wise input format
 }
 
-/**
- * Renders a chart and domain slider for the given graph ID.
- */
 const Chart: React.FC<ChartProps> = ({
   id,
   fromDate,
@@ -42,12 +31,37 @@ const Chart: React.FC<ChartProps> = ({
   interval,
   yDomain,
   className = '',
+  chartData,
 }) => {
-  // Example domain in "data index" space — this would typically be derived from data
-  const fullDomain: [number, number] = [0, 100];
-
-  // Selection state within the domain
+  const fullDomain: [number, number] = [0, 100]; // Placeholder for domain slider
   const [selection, setSelection] = useState<[number, number]>([10, 40]);
+
+  /**
+   * Transform the row-wise chartData into column-wise structure:
+   * {
+   *   col9: [{ timestamp, value }, ...],
+   *   col10: [{ timestamp, value }, ...]
+   * }
+   */
+  const processedData = useMemo(() => {
+    const result: Record<string, { timestamp: string; value: number }[]> = {};
+
+    chartData.forEach(row => {
+      const timestamp = row.datetime;
+      if (!timestamp) return;
+
+      Object.entries(row).forEach(([key, val]) => {
+        if (key === 'datetime') return;
+        const value = parseFloat(val);
+        if (isNaN(value)) return;
+
+        if (!result[key]) result[key] = [];
+        result[key].push({ timestamp, value });
+      });
+    });
+
+    return result;
+  }, [chartData]);
 
   return (
     <div className={`graph-chart ${className}`}>
@@ -58,6 +72,7 @@ const Chart: React.FC<ChartProps> = ({
           toDate={toDate}
           interval={interval}
           yDomain={yDomain}
+          data={processedData} // Transformed data format
         />
       </div>
       <DomainSlider
@@ -66,7 +81,6 @@ const Chart: React.FC<ChartProps> = ({
         onChange={setSelection}
       />
     </div>
-
   );
 };
 
