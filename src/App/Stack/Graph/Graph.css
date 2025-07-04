@@ -20,15 +20,3 @@
         flex-direction: row;
     }
 }
-
-.interval-select-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: 500;
-}
-
-.interval-select {
-    padding: 0.25rem;
-    font-size: 0.9rem;
-}

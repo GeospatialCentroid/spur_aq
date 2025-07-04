@@ -76,9 +76,11 @@ const Menu: React.FC<MenuProps> = ({
 
         {/* Time and interval controls */}
         <div className="dt-button-group">
+          From:
           <DateSelector value={fromDate} onChange={onFromDateChange} />
+          To:
           <DateSelector value={toDate} onChange={onToDateChange} />
-
+          Interval:
           <IntervalSelector value={interval} onChange={onIntervalChange} />
 
         </div>

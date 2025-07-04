@@ -17,12 +17,14 @@ import './VariableDescription.css';
  * @property description - Text description of the selected item.
  * @property onConfirm - Optional callback to confirm the selection (only used for measurements).
  * @property onCancel - Optional callback to cancel the selection (only used for measurements).
+ * @property highlightColor - Color passed from ColorUtil -> Menu -> here, determines the color of the confirm button.
  */
 interface VariableDescriptionProps {
   type: 'station' | 'instrument' | 'measurement';
   description: string;
   onConfirm?: () => void;
   onCancel?: () => void;
+  highlightColor?: string;
 }
 
 /**
@@ -34,6 +36,7 @@ const VariableDescription: React.FC<VariableDescriptionProps> = ({
   description,
   onConfirm,
   onCancel,
+  highlightColor,
 }) => {
   return (
     <div className="variableDescription">
@@ -43,7 +46,19 @@ const VariableDescription: React.FC<VariableDescriptionProps> = ({
       {/* Only show Confirm/Cancel if a measurement is selected and handlers are defined */}
       {type === 'measurement' && onConfirm && onCancel && (
         <div className="description-actions">
-          <button onClick={onConfirm} className="btn btn-primary">
+          <button
+            className="confirm-button btn btn-primary"
+            onClick={onConfirm}
+            style={
+              highlightColor
+                ? {
+                  backgroundColor: highlightColor,
+                  color: 'white',
+                  borderColor: highlightColor, // Ensures border matches if Bootstrap is used
+                }
+                : undefined
+            }
+          >
             Confirm
           </button>
           <button onClick={onCancel} className="btn btn-secondary ml-2">

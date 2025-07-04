@@ -14,6 +14,7 @@ import './VariableModal.css';
 import VariableList from './VariableList';
 import VariableDescription from './VariableDescription';
 import { useConfig } from '../../../../../../context/ConfigContext';
+import { getColorForVariable } from '../../../ColorUtils';
 
 /**
  * Metadata representing a selected item in the hierarchy.
@@ -124,6 +125,14 @@ const VariableModal: React.FC<VariableModalProps> = ({
     return selected.name;
   };
 
+  /**
+   * Dynamically computes highlight color for selected measurement.
+   */
+  const getSelectedColor = (): string | undefined => {
+    if (selected?.type !== 'measurement') return undefined;
+    return getColorForVariable(selected.alias || selected.name);
+  };
+
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -153,6 +162,7 @@ const VariableModal: React.FC<VariableModalProps> = ({
               stations={config}
               onSelect={handleSelect}
               selectedKey={selectedKey ?? undefined}
+              selectedColor={getSelectedColor()}
             />
           </div>
 
@@ -162,7 +172,13 @@ const VariableModal: React.FC<VariableModalProps> = ({
               description={selected.description}
               onConfirm={selected.type === 'measurement' ? handleConfirm : undefined}
               onCancel={selected.type === 'measurement' ? handleCancel : undefined}
+              highlightColor={
+                selected.type === 'measurement'
+                  ? getColorForVariable(selected.alias || selected.name)
+                  : undefined
+              }
             />
+
           ) : (
             <div className="variableDescription">
               <p>Select a station, instrument, or measurement to view its description.</p>

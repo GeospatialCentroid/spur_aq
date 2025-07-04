@@ -1,12 +1,12 @@
 /* Red menu */
 .graph-menu {
-    background-color: aqua;
+    background-color: #fefefe;
     position: relative;
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 0.5rem;
+    padding: .5rem;
 }
 
 @media (min-width: 768px) {
@@ -16,28 +16,33 @@
 }
 
 .variable-button-group {
-    margin: .5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    max-height: 250px;
-    overflow-y: auto;
-    padding-right: 0.5rem;
-}
-
-.variable-button-group {
-    background-color: #f9f9f9;
+    margin-top: .75rem;
+    background-color: #efefef;
     border: 1px solid #ccc;
     border-radius: 8px;
     padding: 0.5rem;
+
+    /* Scroll behavior */
+    height: 235px;
+    /* FIXED height */
+    overflow-y: auto;
+
+    /* Layout */
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    font-weight: 500;
 }
-
-
 
 .dt-button-group {
     display: flex;
     justify-content: center;
     gap: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .add-variable-button {
@@ -46,7 +51,7 @@
     background-color: #0d6efd;
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     font-size: 0.9rem;
 }

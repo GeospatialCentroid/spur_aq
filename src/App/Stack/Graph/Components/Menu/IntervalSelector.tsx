@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import './IntervalSelector.css'
 
 interface IntervalSelectorProps {
   value: string;
@@ -16,20 +17,17 @@ interface IntervalSelectorProps {
 
 const IntervalSelector: React.FC<IntervalSelectorProps> = ({ value, onChange }) => {
   return (
-    <label className="interval-select-label">
-      Interval:
-      <select
-        className="interval-select"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <option value="1">1 minute</option>
-        <option value="5">5 minutes</option>
-        <option value="10">10 minutes</option>
-        <option value="30">30 minutes</option>
-        <option value="60">60 minutes</option>
-      </select>
-    </label>
+    <select
+      className="interval-select"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    >
+      <option value="1">1 minute</option>
+      <option value="5">5 minutes</option>
+      <option value="10">10 minutes</option>
+      <option value="30">30 minutes</option>
+      <option value="60">60 minutes</option>
+    </select>
   );
 };
 

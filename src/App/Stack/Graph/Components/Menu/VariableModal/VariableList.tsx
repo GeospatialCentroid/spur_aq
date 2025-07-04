@@ -18,6 +18,7 @@ import { Station } from '../../../../../../Types/config';
  * @property stations - Array of stations, each with instruments and measurements.
  * @property onSelect - Callback invoked when a station, instrument, or measurement is clicked.
  * @property selectedKey - Optional unique key used to highlight the currently selected item.
+ * @property selectedColor - Optional color used to highlight the selected measurement.
  */
 interface VariableListProps {
   stations: Station[];
@@ -32,19 +33,27 @@ interface VariableListProps {
     key: string
   ) => void;
   selectedKey?: string;
+  selectedColor?: string;
 }
 
 /**
  * Renders the station → instrument → measurement hierarchy as a nested interactive list.
  */
-const VariableList: React.FC<VariableListProps> = ({ stations, onSelect, selectedKey }) => {
+const VariableList: React.FC<VariableListProps> = ({
+  stations,
+  onSelect,
+  selectedKey,
+  selectedColor,
+}) => {
   return (
     <div>
       {stations.map((station) => (
         <div key={station.id} style={{ marginBottom: '1rem' }}>
           {/* Station Level */}
           <div
-            className={`selectable station ${selectedKey === `station-${station.id}` ? 'selected' : ''}`}
+            className={`selectable station ${
+              selectedKey === `station-${station.id}` ? 'selected' : ''
+            }`}
             onClick={() =>
               onSelect(
                 {
@@ -64,7 +73,9 @@ const VariableList: React.FC<VariableListProps> = ({ stations, onSelect, selecte
               <li key={instrument.id}>
                 {/* Instrument Level */}
                 <div
-                  className={`selectable instrument ${selectedKey === `instrument-${instrument.id}` ? 'selected' : ''}`}
+                  className={`selectable instrument ${
+                    selectedKey === `instrument-${instrument.id}` ? 'selected' : ''
+                  }`}
                   onClick={() =>
                     onSelect(
                       {
@@ -99,6 +110,14 @@ const VariableList: React.FC<VariableListProps> = ({ stations, onSelect, selecte
                             },
                             measurementKey
                           )
+                        }
+                        style={
+                          isSelected && selectedColor
+                            ? {
+                                backgroundColor: selectedColor,
+                                color: 'white',
+                              }
+                            : undefined
                         }
                       >
                         {m.alias || m.name}

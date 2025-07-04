@@ -11,6 +11,7 @@
 import React, { useState } from 'react';
 import VariableModal from './VariableModal/VariableModal';
 import './VariableSelector.css';
+import { getColorForVariable } from '../../ColorUtils';
 
 /**
  * Represents a user-selected variable.
@@ -60,9 +61,21 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
   return (
     <>
       {/* Button shows current variable or fallback text */}
-      <button className="variable-select-button" onClick={openModal}>
+      <button
+        className="variable-select-button"
+        onClick={openModal}
+        style={
+          value?.name
+            ? {
+              backgroundColor: getColorForVariable(value.name),
+              color: 'white', //may need a contrast helper to keep text readable
+            }
+            : undefined
+        }
+      >
         {value?.name || 'Select Variable'}
       </button>
+
 
       {/* Modal for choosing the variable */}
       <VariableModal

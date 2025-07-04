@@ -17,6 +17,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import './D3Chart.css';
+import { getColorForVariable } from '../../ColorUtils';
 
 /**
  * Props for the D3Chart component.
@@ -37,14 +38,13 @@ interface D3ChartProps {
   data?: Record<string, { timestamp: string; value: number }[]>;
 }
 
-
 const D3Chart: React.FC<D3ChartProps> = ({
   id,
   fromDate,
   toDate,
   interval,
   yDomain,
-  data = [],
+  data = {},
 }) => {
   const ref = useRef<SVGSVGElement | null>(null);
 
@@ -164,7 +164,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
     g.append('g').call(yAxis);
 
     /** Plot lines for each key in the data object */
-    Object.entries(data).forEach(([key, series], i) => {
+    Object.entries(data).forEach(([key, series]) => {
       // Sort data chronologically
       const sortedSeries = [...series].sort((a, b) =>
         new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -178,12 +178,12 @@ const D3Chart: React.FC<D3ChartProps> = ({
       g.append('path')
         .datum(sortedSeries)
         .attr('fill', 'none')
-        .attr('stroke', d3.schemeCategory10[i % 10]) // Cycle through 10 colors
-        .attr('stroke-width', 2)
+        .attr('stroke', getColorForVariable(key))
+        .attr('stroke-width', 3)
         .attr('d', line);
     });
 
-    /** Add chart title */
+    /** Chart title (currently disabled) */
     // svg.append('text')
     //   .attr('x', width / 2)
     //   .attr('y', 20)
