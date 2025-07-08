@@ -1,34 +1,47 @@
-/* src/App/Stack/Graph/Components/Chart/DomainSlider.css */
+/* Outer wrapper */
 .domain-slider-wrapper {
-    width: 100%;
-    background-color: #f5f5f5;
-    padding: 15px;
+  width: 100%;
+  background-color: #f5f5f5;
+  padding: .75rem;
+  padding-bottom: 3px;
+  box-sizing: border-box;
+  border-top: 1px solid #ddd;
+  flex-shrink: 0;
 }
 
+/* Track container */
 .domain-slider {
-    width: 100%;
-    padding: 0 12px;
-    user-select: none;
+  width: 100%;
+  padding: 0 12px;
+  user-select: none;
+  display: flex;
+  align-items: center;
 }
 
+/* Track line between thumbs */
 .domain-slider .slider-track {
-    height: 10px;
-    border-radius: 4px;
-    cursor: grab;
-    width: 100%;
+  height: 8px;
+  border-radius: 5px;
+  background: #ccc;
+  width: 100%;
+  cursor: grab;
+  will-change: background;
 }
 
+/* Draggable thumb handles */
 .domain-slider .slider-handle {
-    height: 20px;
-    width: 20px;
-    background: #666;
-    border-radius: 50%;
-    cursor: grab;
-    transition: background 0.2s;
+  height: 18px;
+  width: 18px;
+  background: #666;
+  border-radius: 50%;
+  cursor: grab;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
-.domain-slider .slider-handle:active,
-.domain-slider .slider-handle:hover {
-    background: steelblue;
-    cursor: grabbing;
+/* Hover/active thumb state */
+.domain-slider .slider-handle:hover,
+.domain-slider .slider-handle:active {
+  background: steelblue;
+  transform: scale(1.15);
+  cursor: grabbing;
 }

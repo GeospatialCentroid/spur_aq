@@ -1,22 +1,37 @@
-/* Blue chart */
 .graph-chart {
-  background-color: blue;
+  background-color: #f5f5f5;
   flex: 1 1 65%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   position: relative;
-  min-height: 250px; /* Ensures enough space to see axes */
-}
-.chart-body {
-  flex: 1 1 auto;
-  position: relative;
+  /* Ensures enough space to see axes */
 }
 
+.chart-body {
+  flex-grow: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-footer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #444;
+  width: 100%;
+}
+
+.slider-label {
+  padding-bottom: 5px;
+}
 
 
 @media (min-width: 768px) {
-    .graph-chart {
-        flex: 1;
-    }
+  .graph-chart {
+    flex: 1;
+  }
 }

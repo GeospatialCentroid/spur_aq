@@ -86,7 +86,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
     /** Select primary tick interval for X-axis based on chart duration */
     let tickInterval: d3.TimeInterval;
     if (durationMinutes <= 60) {
-      tickInterval = d3.timeMinute.every(1)!;
+      tickInterval = d3.timeMinute.every(15)!;
     } else if (durationMinutes <= 6 * 60) {
       tickInterval = d3.timeMinute.every(15)!;
     } else if (durationMinutes <= 24 * 60) {
