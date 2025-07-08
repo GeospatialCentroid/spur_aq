@@ -37,27 +37,29 @@ root
 │   │       ├── Stack.css
 │   │       ├── Stack.tsx
 │   │       └── Graph/
+│   │           ├── ColorUtils.tsx
 │   │           ├── Graph.css
 │   │           ├── Graph.tsx
 │   │           └── Components/
-│   │               ├── Chart/
 │   │               │   ├── Chart.css
 │   │               │   ├── Chart.tsx
+│   │               │   ├── ControlBar.css
+│   │               │   ├── ControlBar.tsx
+│   │               │   ├── Menu.css
+│   │               │   ├── Menu.tsx
+│   │               ├── Chart/
 │   │               │   ├── D3Chart.tsx
 │   │               │   ├── DomainSlider.css
 │   │               │   └── DomainSlider.tsx
 │   │               ├── ControlBar/
 │   │               │   ├── CloseButton.css
 │   │               │   ├── CloseButton.tsx
-│   │               │   ├── ControlBar.css
-│   │               │   ├── ControlBar.tsx
 │   │               │   ├── DragHandle.css
 │   │               │   └── DragHandle.tsx
 │   │               └── Menu/
-│   │                   ├── Menu.css
-│   │                   ├── Menu.tsx
 │   │                   ├── DateSelector.css
 │   │                   ├── DateSelector.tsx
+│   │                   ├── IntervalSelector.css
 │   │                   ├── IntervalSelector.tsx
 │   │                   ├── ExpandToggle.css
 │   │                   ├── ExpandToggle.tsx
