@@ -15,7 +15,6 @@ import Menu from './Components/Menu';
 import ControlBar from './Components/ControlBar';
 import Chart from './Components/Chart';
 import ExpandToggle from './Components/Menu/ExpandToggle';
-import DomainSlider from './Components/Chart/DomainSlider';
 import { useConfig } from '../../../context/ConfigContext';
 
 /** Props for the Graph component */
@@ -47,7 +46,7 @@ function getStartOfTodayOneWeekAgo(): string {
 }
 
 /** Utility: Get ISO string for current time */
-function getNow(): string {
+export function getNow(): string {
   return new Date().toISOString();
 }
 
@@ -121,30 +120,38 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
 
   /** Log creation/removal lifecycle */
   useEffect(() => {
-    const start = new Date(fromDate).getTime();
-    const end = new Date(toDate).getTime();
-    const newDomain: [number, number] = [start, end];
+    let start = new Date(fromDate).getTime();
+    let end = new Date(toDate).getTime();
 
+    // Flip if out of order
+    if (start > end) {
+      [start, end] = [end, start];
+    }
+
+    // Minimum domain width of 1 minute
+    if (end - start < 60 * 1000) {
+      end = start + 60 * 1000;
+    }
+
+    const newDomain: [number, number] = [start, end];
     setDomain(newDomain);
 
-    setSelection((prevSelection) => {
-      let [selStart, selEnd] = prevSelection;
-
+    setSelection(([selStart, selEnd]) => {
       const wasFullyZoomedOut =
-        selStart === domain[0] && selEnd === domain[1];
+        selStart === domain[0] && selEnd === domain[1]; // still safe for now
 
       const clampedStart = Math.max(start, Math.min(end, selStart));
       const clampedEnd = Math.max(start, Math.min(end, selEnd));
 
-      const minRange = 60 * 1000; // 1 minute in ms
-
-      if (wasFullyZoomedOut || clampedEnd - clampedStart < minRange) {
+      if (wasFullyZoomedOut || clampedEnd - clampedStart < 60 * 1000) {
         return [start, end];
       }
 
       return [clampedStart, clampedEnd];
     });
   }, [fromDate, toDate]);
+
+
 
   /** Fetch chart data whenever variable list, date range, or interval changes */
   useEffect(() => {
@@ -205,8 +212,30 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
 
   // --- Handlers ---
 
-  const handleFromDateChange = (date: string) => setFromDate(date);
-  const handleToDateChange = (date: string) => setToDate(date);
+  const handleFromDateChange = (newFromDate: string) => {
+    const newFrom = new Date(newFromDate).getTime();
+    const to = new Date(toDate).getTime();
+    if (newFrom > to) {
+      // Swap the values
+      setFromDate(toDate);     // fromDate becomes old toDate
+      setToDate(newFromDate);  // toDate becomes newly selected (later) time
+    } else {
+      setFromDate(newFromDate);
+    }
+  };
+
+  const handleToDateChange = (newToDate: string) => {
+    const newTo = new Date(newToDate).getTime();
+    const from = new Date(fromDate).getTime();
+    if (newTo < from) {
+      setFromDate(newToDate);  // new earlier value becomes start
+      setToDate(fromDate);     // previous from becomes new end
+    } else {
+      setToDate(newToDate);
+    }
+  };
+
+
   const handleIntervalChange = (newInterval: string) => setInterval(newInterval);
 
   const handleVariableChange = (index: number, value: SelectedVariable) => {

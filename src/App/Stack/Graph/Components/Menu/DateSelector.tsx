@@ -15,24 +15,28 @@ import 'jquery-datetimepicker/build/jquery.datetimepicker.min.css';
 import './DateSelector.css';
 
 // Expose jQuery to global scope (required for datetimepicker plugin to work)
-;(window as any).$ = $;
-;(window as any).jQuery = $;
+; (window as any).$ = $;
+; (window as any).jQuery = $;
 
 /**
  * Props for the DateSelector component.
  *
  * @property value - The current ISO date string.
  * @property onChange - Callback triggered when the user selects a new date/time.
+ * @property minDate - ISO string representing the minimum selectable date as determined by the total current date range
+ * @property maxDate - ISO string representing the maximimum selectable date as determined by the total current date range
  */
 interface DateSelectorProps {
   value: string;
   onChange: (newDate: string) => void;
+  minDate?: string;
+  maxDate?: string;
 }
 
 /**
  * Renders a date/time picker using jQuery's datetimepicker inside a React component.
  */
-export default function DateSelector({ value, onChange }: DateSelectorProps) {
+export default function DateSelector({ value, onChange, minDate, maxDate }: DateSelectorProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Initialize the jQuery datetimepicker on mount
@@ -42,6 +46,8 @@ export default function DateSelector({ value, onChange }: DateSelectorProps) {
       $(input).datetimepicker({
         format: 'Y-m-d H:i',
         step: 15,
+        minDate: minDate ? new Date(minDate) : false,
+        maxDate: maxDate ? new Date(maxDate) : false,
         onChangeDateTime: (current: Date) => {
           if (current) {
             onChange(current.toISOString());
@@ -52,6 +58,7 @@ export default function DateSelector({ value, onChange }: DateSelectorProps) {
       });
 
       // If no value is provided, default to the current date/time
+
       if (!value) {
         const defaultDate = new Date();
         input.value = formatDateForPicker(defaultDate);
@@ -65,7 +72,8 @@ export default function DateSelector({ value, onChange }: DateSelectorProps) {
         $(input).datetimepicker('destroy');
       }
     };
-  }, [onChange]);
+  }, [onChange, minDate, maxDate]);
+
 
   // Keep input field in sync with external value prop
   useEffect(() => {

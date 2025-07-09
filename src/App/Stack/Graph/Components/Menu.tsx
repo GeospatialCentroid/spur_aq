@@ -13,6 +13,7 @@ import './Menu.css';
 import DateSelector from './Menu/DateSelector';
 import VariableSelector from './Menu/VariableSelector';
 import IntervalSelector from './Menu/IntervalSelector';
+import {getNow} from '../Graph';
 
 
 /**
@@ -77,9 +78,18 @@ const Menu: React.FC<MenuProps> = ({
         {/* Time and interval controls */}
         <div className="dt-button-group">
           From:
-          <DateSelector value={fromDate} onChange={onFromDateChange} />
+          <DateSelector
+            value={fromDate}
+            onChange={onFromDateChange}
+            maxDate={toDate}
+          />
           To:
-          <DateSelector value={toDate} onChange={onToDateChange} />
+          <DateSelector
+            value={toDate}
+            onChange={onToDateChange}
+            minDate={fromDate}
+            maxDate={getNow()}
+          />
           Interval:
           <IntervalSelector value={interval} onChange={onIntervalChange} />
 
