@@ -179,7 +179,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
         .datum(sortedSeries)
         .attr('fill', 'none')
         .attr('stroke', getColorForVariable(key))
-        .attr('stroke-width', 3)
+        .attr('stroke-width', 1.5)
         .attr('d', line);
     });
 

@@ -13,8 +13,7 @@ import './Menu.css';
 import DateSelector from './Menu/DateSelector';
 import VariableSelector from './Menu/VariableSelector';
 import IntervalSelector from './Menu/IntervalSelector';
-import {getNow} from '../Graph';
-
+import { getNow } from '../Graph';
 
 /**
  * Represents a single user-selected measurement variable.
@@ -40,6 +39,7 @@ interface SelectedVariable {
  * @property variables - Array of selected variables.
  * @property onVariableChange - Callback for modifying a selected variable.
  * @property onAddVariable - Callback for adding a new variable selector.
+ * @property onRemoveVariable - Callback for removing a variable.
  * @property interval - Currently selected averaging interval.
  * @property onIntervalChange - Callback for changing the interval.
  */
@@ -52,6 +52,7 @@ interface MenuProps {
   variables: SelectedVariable[];
   onVariableChange: (index: number, v: SelectedVariable) => void;
   onAddVariable: () => void;
+  onRemoveVariable: (index: number) => void;
   interval: string;
   onIntervalChange: (interval: string) => void;
 }
@@ -68,6 +69,7 @@ const Menu: React.FC<MenuProps> = ({
   variables,
   onVariableChange,
   onAddVariable,
+  onRemoveVariable,
   interval,
   onIntervalChange,
 }) => {
@@ -92,7 +94,6 @@ const Menu: React.FC<MenuProps> = ({
           />
           Interval:
           <IntervalSelector value={interval} onChange={onIntervalChange} />
-
         </div>
 
         {/* Variable selectors and "Add Variable" button */}
@@ -102,6 +103,7 @@ const Menu: React.FC<MenuProps> = ({
               key={i}
               value={v}
               onChange={(val) => onVariableChange(i, val)}
+              onRemove={() => onRemoveVariable(i)}
             />
           ))}
 

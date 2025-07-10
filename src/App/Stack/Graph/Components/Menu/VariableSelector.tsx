@@ -12,6 +12,7 @@ import React, { useState } from 'react';
 import VariableModal from './VariableModal/VariableModal';
 import './VariableSelector.css';
 import { getColorForVariable } from '../../ColorUtils';
+import { X } from 'react-bootstrap-icons'
 
 /**
  * Represents a user-selected variable.
@@ -35,6 +36,7 @@ interface SelectedVariable {
 interface VariableSelectorProps {
   value: SelectedVariable | null;
   onChange: (variable: SelectedVariable) => void;
+  onRemove?: () => void;
 }
 
 /**
@@ -43,6 +45,7 @@ interface VariableSelectorProps {
 const VariableSelector: React.FC<VariableSelectorProps> = ({
   value,
   onChange,
+  onRemove,
 }) => {
   const [isOpen, setIsOpen] = useState(false); // Tracks if the modal is open
 
@@ -61,20 +64,34 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
   return (
     <>
       {/* Button shows current variable or fallback text */}
-      <button
-        className="variable-select-button"
-        onClick={openModal}
-        style={
-          value?.name
-            ? {
-              backgroundColor: getColorForVariable(value.name),
-              color: 'white', //may need a contrast helper to keep text readable
-            }
-            : undefined
-        }
-      >
-        {value?.name || 'Select Variable'}
-      </button>
+      <div className="variable-selector-wrapper">
+        {/* Button shows current variable or fallback text */}
+        <button
+          className="variable-select-button"
+          onClick={openModal}
+          style={
+            value?.name
+              ? {
+                backgroundColor: getColorForVariable(value.name),
+                color: 'white',
+              }
+              : undefined
+          }
+        >
+          {value?.name || 'Select Variable'}
+        </button>
+
+        {onRemove && (
+          <button
+            className="remove-variable-button"
+            onClick={onRemove}
+            aria-label="Remove variable"
+          >
+            <X />
+          </button>
+        )}
+      </div>
+
 
 
       {/* Modal for choosing the variable */}

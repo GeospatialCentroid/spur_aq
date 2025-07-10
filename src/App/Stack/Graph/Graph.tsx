@@ -151,14 +151,13 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
     });
   }, [fromDate, toDate]);
 
-
-
   /** Fetch chart data whenever variable list, date range, or interval changes */
   useEffect(() => {
     if (
       variables.length === 0 ||
       variables.some(v => !v.name || v.stationId === 0 || v.instrumentId === 0)
     ) {
+      setChartData([]);
       return;
     }
 
@@ -193,7 +192,6 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
             }
           });
         });
-
 
         const min = Math.min(...values);
         const max = Math.max(...values);
@@ -235,7 +233,6 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
     }
   };
 
-
   const handleIntervalChange = (newInterval: string) => setInterval(newInterval);
 
   const handleVariableChange = (index: number, value: SelectedVariable) => {
@@ -244,6 +241,10 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
       updated[index] = value;
       return updated;
     });
+  };
+
+  const handleRemoveVariable = (index: number) => {
+    setVariables((prev) => prev.filter((_, i) => i !== index));
   };
 
   const addVariable = () => {
@@ -276,6 +277,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
             onToDateChange={handleToDateChange}
             variables={variables}
             onVariableChange={handleVariableChange}
+            onRemoveVariable={handleRemoveVariable}
             onAddVariable={addVariable}
             interval={interval}
             onIntervalChange={handleIntervalChange}
@@ -302,7 +304,6 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
           selection={selection}
           onSliderChange={handleSliderChange}
         />
-
       </div>
 
       <div className="graph-control-bar">
@@ -310,6 +311,6 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove }) => {
       </div>
     </div>
   );
-}
+};
 
-export default Graph;
+export default React.memo(Graph);
