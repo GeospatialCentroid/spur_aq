@@ -4,60 +4,129 @@
  * Renders a sortable, dynamic stack of Graph components.
  *
  * Users can add new graphs, remove existing ones, and reorder them via drag-and-drop.
+ * Graph state is serialized into the URL to allow reloading the same layout later.
  */
 
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Stack.css';
 import Graph from './Graph/Graph';
 import { Plus } from 'react-bootstrap-icons';
+import {
+  EncodedGraphState,
+  decodeGraphList,
+  encodeGraphList,
+} from './Graph/GraphStateUtils';
 
 /**
- * Represents a single graph item in the stack.
+ * Internal item structure for each graph in the stack.
  *
- * @property id - Unique numeric identifier used to track and render each graph.
+ * @property id - Unique numeric identifier for rendering and managing the graph.
+ * @property state - Serialized settings for this specific graph instance.
  */
 interface GraphItem {
   id: number;
+  state: EncodedGraphState;
 }
 
 /**
  * Stack component that manages and displays a sortable list of Graph components.
  *
- * - Allows users to add and remove graphs.
- * - Maintains internal state for the list of graph IDs.
- * - Uses ReactSortable to support drag-and-drop reordering.
+ * - Loads initial graph layout from the URL.
+ * - Saves graph state back to the URL whenever changed.
+ * - Allows adding, removing, and reordering graphs.
  */
 const Stack: React.FC = () => {
-  const [graphs, setGraphs] = useState<GraphItem[]>([]); // State: list of graphs currently rendered
-  const nextIdRef = useRef(1);                            // Stable ref for incremental IDs
+  const [graphs, setGraphs] = useState<GraphItem[]>([]);             // State: list of graph items with state
+  const nextIdRef = useRef(1);                                       // Unique ID counter for new graphs
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   /**
-   * Adds a new Graph to the stack with a unique ID.
+   * On component mount, parse the URL to restore any previously saved graph layout.
+   */
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const gParam = params.get('g');
+    if (gParam) {
+      const decoded = decodeGraphList(gParam);
+      const restored = decoded.map((state) => ({
+        id: nextIdRef.current++,
+        state,
+      }));
+      setGraphs(restored);
+    }
+  }, []);
+
+  /**
+   * Whenever the graph layout or settings change, update the URL with the new state.
+   */
+  useEffect(() => {
+    const query = encodeGraphList(graphs.map((g) => g.state));
+    const url = new URL(window.location.href);
+    url.searchParams.set('g', query);
+    navigate(url.pathname + url.search, { replace: true });
+  }, [graphs]);
+
+  /**
+   * Adds a new empty graph to the stack with default settings.
    */
   const addGraph = () => {
     const newId = nextIdRef.current++;
-    setGraphs((g) => [...g, { id: newId }]);
+    const now = new Date();
+    const oneWeekAgo = new Date(now);
+    oneWeekAgo.setDate(now.getDate() - 7);
+    oneWeekAgo.setHours(0, 0, 0, 0);
+
+    const newGraph: GraphItem = {
+      id: newId,
+      state: {
+        id: newId.toString(36),
+        stationId: 0,
+        instrumentId: 0,
+        variableNames: [],
+        fromDate: oneWeekAgo.toISOString(),
+        toDate: now.toISOString(),
+        interval: '60',
+        selection: [oneWeekAgo.getTime(), now.getTime()],
+      },
+    };
+
+    setGraphs((prev) => [...prev, newGraph]);
   };
 
   /**
-   * Removes a Graph from the stack by ID.
+   * Removes a graph from the stack.
    *
-   * @param id - The ID of the Graph to remove.
+   * @param id - The graph ID to remove.
    */
   const removeGraph = (id: number) => {
     setGraphs((g) => g.filter((item) => item.id !== id));
+  };
+
+  /**
+   * Updates the saved state of a single graph, triggering a URL update.
+   *
+   * @param id - The ID of the graph being updated.
+   * @param newState - The new state to save.
+   */
+  const updateGraphState = (id: number, newState: EncodedGraphState) => {
+    setGraphs((prev) =>
+      prev.map((g) => (g.id === id ? { ...g, state: newState } : g))
+    );
   };
 
   return (
     // Main container for the graph stack UI
     <div className="container-fluid py-4 d-flex flex-column stack-container">
 
-      {/* 
-      Sortable container for the list of Graph components.
-      - `list` provides the current array of graph items.
-      - `setList` updates the state when reordered.
-      - `handle=".drag-handle"` enables drag functionality on elements with that class.
+      {/*
+        Sortable container for the list of Graph components.
+        - `list` provides the current array of graph items.
+        - `setList` updates the state when reordered.
+        - `handle=".drag-handle"` enables dragging by a specific part of the graph.
       */}
       <ReactSortable
         list={graphs}
@@ -67,26 +136,22 @@ const Stack: React.FC = () => {
         animation={150}
         handle=".drag-handle"
       >
-        {/* 
-        Render each Graph inside a wrapper div.
-        Each Graph receives:
-        - `id`: the unique identifier.
-        - `onRemove`: a callback to remove it from the stack.
-        */}
         {graphs.map((item) => (
           <div key={item.id} className="graph-wrapper">
             <Graph
               id={item.id}
+              initialState={item.state}
+              onStateChange={(id, state) => updateGraphState(item.id, state)}
               onRemove={() => removeGraph(item.id)}
             />
           </div>
         ))}
       </ReactSortable>
 
-      {/* 
-      Button to add a new Graph to the stack.
-      - Calls `addGraph` when clicked.
-      - Uses Bootstrap and an icon for visual styling.
+      {/*
+        Button to add a new Graph to the stack.
+        - Calls `addGraph` when clicked.
+        - Uses Bootstrap and an icon for visual styling.
       */}
       <button
         type="button"
