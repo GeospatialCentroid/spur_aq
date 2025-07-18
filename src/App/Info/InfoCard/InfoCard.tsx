@@ -65,6 +65,7 @@ const InfoCard: React.FC = () => {
         </div> */}
 
         <div className="card-body">
+             <h5 className="card-title">Info</h5>
           <p className="card-text">{info.text || 'Loading...'}</p>
           {info.image && (
             <img
