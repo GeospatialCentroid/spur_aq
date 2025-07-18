@@ -12,7 +12,7 @@ import React, { useState } from 'react';
 import VariableModal from './VariableModal/VariableModal';
 import './VariableSelector.css';
 import { getColorForVariable } from '../../ColorUtils';
-import { X } from 'react-bootstrap-icons'
+import { XLg } from 'react-bootstrap-icons';
 
 /**
  * Represents a user-selected variable.
@@ -87,7 +87,7 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
             onClick={onRemove}
             aria-label="Remove variable"
           >
-            <X />
+            <XLg size={16} style={{ stroke: 'currentColor', strokeWidth: 1 }} />
           </button>
         )}
       </div>

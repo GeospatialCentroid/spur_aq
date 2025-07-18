@@ -5,6 +5,7 @@
   width: 100%;
   height: 40px; /* set a consistent height */
   margin-bottom: 0.5rem;
+  border: #000000 2px;
 }
 
 /* Updated variable select button */
