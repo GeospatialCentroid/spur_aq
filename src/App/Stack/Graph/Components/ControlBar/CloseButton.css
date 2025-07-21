@@ -1,16 +1,9 @@
 .delete-btn {
     background-color: #dc3545;
     color: white;
-    width: 20%;
-    height: 100%;
+    height: 3.2rem;
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;
-}
-@media (min-width: 768px) {
-    .delete-btn {
-        width: 100%;
-        height: 20%;
-    }
 }

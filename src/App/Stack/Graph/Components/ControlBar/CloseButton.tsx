@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { X } from 'react-bootstrap-icons';
+import { XLg } from 'react-bootstrap-icons';
 import './CloseButton.css';
 
 /**
@@ -25,7 +25,7 @@ interface CloseButtonProps {
  */
 const CloseButton: React.FC<CloseButtonProps> = ({ onClick }) => (
   <button className="delete-btn" onClick={onClick} aria-label="Remove graph">
-    <X />
+    <XLg size={16} style={{ stroke: 'currentColor', strokeWidth: 1 }} />
   </button>
 );
 

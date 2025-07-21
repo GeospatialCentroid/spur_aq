@@ -1,14 +1,8 @@
 // File: src/App/Stack/Graph/Components/Menu/ExpandToggle.tsx
 
-/**
- * ExpandToggle component
- *
- * - Renders a toggle button for collapsing or expanding the menu panel.
- * - Displays "<<" when expanded, and ">>" when collapsed.
- */
-
 import React from 'react';
 import './ExpandToggle.css';
+import { TriangleFill } from 'react-bootstrap-icons';
 
 /**
  * Props for the ExpandToggle component.
@@ -26,10 +20,13 @@ interface ExpandToggleProps {
 /**
  * A small toggle button for showing or hiding the graph configuration menu.
  */
-export default function ExpandToggle({ expanded, onToggle }: ExpandToggleProps) {
+export default function ExpandToggle({ expanded, onToggle, className }: ExpandToggleProps) {
   return (
+
     <button className="expand-toggle" onClick={onToggle}>
-      {expanded ? '<<' : '>>'}
+      <TriangleFill
+        style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(270deg)' }}
+      />
     </button>
   );
 }
