@@ -18,6 +18,9 @@ import Chart from './Components/Chart';
 import ExpandToggle from './Components/Menu/ExpandToggle';
 import { useConfig } from '../../../context/ConfigContext';
 import { EncodedGraphState } from './GraphStateUtils';
+import { buildApiUrl, groupVariablesByInstrument } from './graphApiUtils';
+import { getStartOfTodayOneWeekAgo, getNow } from './graphDateUtils'
+import { syncDateRange, validateSliderRange } from './graphHandlers';
 
 /** Props for the Graph component */
 interface GraphProps {
@@ -25,78 +28,6 @@ interface GraphProps {
   onRemove: () => void;
   initialState?: EncodedGraphState;
   onStateChange?: (id: number, newState: EncodedGraphState) => void;
-}
-
-/** User-selected variable (station, instrument, and variable name) */
-type SelectedVariable = {
-  name: string;
-  stationId: number;
-  instrumentId: number;
-};
-
-/** Groups variables by instrument for efficient API requests */
-type VariableGroup = {
-  stationId: number;
-  instrumentId: number;
-  variableNames: string[];
-};
-
-/** Utility: Get ISO string for midnight one week ago today */
-function getStartOfTodayOneWeekAgo(): string {
-  const d = new Date();
-  d.setDate(d.getDate() - 7);
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString();
-}
-
-/** Utility: Get ISO string for current time */
-export function getNow(): string {
-  return new Date().toISOString();
-}
-
-/** Utility: Format a date for the API URL */
-function formatDateForUrl(dateString: string): string {
-  const d = new Date(dateString);
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  const dd = String(d.getDate()).padStart(2, '0');
-  const hh = String(d.getHours()).padStart(2, '0');
-  const min = String(d.getMinutes()).padStart(2, '0');
-  const ss = String(d.getSeconds()).padStart(2, '0');
-  return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
-}
-
-/** Utility: Build a fully encoded API URL for measurements */
-function buildApiUrl(
-  stationId: number,
-  variableNames: string[],
-  instrumentId: number,
-  startDate: string,
-  endDate: string,
-  interval: string
-): string {
-  const baseUrl = 'http://129.82.30.72:8001';
-  const encodedStart = encodeURIComponent(formatDateForUrl(startDate));
-  const encodedEnd = encodeURIComponent(formatDateForUrl(endDate));
-  const variablePath = variableNames.join(',');
-  return `${baseUrl}/measurement/${instrumentId}/measurements/${variablePath}/${interval}/?start=${encodedStart}&end=${encodedEnd}`;
-}
-
-/** Utility: Group selected variables by station/instrument pair */
-function groupVariablesByInstrument(vars: SelectedVariable[]): VariableGroup[] {
-  const map = new Map<string, VariableGroup>();
-  vars.forEach((v) => {
-    const key = `${v.stationId}:${v.instrumentId}`;
-    if (!map.has(key)) {
-      map.set(key, {
-        stationId: v.stationId,
-        instrumentId: v.instrumentId,
-        variableNames: [],
-      });
-    }
-    map.get(key)!.variableNames.push(v.name);
-  });
-  return Array.from(map.values());
 }
 
 /** Main component representing one full graph unit */
@@ -155,25 +86,20 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   // --- Handlers ---
 
   const handleFromDateChange = (newFromDate: string) => {
-    const newFrom = new Date(newFromDate).getTime();
-    const to = new Date(toDate).getTime();
-    if (newFrom > to) {
-      setFromDate(toDate);
-      setToDate(newFromDate);
-    } else {
-      setFromDate(newFromDate);
-    }
+    const [from, to] = syncDateRange(newFromDate, toDate, true);
+    setFromDate(from);
+    setToDate(to);
   };
 
   const handleToDateChange = (newToDate: string) => {
-    const newTo = new Date(newToDate).getTime();
-    const from = new Date(fromDate).getTime();
-    if (newTo < from) {
-      setFromDate(newToDate);
-      setToDate(fromDate);
-    } else {
-      setToDate(newToDate);
-    }
+    const [from, to] = syncDateRange(fromDate, newToDate, false);
+    setFromDate(from);
+    setToDate(to);
+  };
+
+  const handleSliderChange = (range: [number, number]) => {
+    const validated = validateSliderRange(range);
+    if (validated) setSelection(validated);
   };
 
   const handleIntervalChange = (newInterval: string) => setInterval(newInterval);
@@ -192,14 +118,6 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
 
   const addVariable = () => {
     setVariables((prev) => [...prev, { name: '', stationId: 0, instrumentId: 0 }]);
-  };
-
-  const handleSliderChange = (range: [number, number]) => {
-    const minRange = 60 * 1000;
-    const [start, end] = range;
-    if (end - start >= minRange) {
-      setSelection(range);
-    }
   };
 
   /** Validate and clamp domain/selection on date change */
