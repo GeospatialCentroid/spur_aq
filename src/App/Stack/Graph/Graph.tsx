@@ -3,7 +3,7 @@
 /**
  * Graph component representing a single interactive graph panel in the UI.
  *
- * - Manages selected variables, date range, and interval for the chart.
+ * - Manages selected variables, date range, interval, and "update live" flag for the chart.
  * - Builds API URLs to fetch measurement data based on selected settings.
  * - Displays a Menu for configuration, a Chart for visualization, and a ControlBar for controls.
  * - Supports toggling menu visibility, removing the graph, and zooming via a DomainSlider.
@@ -40,6 +40,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const [toDate, setToDate] = useState<string>(initialState?.toDate || getNow());
   const [variables, setVariables] = useState<SelectedVariable[]>([]);
   const [interval, setInterval] = useState<string>(initialState?.interval || '60');
+  const [updateLive, setUpdateLive] = useState<boolean>(initialState?.updateLive ?? false);
 
   const [yMin, setYMin] = useState(0);
   const [yMax, setYMax] = useState(1);
@@ -64,6 +65,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
     selection,
     onStateChange,
     lastEmitted,
+    updateLive,
   });
 
   /** Validate and clamp domain/selection on date change */
@@ -136,6 +138,8 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
             onAddVariable={addVariable}
             interval={interval}
             onIntervalChange={handleIntervalChange}
+            updateLive={updateLive}
+            onUpdateLiveChange={setUpdateLive}
           />
         </div>
       )}

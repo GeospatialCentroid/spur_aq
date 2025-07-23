@@ -11,7 +11,7 @@
  * - Multiple graph configurations are separated by `__`
  *
  * Example (single graph):
- *   graph.1a_station.1_instrument.2_variables.ozone~pm25_start.2025-07-01T00:00_end.2025-07-08T00:00_interval.60_domain.1620000000~1620600000
+ *   graph.1a_station.1_instrument.2_variables.ozone~pm25_start.2025-07-01T00:00_end.2025-07-08T00:00_interval.60_domain.1620000000~1620600000_live.1
  *
  * Example (multiple graphs):
  *   graph.1a_...__graph.2b_...
@@ -27,6 +27,7 @@ export type EncodedGraphState = {
   toDate: string;
   interval: string;
   selection: [number, number]; // [start, end] timestamps in ms
+  updateLive?: boolean;
 };
 
 /**
@@ -35,7 +36,6 @@ export type EncodedGraphState = {
 function encodeSelection([start, end]: [number, number]): string {
   return `${Math.floor(start / 1000)}~${Math.floor(end / 1000)}`;
 }
-
 
 /**
  * Encodes a single graph's state to a readable URL-safe string.
@@ -48,11 +48,12 @@ function encodeSelection([start, end]: [number, number]): string {
  *   - start/end: ISO 8601 strings
  *   - interval: numeric interval
  *   - domain: start~end in seconds
+ *   - live: 1 if updateLive is true
  */
 export function encodeGraphState(g: EncodedGraphState): string {
   const vars = g.variableNames.join('~');
   const sel = encodeSelection(g.selection);
-  return [
+  const fields = [
     `graph.${g.id}`,
     `station.${g.stationId}`,
     `instrument.${g.instrumentId}`,
@@ -61,7 +62,9 @@ export function encodeGraphState(g: EncodedGraphState): string {
     `end.${g.toDate}`,
     `interval.${g.interval}`,
     `domain.${sel}`,
-  ].join('_');
+  ];
+  if (g.updateLive) fields.push('live.1');
+  return fields.join('_');
 }
 
 /**
@@ -71,21 +74,27 @@ export function encodeGraphState(g: EncodedGraphState): string {
 export function decodeGraphState(encoded: string): EncodedGraphState | null {
   try {
     const parts = encoded.split('_');
-    const id = parts[0].split('=')[1];
-    const stationId = parseInt(parts[1].split('.')[1]);
-    const instrumentId = parseInt(parts[2].split('.')[1]);
-    const variableNames = parts[3].split('.')[1].split('~');
-    const fromDate = parts[4].split('.')[1];
-    const toDate = parts[5].split('.')[1];
-    const interval = parts[6].split('.')[1];
-    const [selStartSec, selEndSec] = parts[7].split('.')[1].split('~').map(Number);
+    const getValue = (prefix: string) => {
+      const found = parts.find(p => p.startsWith(prefix + '.'));
+      return found ? found.split('.')[1] : undefined;
+    };
+
+    const id = getValue('graph') ?? '';
+    const stationId = parseInt(getValue('station') || '0');
+    const instrumentId = parseInt(getValue('instrument') || '0');
+    const variableNames = (getValue('variables') || '').split('~');
+    const fromDate = getValue('start') ?? '';
+    const toDate = getValue('end') ?? '';
+    const interval = getValue('interval') ?? '60';
+    const domain = getValue('domain') ?? '0~0';
+    const [selStartSec, selEndSec] = domain.split('~').map(Number);
+    const updateLive = getValue('live') === '1';
+
     const start = new Date(fromDate).getTime();
     const end = new Date(toDate).getTime();
-
     const rawSelection: [number, number] = [selStartSec * 1000, selEndSec * 1000];
     const clampedStart = Math.max(start, Math.min(end, rawSelection[0]));
     const clampedEnd = Math.max(start, Math.min(end, rawSelection[1]));
-
     const selection: [number, number] =
       clampedEnd - clampedStart < 60 * 1000 ? [start, end] : [clampedStart, clampedEnd];
 
@@ -98,13 +107,13 @@ export function decodeGraphState(encoded: string): EncodedGraphState | null {
       toDate,
       interval,
       selection,
+      updateLive,
     };
   } catch (e) {
     console.warn('Failed to decode graph state:', encoded, e);
     return null;
   }
 }
-
 
 /**
  * Encodes a list of graph states into a single URL-safe string.

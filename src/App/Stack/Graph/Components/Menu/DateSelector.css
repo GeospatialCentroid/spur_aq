@@ -18,6 +18,7 @@ input.form-control::placeholder {
   font-size: 14px;
   border-radius: 4px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 9999 !important;
 }
 
 /* Prevent weird left padding on calendar cells */
@@ -34,4 +35,14 @@ input.form-control::placeholder {
   background-color: #007bff !important;
   color: white !important;
   border-radius: 4px;
+}
+/* .custom-dtpicker{
+  width: 8.5rem;
+} */
+.graph-menu,
+.menu-content,
+.dt-button-group,
+.variable-button-group {
+  overflow: visible !important;
+  position: static !important;
 }

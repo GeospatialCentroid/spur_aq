@@ -1,32 +1,12 @@
 // File: src/App/Stack/Graph/Components/Menu.tsx
 
-/**
- * Menu component for selecting a time range, interval, and variables for a Graph.
- *
- * - Provides controls for setting `fromDate` and `toDate` using DateSelector components.
- * - Allows selection of an averaging interval.
- * - Allows dynamic addition and configuration of variable inputs via VariableSelector.
- */
-
 import React from 'react';
 import './Menu.css';
 import DateSelector from './Menu/DateSelector';
 import VariableSelector from './Menu/VariableSelector';
 import IntervalSelector from './Menu/IntervalSelector';
+import { SelectedVariable } from '../graphTypes';
 import { getNow } from '../graphDateUtils';
-
-/**
- * Represents a single user-selected measurement variable.
- *
- * @property name - The variable name (e.g., "PM2.5").
- * @property stationId - ID of the station the variable comes from.
- * @property instrumentId - ID of the instrument recording the variable.
- */
-interface SelectedVariable {
-  name: string;
-  stationId: number;
-  instrumentId: number;
-}
 
 /**
  * Props for the Menu component.
@@ -42,6 +22,8 @@ interface SelectedVariable {
  * @property onRemoveVariable - Callback for removing a variable.
  * @property interval - Currently selected averaging interval.
  * @property onIntervalChange - Callback for changing the interval.
+ * @property updateLive - Whether live updates are enabled.
+ * @property onUpdateLiveChange - Callback for toggling live update.
  */
 interface MenuProps {
   className?: string;
@@ -55,6 +37,8 @@ interface MenuProps {
   onRemoveVariable: (index: number) => void;
   interval: string;
   onIntervalChange: (interval: string) => void;
+  updateLive: boolean;
+  onUpdateLiveChange: (value: boolean) => void;
 }
 
 /**
@@ -72,31 +56,51 @@ const Menu: React.FC<MenuProps> = ({
   onRemoveVariable,
   interval,
   onIntervalChange,
+  updateLive,
+  onUpdateLiveChange,
 }) => {
   return (
     <div className={`graph-menu ${className}`}>
       <div className="menu-content">
 
-        {/* Time and interval controls */}
+        {/* Time range controls */}
         <div className="dt-button-group">
-          From:
-          <DateSelector
-            value={fromDate}
-            onChange={onFromDateChange}
-            maxDate={toDate}
-          />
-          To:
-          <DateSelector
-            value={toDate}
-            onChange={onToDateChange}
-            minDate={fromDate}
-            maxDate={getNow()}
-          />
-          Interval:
-          <IntervalSelector value={interval} onChange={onIntervalChange} />
+          <div className="start-date" title="The start date for the graph">
+            From:
+            <DateSelector
+              value={fromDate}
+              onChange={onFromDateChange}
+              maxDate={toDate}
+            />
+          </div>
+          <div className="end-date" title="The end date for the graph">
+            To:
+            <DateSelector
+              value={toDate}
+              onChange={onToDateChange}
+              minDate={fromDate}
+              maxDate={getNow()}
+            />
+          </div>
         </div>
 
-        {/* Variable selectors and "Add Variable" button */}
+        {/* Interval and Update Live controls */}
+        <div className="dt-button-group interval-group">
+          <div className="interval-selector" title="The timing between data points for the graph">
+            Interval:
+            <IntervalSelector value={interval} onChange={onIntervalChange} />
+          </div>
+          <div className="update-live-checkbox" title="Automatically fetch new data when available">
+            Update Live:
+            <input
+              type="checkbox"
+              checked={updateLive}
+              onChange={(e) => onUpdateLiveChange(e.target.checked)}
+            />
+          </div>
+        </div>
+
+        {/* Variable selectors */}
         <div className="variable-button-group">
           {variables.map((v, i) => (
             <VariableSelector

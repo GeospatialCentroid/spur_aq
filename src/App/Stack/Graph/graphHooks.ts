@@ -48,6 +48,7 @@ export function useEmitGraphState({
     selection,
     onStateChange,
     lastEmitted,
+    updateLive,
 }: {
     id: number;
     variables: SelectedVariable[];
@@ -57,6 +58,7 @@ export function useEmitGraphState({
     selection: [number, number];
     onStateChange?: (id: number, state: EncodedGraphState) => void;
     lastEmitted: React.MutableRefObject<string>;
+    updateLive?: boolean;
 }) {
     useEffect(() => {
         if (!onStateChange) return;
