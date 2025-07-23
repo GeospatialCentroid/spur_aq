@@ -13,7 +13,7 @@ import './Menu.css';
 import DateSelector from './Menu/DateSelector';
 import VariableSelector from './Menu/VariableSelector';
 import IntervalSelector from './Menu/IntervalSelector';
-import { getNow } from '../Graph';
+import { getNow } from '../graphDateUtils';
 
 /**
  * Represents a single user-selected measurement variable.

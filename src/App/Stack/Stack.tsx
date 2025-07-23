@@ -58,7 +58,7 @@ const Stack: React.FC = () => {
       }));
       setGraphs(restored);
     }
-  }, []);
+  }, [location.search]);
 
   /**
    * Whenever the graph layout or settings change, update the URL with the new state.
@@ -68,7 +68,7 @@ const Stack: React.FC = () => {
     const url = new URL(window.location.href);
     url.searchParams.set('g', query);
     navigate(url.pathname + url.search, { replace: true });
-  }, [graphs]);
+  }, [graphs, navigate]);
 
   /**
    * Adds a new empty graph to the stack with default settings.
