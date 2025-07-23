@@ -17,7 +17,7 @@ import ControlBar from './Components/ControlBar';
 import Chart from './Components/Chart';
 import ExpandToggle from './Components/Menu/ExpandToggle';
 import { useConfig } from '../../../context/ConfigContext';
-import { EncodedGraphState } from './GraphStateUtils';
+import { EncodedGraphState } from './graphStateUtils';
 
 /** Props for the Graph component */
 interface GraphProps {

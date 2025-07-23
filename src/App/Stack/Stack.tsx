@@ -17,7 +17,7 @@ import {
   EncodedGraphState,
   decodeGraphList,
   encodeGraphList,
-} from './Graph/GraphStateUtils';
+} from './Graph/graphStateUtils';
 
 /**
  * Internal item structure for each graph in the stack.
