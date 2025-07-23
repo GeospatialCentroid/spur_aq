@@ -72,7 +72,7 @@ export default function DateSelector({ value, onChange, minDate, maxDate }: Date
         $(input).datetimepicker('destroy');
       }
     };
-  }, [onChange, minDate, maxDate]);
+  }, [onChange, minDate, maxDate, value]);
 
 
   // Keep input field in sync with external value prop
