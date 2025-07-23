@@ -10,17 +10,18 @@
  * - Emits compact state to parent when relevant settings change.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import './Graph.css';
 import Menu from './Components/Menu';
 import ControlBar from './Components/ControlBar';
 import Chart from './Components/Chart';
 import ExpandToggle from './Components/Menu/ExpandToggle';
 import { useConfig } from '../../../context/ConfigContext';
-import { EncodedGraphState } from './GraphStateUtils';
-import { buildApiUrl, groupVariablesByInstrument } from './graphApiUtils';
-import { getStartOfTodayOneWeekAgo, getNow } from './graphDateUtils'
+import { EncodedGraphState } from './graphStateUtils';
+import { getStartOfTodayOneWeekAgo, getNow } from './graphDateUtils';
 import { syncDateRange, validateSliderRange } from './graphHandlers';
+import { useHydrateInitialVariables, useEmitGraphState, useClampDomainEffect, useFetchChartData } from './graphHooks';
+import { SelectedVariable } from './graphTypes';
 
 /** Props for the Graph component */
 interface GraphProps {
@@ -51,37 +52,35 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const lastFetchKey = useRef<string>('');
 
   /** Hydrate variables from initial state if provided */
-  useEffect(() => {
-    if (initialState && initialState.variableNames.length > 0) {
-      setVariables(initialState.variableNames.map(name => ({
-        name,
-        stationId: initialState.stationId,
-        instrumentId: initialState.instrumentId,
-      })));
-    }
-  }, [initialState]);
+  useHydrateInitialVariables(initialState, setVariables);
 
   /** Emit compact state only when values actually change */
-  useEffect(() => {
-    if (!onStateChange) return;
+  useEmitGraphState({
+    id,
+    variables,
+    fromDate,
+    toDate,
+    interval,
+    selection,
+    onStateChange,
+    lastEmitted,
+  });
 
-    const state: EncodedGraphState = {
-      id: id.toString(36),
-      stationId: variables[0]?.stationId || 0,
-      instrumentId: variables[0]?.instrumentId || 0,
-      variableNames: variables.map(v => v.name),
-      fromDate,
-      toDate,
-      interval,
-      selection,
-    };
+  /** Validate and clamp domain/selection on date change */
+  useClampDomainEffect(fromDate, toDate, domain, setDomain, setSelection);
 
-    const key = JSON.stringify(state);
-    if (key === lastEmitted.current) return;
-    lastEmitted.current = key;
-
-    onStateChange(id, state);
-  }, [id, fromDate, toDate, interval, variables, selection, onStateChange]);
+  /** Fetch chart data only when dependencies change meaningfully */
+  useFetchChartData({
+    id,
+    variables,
+    fromDate,
+    toDate,
+    interval,
+    setChartData,
+    setYMin,
+    setYMax,
+    lastFetchKey,
+  });
 
   // --- Handlers ---
 
@@ -119,74 +118,6 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const addVariable = () => {
     setVariables((prev) => [...prev, { name: '', stationId: 0, instrumentId: 0 }]);
   };
-
-  /** Validate and clamp domain/selection on date change */
-  useEffect(() => {
-    let start = new Date(fromDate).getTime();
-    let end = new Date(toDate).getTime();
-
-    if (start > end) [start, end] = [end, start];
-    if (end - start < 60 * 1000) end = start + 60 * 1000;
-
-    const newDomain: [number, number] = [start, end];
-    setDomain(newDomain);
-
-    setSelection(([selStart, selEnd]) => {
-      const wasFullyZoomedOut = selStart === domain[0] && selEnd === domain[1];
-      const clampedStart = Math.max(start, Math.min(end, selStart));
-      const clampedEnd = Math.max(start, Math.min(end, selEnd));
-      return (wasFullyZoomedOut || clampedEnd - clampedStart < 60 * 1000) ? [start, end] : [clampedStart, clampedEnd];
-    });
-  }, [fromDate, toDate]);
-
-  /** Fetch chart data only when dependencies change meaningfully */
-  useEffect(() => {
-    if (
-      variables.length === 0 ||
-      variables.some(v => !v.name || v.stationId === 0 || v.instrumentId === 0)
-    ) {
-      setChartData([]);
-      return;
-    }
-
-    const fetchKey = JSON.stringify({ variables, fromDate, toDate, interval });
-    if (fetchKey === lastFetchKey.current) return;
-    lastFetchKey.current = fetchKey;
-
-    console.log(`Graph ${id}: Fetching new data due to state change`);
-
-    const groups = groupVariablesByInstrument(variables);
-    groups.forEach(async (group, index) => {
-      const url = buildApiUrl(group.stationId, group.variableNames, group.instrumentId, fromDate, toDate, interval);
-      console.log(`Graph ${id}: URL #${index + 1} = ${url}`);
-
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-        const data = await response.json();
-        console.log(`Graph ${id}: Data received`, data);
-
-        setChartData(data);
-
-        const values: number[] = [];
-        data.forEach((row: Record<string, string>) => {
-          Object.entries(row).forEach(([key, val]) => {
-            if (key !== 'datetime') {
-              const num = parseFloat(val);
-              if (!isNaN(num)) values.push(num);
-            }
-          });
-        });
-
-        const min = Math.min(...values);
-        const max = Math.max(...values);
-        setYMin(isFinite(min) ? min : 0);
-        setYMax(isFinite(max) ? max : 1);
-      } catch (error) {
-        console.error(`Graph ${id}: Failed to fetch data`, error);
-      }
-    });
-  }, [variables, fromDate, toDate, interval, id]);
 
   if (!config) return null;
 

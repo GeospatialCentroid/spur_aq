@@ -1,4 +1,6 @@
-// File: src/App/Stack/Graph/graphApiUtils.ts
+// File: src/App/Stack/Graph/graphApiUtils.
+
+import { SelectedVariable, VariableGroup } from './graphTypes';
 
 /** Utility: Build a fully encoded API URL for measurements */
 export function buildApiUrl(
