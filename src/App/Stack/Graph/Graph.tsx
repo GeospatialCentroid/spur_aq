@@ -28,10 +28,19 @@ interface GraphProps {
 }
 
 /** User-selected variable (station, instrument, and variable name) */
-type SelectedVariable = {
+export type SelectedVariable = {
   name: string;
   stationId: number;
   instrumentId: number;
+//   measurement:
+  //calibrations:Calibration[];
+
+};
+
+type Calibration = {
+  slope: number;
+  offset: number;
+  start_date: string;
 };
 
 /** Groups variables by instrument for efficient API requests */
@@ -126,6 +135,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
         name,
         stationId: initialState.stationId,
         instrumentId: initialState.instrumentId,
+
       })));
     }
   }, [initialState]);
@@ -309,6 +319,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
           domain={domain}
           selection={selection}
           onSliderChange={handleSliderChange}
+          variables={variables}
         />
       </div>
 

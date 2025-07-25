@@ -13,6 +13,7 @@ import React, { useMemo } from 'react';
 import D3Chart from './Chart/D3Chart';
 import DomainSlider from './Chart/DomainSlider';
 import './Chart.css';
+import {SelectedVariable} from '../Graph';
 
 /** Props for Chart component */
 interface ChartProps {
@@ -26,6 +27,7 @@ interface ChartProps {
   selection: [number, number]; // Selected time window
   onSliderChange: (range: [number, number]) => void;
   className?: string;
+  variables:SelectedVariable[];
 }
 
 const Chart: React.FC<ChartProps> = ({
@@ -39,6 +41,7 @@ const Chart: React.FC<ChartProps> = ({
   selection,
   onSliderChange,
   className = '',
+  variables
 }) => {
   /**
    * Transform row-wise chartData into column-wise structure:
@@ -136,6 +139,7 @@ const Chart: React.FC<ChartProps> = ({
           interval={interval}
           yDomain={yDomain}
           data={processedData}
+          variables={variables}
         />
       </div>
 
