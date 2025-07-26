@@ -1,6 +1,6 @@
 // File: src/App/Stack/Graph/graphApiUtils.
 
-import { SelectedVariable, VariableGroup } from './graphTypes';
+import { SelectedMeasurement, VariableGroup } from './graphTypes';
 
 /** Utility: Build a fully encoded API URL for measurements */
 export function buildApiUrl(
@@ -31,7 +31,7 @@ function formatDateForUrl(dateString: string): string {
 }
 
 /** Utility: Group selected variables by station/instrument pair */
-export function groupVariablesByInstrument(vars: SelectedVariable[]): VariableGroup[] {
+export function groupVariablesByInstrument(vars: SelectedMeasurement[]): VariableGroup[] {
     const map = new Map<string, VariableGroup>();
     vars.forEach((v) => {
         const key = `${v.stationId}:${v.instrumentId}`;

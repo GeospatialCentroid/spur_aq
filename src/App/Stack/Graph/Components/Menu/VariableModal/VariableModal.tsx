@@ -1,4 +1,4 @@
-// File: src/App/Stack/Graph/Components/Menu/VariableModal.tsx
+""// File: src/App/Stack/Graph/Components/Menu/VariableModal.tsx
 
 /**
  * VariableModal component
@@ -15,6 +15,7 @@ import VariableList from './VariableList';
 import VariableDescription from './VariableDescription';
 import { useConfig } from '../../../../../../context/ConfigContext';
 import { getColorForVariable } from '../../../ColorUtils';
+import { SelectedMeasurement, createBlankMeasurement } from '../../../graphTypes';
 
 /**
  * Metadata representing a selected item in the hierarchy.
@@ -34,19 +35,6 @@ type SelectedItem = {
 };
 
 /**
- * Final structure representing a confirmed variable selection.
- *
- * @property name - Variable display name or alias.
- * @property stationId - ID of the station containing the variable.
- * @property instrumentId - ID of the instrument recording the variable.
- */
-interface SelectedVariable {
-  name: string;
-  stationId: number;
-  instrumentId: number;
-}
-
-/**
  * Props for the VariableModal component.
  *
  * @property isOpen - Controls whether the modal is currently visible.
@@ -56,7 +44,7 @@ interface SelectedVariable {
 interface VariableModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirmSelection?: (variable: SelectedVariable) => void;
+  onConfirmSelection?: (variable: SelectedMeasurement) => void;
 }
 
 const VariableModal: React.FC<VariableModalProps> = ({
@@ -73,23 +61,25 @@ const VariableModal: React.FC<VariableModalProps> = ({
 
   /**
    * Handles the confirm action — only valid if a measurement is selected.
-   * Parses the composite selectedKey and constructs the final SelectedVariable.
+   * Parses the composite selectedKey and constructs the final SelectedMeasurement.
    */
   const handleConfirm = () => {
     if (selected?.type === 'measurement' && selectedKey) {
-      const label = selected.alias || selected.name;
-
       const parts = selectedKey.split(':');
       if (parts.length === 3) {
         const stationId = parseInt(parts[0], 10);
         const instrumentId = parseInt(parts[1], 10);
 
-        onConfirmSelection?.({
-          name: label,
+        const measurement: SelectedMeasurement = {
+          ...createBlankMeasurement(),
+          name: selected.name,
+          alias: selected.alias || selected.name,
+          description: selected.description,
           stationId,
           instrumentId,
-        });
+        };
 
+        onConfirmSelection?.(measurement);
         onClose();
       } else {
         console.warn('Invalid selectedKey format:', selectedKey);

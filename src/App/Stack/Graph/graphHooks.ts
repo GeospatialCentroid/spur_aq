@@ -12,7 +12,7 @@
 import { useEffect } from 'react';
 import { EncodedGraphState } from './graphStateUtils';
 import { groupVariablesByInstrument, buildApiUrl } from './graphApiUtils';
-import { SelectedVariable } from './graphTypes';
+import { SelectedMeasurement, createBlankMeasurement } from './graphTypes';
 
 /**
  * Initializes the variable selection state from the decoded initial graph state.
@@ -20,20 +20,21 @@ import { SelectedVariable } from './graphTypes';
  */
 export function useHydrateInitialVariables(
     initialState: EncodedGraphState | undefined,
-    setVariables: (v: SelectedVariable[]) => void
+    setVariables: (v: SelectedMeasurement[]) => void
 ) {
     useEffect(() => {
         if (initialState && initialState.variableNames.length > 0) {
-            setVariables(
-                initialState.variableNames.map(name => ({
-                    name,
-                    stationId: initialState.stationId,
-                    instrumentId: initialState.instrumentId,
-                }))
-            );
+            const hydrated = initialState.variableNames.map(name => ({
+                ...createBlankMeasurement(),
+                name,
+                stationId: initialState.stationId,
+                instrumentId: initialState.instrumentId,
+            }));
+            setVariables(hydrated);
         }
     }, [initialState, setVariables]);
 }
+
 
 /**
  * Emits the current graph state to the parent when relevant parameters change.
@@ -50,7 +51,7 @@ export function useEmitGraphState({
     lastEmitted,
 }: {
     id: number;
-    variables: SelectedVariable[];
+    variables: SelectedMeasurement[];
     fromDate: string;
     toDate: string;
     interval: string;
@@ -139,7 +140,7 @@ export function useFetchChartData({
     lastFetchKey,
 }: {
     id: number;
-    variables: SelectedVariable[];
+    variables: SelectedMeasurement[];
     fromDate: string;
     toDate: string;
     interval: string;

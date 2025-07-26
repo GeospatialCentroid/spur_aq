@@ -20,3 +20,15 @@ export interface Measurement {
   max: number;
   description: string;
 }
+
+export function createBlankMeasurement(): Measurement {
+  return {
+    id: -1,
+    name: '',
+    alias: '',
+    units: 0,
+    min: 0,
+    max: 0,
+    description: '',
+  };
+}

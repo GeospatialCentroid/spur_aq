@@ -1,5 +1,6 @@
 /** User-selected variable (station, instrument, and variable name) */
-export type SelectedVariable = {
+import { Measurement } from "../../../Types/measurement"
+export type SelectedMeasurement = Measurement & {
   name: string;
   stationId: number;
   instrumentId: number;
@@ -11,3 +12,18 @@ export type VariableGroup = {
   instrumentId: number;
   variableNames: string[];
 };
+
+// Creates a blank measurement, allows a new unselected variable
+export function createBlankMeasurement(): SelectedMeasurement {
+  return {
+    id: -1,
+    name: '',
+    alias: '',
+    units: 0,
+    min: 0,
+    max: 0,
+    description: '',
+    stationId: -1,
+    instrumentId: -1,
+  };
+}

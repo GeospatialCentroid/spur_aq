@@ -21,7 +21,7 @@ import { EncodedGraphState } from './graphStateUtils';
 import { getStartOfTodayOneWeekAgo, getNow } from './graphDateUtils';
 import { syncDateRange, validateSliderRange } from './graphHandlers';
 import { useHydrateInitialVariables, useEmitGraphState, useClampDomainEffect, useFetchChartData } from './graphHooks';
-import { SelectedVariable } from './graphTypes';
+import { SelectedMeasurement, createBlankMeasurement } from './graphTypes';
 
 /** Props for the Graph component */
 interface GraphProps {
@@ -38,7 +38,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
 
   const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgo());
   const [toDate, setToDate] = useState<string>(initialState?.toDate || getNow());
-  const [variables, setVariables] = useState<SelectedVariable[]>([]);
+  const [variables, setVariables] = useState<SelectedMeasurement[]>([]);
   const [interval, setInterval] = useState<string>(initialState?.interval || '60');
 
   const [yMin, setYMin] = useState(0);
@@ -103,7 +103,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
 
   const handleIntervalChange = (newInterval: string) => setInterval(newInterval);
 
-  const handleVariableChange = (index: number, value: SelectedVariable) => {
+  const handleVariableChange = (index: number, value: SelectedMeasurement) => {
     setVariables((prev) => {
       const updated = [...prev];
       updated[index] = value;
@@ -116,7 +116,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   };
 
   const addVariable = () => {
-    setVariables((prev) => [...prev, { name: '', stationId: 0, instrumentId: 0 }]);
+    setVariables((prev) => [...prev, { ...createBlankMeasurement()}]); //Add a blank measurement to the list of variables
   };
 
   if (!config) return null;
