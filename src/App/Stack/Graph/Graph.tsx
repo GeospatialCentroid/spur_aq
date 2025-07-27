@@ -20,7 +20,7 @@ import { useConfig } from '../../../context/ConfigContext';
 import { EncodedGraphState } from './graphStateUtils';
 import { getStartOfTodayOneWeekAgo, getNow } from './graphDateUtils';
 import { syncDateRange, validateSliderRange } from './graphHandlers';
-import { useHydrateInitialVariables, useEmitGraphState, useClampDomainEffect, useFetchChartData } from './graphHooks';
+import { useEmitGraphState, useClampDomainEffect, useFetchChartData } from './graphHooks';
 import { SelectedMeasurement, createBlankMeasurement } from './graphTypes';
 
 /** Props for the Graph component */
@@ -38,7 +38,14 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
 
   const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgo());
   const [toDate, setToDate] = useState<string>(initialState?.toDate || getNow());
-  const [variables, setVariables] = useState<SelectedMeasurement[]>([]);
+  const [variables, setVariables] = useState<SelectedMeasurement[]>(
+    (initialState?.variableNames || []).map((name) => ({
+      ...createBlankMeasurement(),
+      name,
+      stationId: initialState?.stationId ?? 0,
+      instrumentId: initialState?.instrumentId ?? 0,
+    }))
+  );
   const [interval, setInterval] = useState<string>(initialState?.interval || '60');
 
   const [yMin, setYMin] = useState(0);
@@ -50,9 +57,6 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
 
   const lastEmitted = useRef<string>('');
   const lastFetchKey = useRef<string>('');
-
-  /** Hydrate variables from initial state if provided */
-  useHydrateInitialVariables(initialState, setVariables);
 
   /** Emit compact state only when values actually change */
   useEmitGraphState({
@@ -116,7 +120,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   };
 
   const addVariable = () => {
-    setVariables((prev) => [...prev, { ...createBlankMeasurement()}]); //Add a blank measurement to the list of variables
+    setVariables((prev) => [...prev, { ...createBlankMeasurement() }]);
   };
 
   if (!config) return null;

@@ -1,5 +1,4 @@
 // File: src/App/Stack/Graph/graphStateUtils.tsx
-
 /**
  * Encodes and decodes graph state for use in shareable, human-editable URLs.
  *
@@ -35,7 +34,6 @@ export type EncodedGraphState = {
 function encodeSelection([start, end]: [number, number]): string {
   return `${Math.floor(start / 1000)}~${Math.floor(end / 1000)}`;
 }
-
 
 /**
  * Encodes a single graph's state to a readable URL-safe string.
