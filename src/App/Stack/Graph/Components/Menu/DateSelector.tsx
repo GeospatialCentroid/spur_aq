@@ -55,7 +55,8 @@ export default function DateSelector({ value, onChange, minDate, maxDate }: Date
         maxDate={maxDate ? new Date(maxDate) : undefined}
         placeholderText="Select date and time"
         className="custom-dtpicker"
-        withPortal // good for mobile
+        popperPlacement="bottom-start"
+        popperClassName="dtpicker-popper"
       />
     </div>
   );
