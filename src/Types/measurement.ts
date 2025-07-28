@@ -1,5 +1,6 @@
 // File: src/types/measurement.ts
 
+import {Calibration} from './calibration'
 /**
  * Represents a measurable variable collected by an instrument.
  *
@@ -19,4 +20,6 @@ export interface Measurement {
   min: number;
   max: number;
   description: string;
-}
+  calibrations:Calibration[];
+
+  }

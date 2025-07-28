@@ -18,6 +18,7 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import './D3Chart.css';
 import { getColorForVariable } from '../../ColorUtils';
+import {SelectedMeasurement} from '../../graphTypes';
 
 /**
  * Props for the D3Chart component.
@@ -36,6 +37,7 @@ interface D3ChartProps {
   interval: string;
   yDomain: [number, number];
   data?: Record<string, { timestamp: string; value: number }[]>;
+  selectedMeasurements:SelectedMeasurement[]
 }
 
 const D3Chart: React.FC<D3ChartProps> = ({
@@ -45,10 +47,13 @@ const D3Chart: React.FC<D3ChartProps> = ({
   interval,
   yDomain,
   data = {},
+  selectedMeasurements
 }) => {
   const ref = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
+
+    console.log(selectedMeasurements)
     // Clear previous chart elements
     const svg = d3.select(ref.current);
     svg.selectAll('*').remove();
