@@ -20,8 +20,8 @@ import { useConfig } from '../../../context/ConfigContext';
 import { EncodedGraphState } from './graphStateUtils';
 import { getStartOfTodayOneWeekAgo, getNow } from './graphDateUtils';
 import { syncDateRange, validateSliderRange } from './graphHandlers';
-import { useHydrateInitialVariables, useEmitGraphState, useClampDomainEffect, useFetchChartData } from './graphHooks';
-import { SelectedVariable } from './graphTypes';
+import { useEmitGraphState, useClampDomainEffect, useFetchChartData } from './graphHooks';
+import { SelectedMeasurement, createBlankMeasurement } from './graphTypes';
 
 /** Props for the Graph component */
 interface GraphProps {
@@ -38,7 +38,14 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
 
   const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgo());
   const [toDate, setToDate] = useState<string>(initialState?.toDate || getNow());
-  const [variables, setVariables] = useState<SelectedVariable[]>([]);
+  const [variables, setVariables] = useState<SelectedMeasurement[]>(
+    (initialState?.variableNames || []).map((name) => ({
+      ...createBlankMeasurement(),
+      name,
+      stationId: initialState?.stationId ?? 0,
+      instrumentId: initialState?.instrumentId ?? 0,
+    }))
+  );
   const [interval, setInterval] = useState<string>(initialState?.interval || '60');
 
   const [yMin, setYMin] = useState(0);
@@ -50,9 +57,6 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
 
   const lastEmitted = useRef<string>('');
   const lastFetchKey = useRef<string>('');
-
-  /** Hydrate variables from initial state if provided */
-  useHydrateInitialVariables(initialState, setVariables);
 
   /** Emit compact state only when values actually change */
   useEmitGraphState({
@@ -103,7 +107,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
 
   const handleIntervalChange = (newInterval: string) => setInterval(newInterval);
 
-  const handleVariableChange = (index: number, value: SelectedVariable) => {
+  const handleVariableChange = (index: number, value: SelectedMeasurement) => {
     setVariables((prev) => {
       const updated = [...prev];
       updated[index] = value;
@@ -116,7 +120,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   };
 
   const addVariable = () => {
-    setVariables((prev) => [...prev, { name: '', stationId: 0, instrumentId: 0 }]);
+    setVariables((prev) => [...prev, { ...createBlankMeasurement() }]);
   };
 
   if (!config) return null;

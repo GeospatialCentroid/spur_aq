@@ -8,15 +8,11 @@
  * - Supports two-way binding with external state via `value` and `onChange`.
  */
 
-import React, { useEffect, useRef } from 'react';
-import $ from 'jquery';
-import 'jquery-datetimepicker';
-import 'jquery-datetimepicker/build/jquery.datetimepicker.min.css';
+import React from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import './DateSelector.css';
 
-// Expose jQuery to global scope (required for datetimepicker plugin to work)
-; (window as any).$ = $;
-; (window as any).jQuery = $;
 
 /**
  * Props for the DateSelector component.
@@ -27,83 +23,42 @@ import './DateSelector.css';
  * @property maxDate - ISO string representing the maximimum selectable date as determined by the total current date range
  */
 interface DateSelectorProps {
-  value: string;
+  value: string; // ISO string
   onChange: (newDate: string) => void;
-  minDate?: string;
-  maxDate?: string;
+  minDate?: string; // ISO string
+  maxDate?: string; // ISO string
 }
 
 /**
- * Renders a date/time picker using jQuery's datetimepicker inside a React component.
+ * Renders a date/time picker using the React-Datepicker package found at https://reactdatepicker.com/
  */
 export default function DateSelector({ value, onChange, minDate, maxDate }: DateSelectorProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const selectedDate = value ? new Date(value) : null;
 
-  // Initialize the jQuery datetimepicker on mount
-  useEffect(() => {
-    const input = inputRef.current;
-    if (input) {
-      $(input).datetimepicker({
-        format: 'Y-m-d H:i',
-        step: 15,
-        minDate: minDate ? new Date(minDate) : false,
-        maxDate: maxDate ? new Date(maxDate) : false,
-        onChangeDateTime: (current: Date) => {
-          if (current) {
-            onChange(current.toISOString());
-          } else {
-            onChange('');
-          }
-        },
-      });
-
-      // If no value is provided, default to the current date/time
-
-      if (!value) {
-        const defaultDate = new Date();
-        input.value = formatDateForPicker(defaultDate);
-        onChange(defaultDate.toISOString());
-      }
-    }
-
-    // Cleanup on unmount
-    return () => {
-      if (input) {
-        $(input).datetimepicker('destroy');
-      }
-    };
-  }, [onChange, minDate, maxDate, value]);
-
-
-  // Keep input field in sync with external value prop
-  useEffect(() => {
-    const input = inputRef.current;
-    if (!input) return;
-
-    if (value) {
-      const d = new Date(value);
-      input.value = formatDateForPicker(d);
+  const handleChange = (date: Date | null) => {
+    if (date) {
+      onChange(date.toISOString());
     } else {
-      input.value = '';
+      onChange('');
     }
-  }, [value]);
+  };
 
   return (
     <div className="dtpicker-container">
-      <input ref={inputRef} type="text" className="custom-dtpicker" />
+      <DatePicker
+        selected={selectedDate}
+        onChange={handleChange}
+        showTimeSelect
+        timeIntervals={15}
+        dateFormat="yyyy-MM-dd h:mm aa"
+        minDate={minDate ? new Date(minDate) : undefined}
+        maxDate={maxDate ? new Date(maxDate) : undefined}
+        placeholderText="Select date and time"
+        className="custom-dtpicker"
+        popperPlacement="bottom-start"
+        popperClassName="dtpicker-popper"
+      />
     </div>
   );
 }
 
-/**
- * Helper function to format a Date object into "YYYY-MM-DD HH:mm"
- * for display in the input field.
- */
-function formatDateForPicker(date: Date): string {
-  const yyyy = date.getFullYear();
-  const MM = String(date.getMonth() + 1).padStart(2, '0');
-  const dd = String(date.getDate()).padStart(2, '0');
-  const hh = String(date.getHours()).padStart(2, '0');
-  const mm = String(date.getMinutes()).padStart(2, '0');
-  return `${yyyy}-${MM}-${dd} ${hh}:${mm}`;
-}

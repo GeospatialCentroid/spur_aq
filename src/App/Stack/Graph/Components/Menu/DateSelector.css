@@ -1,37 +1,68 @@
-/* Reduce border-radius and adjust padding */
-input.form-control {
-  border-radius: 4px !important;
-  padding: 0.375rem 0.75rem !important;
+/* Container styling */
+.dtpicker-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Input field styling */
+.custom-dtpicker {
+  width: 100%;
+  max-width: 240px;
+  /* padding: 1px 12px; */
   font-size: 1rem;
-  line-height: 1.5;
-  height: 38px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
 }
 
-/* Optional: Align text better */
-input.form-control::placeholder {
-  color: #888;
+.custom-dtpicker:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 4px rgba(74, 144, 226, 0.4);
 }
 
-/* Override datetimepicker popup style if needed */
-.xdsoft_datetimepicker {
-  font-family: 'Segoe UI', sans-serif;
-  font-size: 14px;
-  border-radius: 4px !important;
+/* react-datepicker overrides */
+.react-datepicker {
+  font-family: inherit;
+  border-radius: 6px;
+  border: 1px solid #ccc;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
 }
 
-/* Prevent weird left padding on calendar cells */
-.xdsoft_datetimepicker td, 
-.xdsoft_datetimepicker th {
-  padding: 4px 6px;
-  text-align: center;
+.react-datepicker__header {
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ccc;
 }
 
-/* Optional: Slightly modern look */
-.xdsoft_calendar td.xdsoft_current,
-.xdsoft_calendar td.xdsoft_default,
-.xdsoft_calendar td:hover {
-  background-color: #007bff !important;
-  color: white !important;
-  border-radius: 4px;
+.react-datepicker__day--selected,
+.react-datepicker__day--keyboard-selected {
+  background-color: #4a90e2;
+  color: white;
+}
+
+.react-datepicker__time-container .react-datepicker__time {
+  background: #fff;
+}
+
+.react-datepicker__time-list-item--selected {
+  background-color: #4a90e2;
+  color: white;
+}
+
+/* Mobile override (better spacing) */
+@media (max-width: 600px) {
+  .custom-dtpicker {
+    font-size: 16px;
+    padding: 10px;
+  }
+
+  .react-datepicker {
+    width: 90vw;
+  }
 }

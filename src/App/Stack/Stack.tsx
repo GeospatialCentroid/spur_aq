@@ -3,8 +3,10 @@
 /**
  * Renders a sortable, dynamic stack of Graph components.
  *
- * Users can add new graphs, remove existing ones, and reorder them via drag-and-drop.
- * Graph state is serialized into the URL to allow reloading the same layout later.
+ * - Loads initial graph layout from the URL.
+ * - Saves graph state back to the URL whenever changed.
+ * - Allows adding, removing, and reordering graphs.
+ * - Ensures stable ID rehydration using base36 encoding.
  */
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -22,46 +24,47 @@ import {
 /**
  * Internal item structure for each graph in the stack.
  *
- * @property id - Unique numeric identifier for rendering and managing the graph.
- * @property state - Serialized settings for this specific graph instance.
+ * @property id - Unique numeric identifier for rendering and management.
+ * @property state - Encoded state used for serialization and rehydration.
  */
 interface GraphItem {
   id: number;
   state: EncodedGraphState;
 }
 
-/**
- * Stack component that manages and displays a sortable list of Graph components.
- *
- * - Loads initial graph layout from the URL.
- * - Saves graph state back to the URL whenever changed.
- * - Allows adding, removing, and reordering graphs.
- */
 const Stack: React.FC = () => {
-  const [graphs, setGraphs] = useState<GraphItem[]>([]);             // State: list of graph items with state
-  const nextIdRef = useRef(1);                                       // Unique ID counter for new graphs
-
   const navigate = useNavigate();
   const location = useLocation();
+  const nextIdRef = useRef(1); // Counter to ensure unique graph IDs
 
   /**
-   * On component mount, parse the URL to restore any previously saved graph layout.
+   * Initial hydration from the URL's `g` parameter.
+   * Decodes encoded graph state list and reconstructs GraphItems with stable IDs.
    */
-  useEffect(() => {
+  const [graphs, setGraphs] = useState<GraphItem[]>(() => {
     const params = new URLSearchParams(location.search);
     const gParam = params.get('g');
-    if (gParam) {
-      const decoded = decodeGraphList(gParam);
-      const restored = decoded.map((state) => ({
-        id: nextIdRef.current++,
-        state,
-      }));
-      setGraphs(restored);
-    }
-  }, [location.search]);
+    if (!gParam) return [];
+
+    const decoded = decodeGraphList(gParam);
+    const hydrated = decoded.map((state) => {
+      // If the encoded ID is missing or unparsable, assign a new one
+      let parsedId = parseInt(state.id || '', 36);
+      if (isNaN(parsedId)) {
+        parsedId = nextIdRef.current++;
+        state.id = parsedId.toString(36);
+      } else {
+        nextIdRef.current = Math.max(nextIdRef.current, parsedId + 1);
+      }
+
+      return { id: parsedId, state };
+    });
+
+    return hydrated;
+  });
 
   /**
-   * Whenever the graph layout or settings change, update the URL with the new state.
+   * Encodes and persists graph state to the URL whenever any graph changes.
    */
   useEffect(() => {
     const query = encodeGraphList(graphs.map((g) => g.state));
@@ -71,7 +74,7 @@ const Stack: React.FC = () => {
   }, [graphs, navigate]);
 
   /**
-   * Adds a new empty graph to the stack with default settings.
+   * Adds a new graph with a default 7-day date range and empty variable selection.
    */
   const addGraph = () => {
     const newId = nextIdRef.current++;
@@ -98,36 +101,32 @@ const Stack: React.FC = () => {
   };
 
   /**
-   * Removes a graph from the stack.
-   *
-   * @param id - The graph ID to remove.
+   * Removes a graph from the stack by its unique ID.
    */
   const removeGraph = (id: number) => {
     setGraphs((g) => g.filter((item) => item.id !== id));
   };
 
   /**
-   * Updates the saved state of a single graph, triggering a URL update.
-   *
-   * @param id - The ID of the graph being updated.
-   * @param newState - The new state to save.
+   * Updates the encoded state of a specific graph, preserving its ID.
    */
   const updateGraphState = (id: number, newState: EncodedGraphState) => {
     setGraphs((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, state: newState } : g))
+      prev.map((g) => {
+        if (g.id !== id) return g;
+        return {
+          ...g,
+          state: {
+            ...newState,
+            id: newState.id || g.id.toString(36),
+          },
+        };
+      })
     );
   };
 
   return (
-    // Main container for the graph stack UI
     <div className="container-fluid py-4 d-flex flex-column stack-container">
-
-      {/*
-        Sortable container for the list of Graph components.
-        - `list` provides the current array of graph items.
-        - `setList` updates the state when reordered.
-        - `handle=".drag-handle"` enables dragging by a specific part of the graph.
-      */}
       <ReactSortable
         list={graphs}
         setList={(newState) => setGraphs([...newState])}
@@ -137,7 +136,7 @@ const Stack: React.FC = () => {
         handle=".drag-handle"
       >
         {graphs.map((item) => (
-          <div key={item.id} className="graph-wrapper">
+          <div key={`graph-${item.id}`} className="graph-wrapper">
             <Graph
               id={item.id}
               initialState={item.state}
@@ -148,11 +147,6 @@ const Stack: React.FC = () => {
         ))}
       </ReactSortable>
 
-      {/*
-        Button to add a new Graph to the stack.
-        - Calls `addGraph` when clicked.
-        - Uses Bootstrap and an icon for visual styling.
-      */}
       <button
         type="button"
         className="btn btn-outline-primary align-self-center mt-4"

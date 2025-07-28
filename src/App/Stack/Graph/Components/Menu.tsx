@@ -14,19 +14,8 @@ import DateSelector from './Menu/DateSelector';
 import VariableSelector from './Menu/VariableSelector';
 import IntervalSelector from './Menu/IntervalSelector';
 import { getNow } from '../graphDateUtils';
+import { SelectedMeasurement } from '../graphTypes';
 
-/**
- * Represents a single user-selected measurement variable.
- *
- * @property name - The variable name (e.g., "PM2.5").
- * @property stationId - ID of the station the variable comes from.
- * @property instrumentId - ID of the instrument recording the variable.
- */
-interface SelectedVariable {
-  name: string;
-  stationId: number;
-  instrumentId: number;
-}
 
 /**
  * Props for the Menu component.
@@ -49,8 +38,8 @@ interface MenuProps {
   toDate: string;
   onFromDateChange: (date: string) => void;
   onToDateChange: (date: string) => void;
-  variables: SelectedVariable[];
-  onVariableChange: (index: number, v: SelectedVariable) => void;
+  variables: SelectedMeasurement[];
+  onVariableChange: (index: number, v: SelectedMeasurement) => void;
   onAddVariable: () => void;
   onRemoveVariable: (index: number) => void;
   interval: string;

@@ -13,19 +13,8 @@ import VariableModal from './VariableModal/VariableModal';
 import './VariableSelector.css';
 import { getColorForVariable } from '../../ColorUtils';
 import { XLg } from 'react-bootstrap-icons';
+import { SelectedMeasurement } from '../../graphTypes';
 
-/**
- * Represents a user-selected variable.
- *
- * @property name - Name of the variable (e.g., "PM2.5").
- * @property stationId - ID of the station the variable comes from.
- * @property instrumentId - ID of the instrument that measures the variable.
- */
-interface SelectedVariable {
-  name: string;
-  stationId: number;
-  instrumentId: number;
-}
 
 /**
  * Props for the VariableSelector component.
@@ -34,8 +23,8 @@ interface SelectedVariable {
  * @property onChange - Callback to update the selected variable.
  */
 interface VariableSelectorProps {
-  value: SelectedVariable | null;
-  onChange: (variable: SelectedVariable) => void;
+  value: SelectedMeasurement | null;
+  onChange: (variable: SelectedMeasurement) => void;
   onRemove?: () => void;
 }
 
@@ -56,7 +45,7 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
   const closeModal = () => setIsOpen(false);
 
   // Handles confirmation of variable selection from the modal
-  const handleConfirmSelection = (variable: SelectedVariable) => {
+  const handleConfirmSelection = (variable: SelectedMeasurement) => {
     onChange(variable);
     closeModal();
   };
