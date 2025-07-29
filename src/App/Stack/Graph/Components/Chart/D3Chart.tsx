@@ -268,11 +268,16 @@ g.append('rect')
     if (isNaN(date.getTime())) return; // skip if date is invalid
 
     const tooltipHtml = [`<strong>MT ${mountainFormatter.format(date)}</strong>`]
-      .concat(
-        Object.entries(pointData).map(
-          ([key, value]) => `${key}: ${value.toFixed(2)}`
-        )
-      ).join("<br>");
+  .concat(
+    Object.entries(pointData).map(
+      ([key, value]) => `
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: ${getColorForVariable(key)};"></div>
+          ${key}: ${value.toFixed(2)}
+        </div>
+      `
+    )
+  ).join("");
 
     tooltip.html(tooltipHtml)
       .style('left', (event.pageX + 10) + 'px')
