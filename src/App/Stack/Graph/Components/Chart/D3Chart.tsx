@@ -180,18 +180,7 @@ const mountainFormatter = new Intl.DateTimeFormat('en-US', {
   hour12: true,
 });
 
-   // Tooltip setup
-const tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any> = d3.select('body')
-  .append('div')
-  .attr('id', 'chart-tooltip')
-  .style('position', 'absolute')
-  .style('background', '#fff')
-  .style('border', '1px solid #ccc')
-  .style('padding', '6px')
-  .style('border-radius', '4px')
-  .style('font-size', '12px')
-  .style('pointer-events', 'none')
-  .style('opacity', 0);
+
 
 // Flatten all timestamps (assumes all series are aligned)
 const allTimestamps = Array.from(
@@ -240,6 +229,24 @@ Object.entries(data).forEach(([key, series]) => {
   .style('opacity', 0);
 });
 
+// Ensure a single tooltip exists
+// Ensure a single tooltip exists
+let tooltip: d3.Selection<HTMLDivElement, unknown, HTMLElement, any> = d3.select('body').select<HTMLDivElement>('div.tooltip');
+
+if (tooltip.empty()) {
+  tooltip = d3.select('body')
+    .append('div')
+    .attr('class', 'tooltip')
+    .style('position', 'absolute')
+    .style('pointer-events', 'none')
+    .style('background', '#fff')
+    .style('border', '1px solid #ccc')
+    .style('padding', '6px')
+    .style('border-radius', '4px')
+    .style('font-size', '12px')
+    .style('opacity', 0);
+}
+
 // Add invisible overlay to capture mouse
 g.append('rect')
   .attr('width', width)
@@ -250,17 +257,17 @@ g.append('rect')
     const [mouseX] = d3.pointer(event);
     const x0 = xScale.invert(mouseX);
 
-    // Find closest timestamp
     const bisect = d3.bisector((d: string) => new Date(d)).center;
     const i = bisect(allTimestamps, x0);
     const timestamp = allTimestamps[i];
-
+    if (!timestamp) return; // early exit if undefined
     const pointData = dataByTimestamp.get(timestamp);
     if (!pointData) return;
 
-    // Update tooltip HTML
+    const date = new Date(timestamp.endsWith('Z') ? timestamp : timestamp + 'Z');
+    if (isNaN(date.getTime())) return; // skip if date is invalid
 
-    const tooltipHtml = [`<strong>MT ${mountainFormatter.format(new Date(timestamp+ 'Z'))}</strong>`]
+    const tooltipHtml = [`<strong>MT ${mountainFormatter.format(date)}</strong>`]
       .concat(
         Object.entries(pointData).map(
           ([key, value]) => `${key}: ${value.toFixed(2)}`
@@ -272,7 +279,6 @@ g.append('rect')
       .style('top', (event.pageY - 40) + 'px')
       .style('opacity', 1);
 
-    // Show and move focus circles
     Object.entries(data).forEach(([key, series]) => {
       const point = series.find(d => d.timestamp === timestamp);
       if (point) {
@@ -297,7 +303,7 @@ g.append('rect')
       .attr("x", -height / 2)       // center vertically
       .attr("dy", "1em")
       .style("text-anchor", "middle")
-      .text(variables[0]?.name);
+      .text(variables[0]?.name +" ("+variables[0]?.units+")");
 
       // adding a right axis
       if(variables.length>1){
@@ -307,12 +313,12 @@ g.append('rect')
               .attr("x", -height / 2) // center vertically
               .attr("dy", "1em")
               .attr("text-anchor", "middle")
-              .text(variables[1]?.name);
+                .text(variables[1]?.name +" ("+variables[1]?.units+")");
       }
     // legend
     const legendMarginTop = 10;
     const legendCircleRadius = 6;
-    const legendSpacingX = 120;
+    const legendSpacingX = 160;
 
     const legend = svg.append('g')
       .attr('class', 'legend')
