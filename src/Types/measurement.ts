@@ -16,7 +16,7 @@ export interface Measurement {
   id: number;
   name: string;
   alias: string;
-  units: number;
+  units: string;
   min: number;
   max: number;
   description: string;
