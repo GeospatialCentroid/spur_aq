@@ -11,7 +11,7 @@ export function buildApiUrl(
     endDate: string,
     interval: string
 ): string {
-    const baseUrl = 'http://129.82.30.72:8001';
+    const baseUrl = 'http://129.82.30.40:8001';
     const encodedStart = encodeURIComponent(formatDateForUrl(startDate));
     const encodedEnd = encodeURIComponent(formatDateForUrl(endDate));
     const variablePath = variableNames.join(',');

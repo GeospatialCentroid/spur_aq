@@ -22,7 +22,7 @@ function App() {
   const [config, setConfig] = useState<Config | null>(null);
 
   useEffect(() => {
-    fetch('http://129.82.30.72:8001/stations/?format=json')
+    fetch('http://129.82.30.40:8001/stations/?format=json')
       .then(response => {
         if (!response.ok) throw new Error('Network response was not ok');
         return response.json();
