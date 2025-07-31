@@ -8,10 +8,20 @@
 }
 
 .app-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
   width: 100%;
-  background-color: #282c34;
-  padding-left: 5rem;
+  background-color: #282c34;  /* ← Original dark gray */
   color: white;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  /* Optional: subtle shadow */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .app-body {

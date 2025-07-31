@@ -19,11 +19,12 @@ export function createBlankMeasurement(): SelectedMeasurement {
     id: -1,
     name: '',
     alias: '',
-    units: 0,
+    units: '',
     min: 0,
     max: 0,
     description: '',
     stationId: -1,
     instrumentId: -1,
+    calibrations: [],
   };
 }
