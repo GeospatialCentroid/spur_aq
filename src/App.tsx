@@ -48,14 +48,8 @@ function App() {
   return (
     <ConfigProvider config={config}>
       <div className="app">
-        <header className="app-header"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding:'1rem'
-        }}>
-          <h1>SPUR Air Quality</h1>
+        <header className="app-header">
+        <h1>SPUR Air Quality</h1>
           <img
             src="/Photos/InfoCardPhotos/CSUSpur_horiz_campus_rev_rgb.webp"
             alt="CSU Spur Logo" 
