@@ -140,7 +140,6 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
             onAddVariable={addVariable}
             interval={interval}
             onIntervalChange={handleIntervalChange}
-
           />
         </div>
       )}
@@ -163,7 +162,6 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
           domain={domain}
           selection={selection}
           onSliderChange={handleSliderChange}
-          selectedMeasurements={variables}
         />
       </div>
 
