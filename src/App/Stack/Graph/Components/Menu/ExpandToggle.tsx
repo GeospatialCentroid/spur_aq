@@ -2,7 +2,8 @@
 
 import React from 'react';
 import './ExpandToggle.css';
-import { TriangleFill } from 'react-bootstrap-icons';
+import { ArrowBarLeft, ArrowBarRight } from 'react-bootstrap-icons';
+
 
 /**
  * Props for the ExpandToggle component.
@@ -22,11 +23,12 @@ interface ExpandToggleProps {
  */
 export default function ExpandToggle({ expanded, onToggle, className }: ExpandToggleProps) {
   return (
-
-    <button className="expand-toggle" onClick={onToggle}>
-      <TriangleFill
-        style={{ transform: expanded ? 'rotate(90deg)' : 'rotate(270deg)' }}
-      />
+    <button
+      className={`expand-toggle ${className || ''}`}
+      onClick={onToggle}
+      title={expanded ? 'Collapse Menu' : 'Expand Menu'}
+    >
+      {expanded ? <ArrowBarLeft size={30} /> : <ArrowBarRight size={30} />}
     </button>
   );
 }
