@@ -13,10 +13,18 @@ export function buildApiUrl(
 ): string {
     const baseUrl = 'http://129.82.30.40:8001';
     const encodedStart = encodeURIComponent(formatDateForUrl(startDate));
-    const encodedEnd = encodeURIComponent(formatDateForUrl(endDate));
     const variablePath = variableNames.join(',');
-    return `${baseUrl}/measurement/${instrumentId}/measurements/${variablePath}/${interval}/?start=${encodedStart}&end=${encodedEnd}`;
+
+    let url = `${baseUrl}/measurement/${instrumentId}/measurements/${variablePath}/${interval}/?start=${encodedStart}`;
+    
+    if (endDate) {
+        const encodedEnd = encodeURIComponent(formatDateForUrl(endDate));
+        url += `&end=${encodedEnd}`;
+    }
+
+    return url;
 }
+
 
 /** Utility: Format a date for the API URL */
 function formatDateForUrl(dateString: string): string {

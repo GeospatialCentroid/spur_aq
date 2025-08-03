@@ -20,7 +20,7 @@ import { useConfig } from '../../../context/ConfigContext';
 import { EncodedGraphState } from './graphStateUtils';
 import { getStartOfTodayOneWeekAgo, getNow } from './graphDateUtils';
 import { syncDateRange, validateSliderRange } from './graphHandlers';
-import { useEmitGraphState, useClampDomainEffect, useFetchChartData } from './graphHooks';
+import { useEmitGraphState, useClampDomainEffect, useFetchChartData, useLiveChartUpdates } from './graphHooks';
 import { SelectedMeasurement, createBlankMeasurement } from './graphTypes';
 
 /** Props for the Graph component */
@@ -71,7 +71,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   });
 
   /** Validate and clamp domain/selection on date change */
-  useClampDomainEffect(fromDate, toDate, domain, setDomain, setSelection);
+  useClampDomainEffect(fromDate, toDate, setDomain, setSelection);
 
   /** Fetch chart data only when dependencies change meaningfully */
   useFetchChartData({
@@ -86,19 +86,41 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
     lastFetchKey,
   });
 
+  useLiveChartUpdates({
+  variables,
+  interval,
+  chartData,
+  setChartData,
+  isLive: !toDate,
+  setDomain
+});
+
   // --- Handlers ---
 
-  const handleFromDateChange = (newFromDate: string) => {
-    const [from, to] = syncDateRange(newFromDate, toDate, true);
-    setFromDate(from);
-    setToDate(to);
-  };
+const handleFromDateChange = (newFromDate: string) => {
+  if (!toDate || !newFromDate) {
+    // live mode or invalid: just set as-is
+    setFromDate(newFromDate);
+    return;
+  }
 
-  const handleToDateChange = (newToDate: string) => {
-    const [from, to] = syncDateRange(fromDate, newToDate, false);
-    setFromDate(from);
-    setToDate(to);
-  };
+  const [from, to] = syncDateRange(newFromDate, toDate, true);
+  setFromDate(from);
+  setToDate(to);
+};
+
+const handleToDateChange = (newToDate: string) => {
+  if (!newToDate || !fromDate) {
+    // live mode or invalid: just set as-is
+    setToDate(newToDate);
+    return;
+  }
+
+  const [from, to] = syncDateRange(fromDate, newToDate, false);
+  setFromDate(from);
+  setToDate(to);
+};
+
 
   const handleSliderChange = (range: [number, number]) => {
     const validated = validateSliderRange(range);

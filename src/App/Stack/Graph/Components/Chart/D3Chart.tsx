@@ -53,7 +53,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
 
   useEffect(() => {
   var variables= selectedMeasurements
-  console.log(variables,"variables")
+  // console.log(variables,"variables")
 
     // Clear previous chart elements
     const svg = d3.select<SVGSVGElement, unknown>(ref.current!);
