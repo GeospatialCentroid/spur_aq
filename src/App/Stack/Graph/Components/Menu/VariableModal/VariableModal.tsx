@@ -16,6 +16,7 @@ import VariableDescription from './VariableDescription';
 import { useConfig } from '../../../../../../context/ConfigContext';
 import { getColorForVariable } from '../../../ColorUtils';
 import { SelectedMeasurement, createBlankMeasurement } from '../../../graphTypes';
+import { Calibration } from '../../../../../../Types/calibration';
 
 /**
  * Metadata representing a selected item in the hierarchy.
@@ -32,6 +33,7 @@ type SelectedItem = {
   description: string;
   alias?: string;
   units?: string;
+  calibrations?: Calibration[];
 };
 
 /**
@@ -77,6 +79,8 @@ const VariableModal: React.FC<VariableModalProps> = ({
           description: selected.description,
           stationId,
           instrumentId,
+          units: selected.units ?? '',
+          calibrations: selected.calibrations ?? []
         };
 
         onConfirmSelection?.(measurement);
