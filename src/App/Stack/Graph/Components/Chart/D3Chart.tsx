@@ -175,7 +175,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
     if (secondaryMeasurement) {
       g.append('text')
         .attr('transform', 'rotate(-90)')
-        .attr('y', innerWidth + margin.right - 15)
+        .attr('y', innerWidth + margin.right - 25)
         .attr('x', -innerHeight / 2)
         .attr('dy', '.7em')
         .style('text-anchor', 'middle')
