@@ -1,17 +1,27 @@
 /* Map layout base */
+/* Map layout base */
 .map-wrapper {
   width: 100%;
-  margin: 1rem;
-  position: relative;
+  margin: 1rem 0;
 }
 
+/* Heading stays left-aligned by default */
+
+.map-container-wrapper {
+  display: flex;
+  justify-content: center; /* Center the map */
+}
+
+/* Set max width and center the map */
 .map-container {
   width: 100%;
-  height: 400px;
+  max-width: 500px;
+  height: 300px;
   transition: all 0.3s ease;
   position: relative;
   z-index: 1;
 }
+
 
 /* Fullscreen overlay */
 .map-container.map-fullscreen {

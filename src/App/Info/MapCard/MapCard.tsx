@@ -82,8 +82,9 @@ function getGroupByCode(fullCode: string) {
   )?.[1];
 }
 
-const LandUseLayer = () => {
+const LandUseLayer = ({ expanded }: { expanded: boolean }) => {
   const [geojson, setGeojson] = useState<any>(null);
+  const geoJsonRef = useRef<L.GeoJSON | null>(null);
 
   useEffect(() => {
     fetch("https://services1.arcgis.com/zdB7qR0BtYrg0Xpl/arcgis/rest/services/ODC_ZONE_ZONING_A/FeatureServer/209/query?where=1%3D1&outFields=*&f=geojson")
@@ -91,8 +92,17 @@ const LandUseLayer = () => {
       .then(setGeojson);
   }, []);
 
+  useEffect(() => {
+    if (geoJsonRef.current) {
+      geoJsonRef.current.setStyle(() => ({}));
+    }
+  }, [expanded]);
+
   return geojson ? (
     <GeoJSON
+      ref={(layer) => {
+        geoJsonRef.current = (layer as any)?._leaflet_id ? layer as L.GeoJSON : null;
+      }}
       data={geojson}
       style={(feature) => {
         const fullCode = feature?.properties?.ZONE_DISTRICT || "";
@@ -178,10 +188,28 @@ const ExpandControl = ({
   return null;
 };
 
+// ✅ NEW: Sets mapRef using useMap safely
+const RegisterMapRef = ({ mapRef }: { mapRef: React.MutableRefObject<L.Map | null> }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    mapRef.current = map;
+  }, [map]);
+
+  return null;
+};
+
 const MapCard = () => {
   const { config } = useConfig();
   const [expanded, setExpanded] = useState<boolean>(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
+
+  const mapRef = useRef<L.Map | null>(null);
+  const initialCenter = React.useMemo<[number, number]>(
+    () => [39.78366, -104.974191],
+    []
+  );
+  const initialZoom = 13;
 
   useEffect(() => {
     const mapContainer = mapContainerRef.current;
@@ -193,8 +221,13 @@ const MapCard = () => {
     } else {
       mapContainer.classList.remove("map-fullscreen");
       document.body.classList.remove("map-fullscreen-active");
+
+      setTimeout(() => {
+        mapRef.current?.invalidateSize();
+        mapRef.current?.setView(initialCenter, initialZoom);
+      }, 400);
     }
-  }, [expanded]);
+  }, [expanded, initialCenter]);
 
   if (!config) {
     return <div>Loading map data...</div>;
@@ -203,18 +236,21 @@ const MapCard = () => {
   return (
     <div className="map-wrapper">
       <h5>Map</h5>
-      <div ref={mapContainerRef} className="map-container">
-        <MapContainer
-          center={[39.78366, -104.974191]}
-          zoom={13}
-          style={{ width: "100%", height: "100%" }}
-        >
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <ResizeMapOnExpand trigger={expanded} />
-          <MarkerClusterComponent stations={config} />
-          <LandUseLayer />
-          <ExpandControl expanded={expanded} setExpanded={setExpanded} />
-        </MapContainer>
+      <div className="map-container-wrapper">
+        <div ref={mapContainerRef} className="map-container">
+          <MapContainer
+            center={initialCenter}
+            zoom={initialZoom}
+            style={{ width: "100%", height: "100%" }}
+          >
+            <RegisterMapRef mapRef={mapRef} />
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <ResizeMapOnExpand trigger={expanded} />
+            <MarkerClusterComponent stations={config} />
+            <LandUseLayer expanded={expanded} />
+            <ExpandControl expanded={expanded} setExpanded={setExpanded} />
+          </MapContainer>
+        </div>
       </div>
     </div>
   );
