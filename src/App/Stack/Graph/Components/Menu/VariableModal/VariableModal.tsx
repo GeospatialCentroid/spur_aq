@@ -44,13 +44,16 @@ type SelectedItem = {
 interface VariableModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirmSelection?: (variable: SelectedMeasurement) => void;
+  onConfirmSelection: (variable: any) => void;
+  stationsOverride?: any[]; // Add this optional prop
 }
+
 
 const VariableModal: React.FC<VariableModalProps> = ({
   isOpen,
   onClose,
   onConfirmSelection,
+  stationsOverride, // Add this
 }) => {
   const { config } = useConfig(); // Station/instrument/measurement data
   const [selected, setSelected] = useState<SelectedItem | null>(null); // Currently highlighted item
@@ -149,11 +152,13 @@ const VariableModal: React.FC<VariableModalProps> = ({
         <div className="modal-body">
           <div className="variableList">
             <VariableList
-              stations={config}
+              stations={(stationsOverride ?? config)}
               onSelect={handleSelect}
               selectedKey={selectedKey ?? undefined}
               selectedColor={getSelectedColor()}
             />
+
+
           </div>
 
           {selected ? (

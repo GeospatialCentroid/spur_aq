@@ -1,6 +1,5 @@
 // File: src/types/measurement.ts
 
-import {Calibration} from './calibration'
 /**
  * Represents a measurable variable collected by an instrument.
  *
@@ -12,14 +11,31 @@ import {Calibration} from './calibration'
  * @property max - Maximum expected or valid value for this measurement.
  * @property description - Human-readable explanation of what the measurement represents.
  */
+// src/types/measurement.ts
+
+export interface Calibration {
+  slope: number;
+  offset: number;
+  start_date: string;
+}
+
+export interface Range {
+  color: string;
+  range: [number, number];
+  category: string;
+}
+
 export interface Measurement {
   id: number;
   name: string;
-  alias: string;
-  units: string;
-  min: number;
-  max: number;
-  description: string;
-  calibrations:Calibration[];
-
-  }
+  alias: string | null;
+  units: string | null;
+  min: number | null;
+  max: number | null;
+  description: string | null;
+  calibrations: Calibration[];
+  public_display: boolean;
+  feature_measure: boolean;
+  ranges: Range[] | null;
+  instrument_id?: number; // add this if you're injecting it when parsing
+}

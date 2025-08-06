@@ -101,13 +101,13 @@ const VariableList: React.FC<VariableListProps> = ({
                         className={`selectable measurement ${isSelected ? 'selected' : ''}`}
                         onClick={() =>
                           onSelect(
-                            {
-                              type: 'measurement',
-                              name: m.name,
-                              description: m.description,
-                              alias: m.alias,
-                              units: m.units?.toString(),
-                            },
+                         {
+                            type: 'measurement',
+                            name: m.name,
+                            description: m.description ?? '',
+                            alias: m.alias ?? m.name,
+                            units: m.units?.toString(),
+                          },
                             measurementKey
                           )
                         }

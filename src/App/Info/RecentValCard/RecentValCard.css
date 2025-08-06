@@ -1,0 +1,44 @@
+.recent-values-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.recent-values-card {
+  text-align: center;
+  padding: 0;
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+.recent-values-card .card-body {
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+.gauge-section {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.variable-button {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #0066cc;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-weight: 500;
+}
+
+.variable-button:hover {
+  background-color: #005bb5;
+}
+
