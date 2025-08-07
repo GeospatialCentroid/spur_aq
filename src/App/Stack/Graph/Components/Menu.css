@@ -11,7 +11,8 @@
 
 @media (min-width: 768px) {
     .graph-menu {
-        flex: 0 0 500px;
+        flex: 0 0 600px;
+        /* Increased width from 500px to 600px */
     }
 }
 
@@ -23,9 +24,10 @@
     padding: 0.5rem;
 
     /* Scroll behavior */
-    height: 220px;
     /* FIXED height */
     overflow-y: auto;
+    max-height: 210px;
+    /* Set a fixed height to prevent overflow */
 
     /* Layout */
     display: flex;
@@ -38,11 +40,10 @@
 .dt-button-group {
     display: flex;
     justify-content: center;
-    gap: 1rem;
     font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: .5rem;
 }
 
 .add-variable-button {
@@ -54,4 +55,17 @@
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.9rem;
+}
+
+.interval-group {
+    margin-left: auto;
+    /* Push the interval group to the right */
+    display: flex;
+    /* Use flexbox for inline layout */
+    flex-direction: row;
+    /* Arrange label and selector horizontally */
+    align-items: center;
+    /* Align items vertically */
+    gap: 0.5rem;
+    /* Add spacing between label and selector */
 }

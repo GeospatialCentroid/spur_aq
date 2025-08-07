@@ -8,7 +8,7 @@
  * - useFetchChartData: Fetches and processes measurement data for chart rendering
  */
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { EncodedGraphState, encodeGraphState } from './graphStateUtils';
 import { groupVariablesByInstrument, buildApiUrl } from './graphApiUtils';
 import { SelectedMeasurement } from './graphTypes';
@@ -64,30 +64,37 @@ export function useEmitGraphState({
 export function useClampDomainEffect(
   fromDate: string,
   toDate: string,
-  domain: [number, number],
-  setDomain: (d: [number, number]) => void,
+  setDomain: React.Dispatch<React.SetStateAction<[number, number]>>,
   setSelection: React.Dispatch<React.SetStateAction<[number, number]>>
 ) {
   useEffect(() => {
+    if (!fromDate) return;
+
     const start = new Date(fromDate).getTime();
-    const end = new Date(toDate).getTime();
-    if (start === domain[0] && end === domain[1]) return;
+    const end = toDate ? new Date(toDate).getTime() : Date.now();
+    const minSpan = 60_000;
 
-    const clamped: [number, number] = [
-      Math.min(start, end),
-      Math.max(start, end) + (Math.abs(end - start) < 60000 ? 60000 : 0),
-    ];
+    setDomain(prev => {
+      const clamped: [number, number] = [
+        start,
+        Math.max(start + minSpan, end),
+      ];
 
-    setDomain(clamped);
-    setSelection(sel => {
-      const [s0, s1] = sel;
-      if (s0 < clamped[0] || s1 > clamped[1] || s1 - s0 < 60000) {
-        return [...clamped];
-      }
-      return sel;
+      if (clamped[0] === prev[0] && clamped[1] === prev[1]) return prev;
+      return clamped;
     });
-  }, [fromDate, toDate, domain, setDomain, setSelection]);
+
+    setSelection(prev => {
+      const clampedEnd = Math.max(start + minSpan, end);
+      const adjusted: [number, number] = [
+        Math.max(start, prev[0]),
+        Math.min(clampedEnd, prev[1]),
+      ];
+      return prev[0] !== adjusted[0] || prev[1] !== adjusted[1] ? adjusted : prev;
+    });
+  }, [fromDate, toDate, setDomain, setSelection]);
 }
+
 
 /**
  * Fetches data if variables and range are valid and not already fetched.
@@ -166,4 +173,92 @@ export function useFetchChartData({
        setLoading?.(false);
     });
   }, [id, variables, fromDate, toDate, interval, setChartData, setYMin, setYMax, lastFetchKey]);
+}
+
+
+/**
+ * Polls `/latest_measurement/<instrument>/<interval>/` if toDate is empty (live mode),
+ * appending new data points to chartData.
+ */
+export function useLiveChartUpdates({
+  variables,
+  interval,
+  chartData,
+  setChartData,
+  isLive,
+  setDomain,
+}: {
+  variables: SelectedMeasurement[];
+  interval: string;
+  chartData: { [key: string]: string }[];
+  setChartData: (d: { [key: string]: string }[]) => void;
+  isLive: boolean;
+  setDomain: React.Dispatch<React.SetStateAction<[number, number]>>;
+}) {
+
+  const seenTimestamps = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!isLive || variables.length === 0) return;
+
+    const seen = seenTimestamps.current;
+    chartData.forEach((d) => seen.add(d.datetime));
+
+    const intervalMs = parseInt(interval) * 60 * 1000;
+
+    const poll = async () => {
+      let newRows: { [key: string]: string }[] = [];
+
+      for (const v of variables) {
+        const url = `http://129.82.30.24:8001/latest_measurement/${v.instrumentId}/${interval}/`;
+        try {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const latest: { instrument_id: number; datetime: string; data: string }[] = await res.json();
+
+          for (const entry of latest) {
+            const dataObj = JSON.parse(entry.data);
+            const dt = entry.datetime;
+            if (seen.has(dt)) continue;
+
+            const row: { [key: string]: string } = { datetime: dt };
+
+            variables.forEach((v) => {
+              const val = dataObj[v.name];
+              if (val !== undefined) {
+                row[v.name] = val.toString();
+              }
+            });
+
+            // Only add if we got at least one variable
+            if (Object.keys(row).length > 1) {
+              seen.add(dt);
+              newRows.push(row);
+            }
+          }
+
+        } catch (err) {
+          console.error('Live data fetch failed', err);
+        }
+      }
+
+      if (newRows.length > 0) {
+        const latestTimestamp = new Date(newRows[newRows.length - 1].datetime).getTime();
+        setChartData([...chartData, ...newRows]);
+
+        // Expand domain upper bound
+        setDomain((prev) => {
+          if (latestTimestamp > prev[1]) {
+            return [prev[0], latestTimestamp];
+          }
+          return prev;
+        });
+      }
+    };
+
+    const handle = setInterval(poll, intervalMs);
+    poll(); // initial
+
+    return () => clearInterval(handle);
+  }, [variables, interval, chartData, isLive, setChartData, setDomain]);
 }

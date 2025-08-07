@@ -27,12 +27,19 @@ interface DateSelectorProps {
   onChange: (newDate: string) => void;
   minDate?: string; // ISO string
   maxDate?: string; // ISO string
+  isClearable?: boolean;
 }
 
 /**
  * Renders a date/time picker using the React-Datepicker package found at https://reactdatepicker.com/
  */
-export default function DateSelector({ value, onChange, minDate, maxDate }: DateSelectorProps) {
+export default function DateSelector({
+  value,
+  onChange,
+  minDate,
+  maxDate,
+  isClearable,
+}: DateSelectorProps) {
   const selectedDate = value ? new Date(value) : null;
 
   const handleChange = (date: Date | null) => {
@@ -55,10 +62,12 @@ export default function DateSelector({ value, onChange, minDate, maxDate }: Date
         maxDate={maxDate ? new Date(maxDate) : undefined}
         placeholderText="Select date and time"
         className="custom-dtpicker"
-        popperPlacement="bottom-start"
+        popperPlacement="top-end"
         popperClassName="dtpicker-popper"
+        isClearable={isClearable}
       />
     </div>
   );
 }
+
 

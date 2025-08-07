@@ -21,7 +21,7 @@
     "leaflet.markercluster": "^1.5.3",
     "rc-slider": "^11.1.8",
     "react": "^19.1.0",
-    "react-bootstrap-icons": "^1.11.6",
+    "react-bootstrap-icons": "^1.11.5",
     "react-datepicker": "^8.4.0",
     "react-dom": "^19.1.0",
     "react-leaflet": "^5.0.0",

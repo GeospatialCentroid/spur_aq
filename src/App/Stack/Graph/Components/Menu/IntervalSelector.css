@@ -1,4 +1,12 @@
-.interval-select {
-    padding: 0.25rem;
-    font-size: 0.9rem;
+/* IntervalSelector styling to match date pickers */
+.interval-group select {
+  max-width: 260px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: #fff;
+  color: #333;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  height: 2rem;
 }
