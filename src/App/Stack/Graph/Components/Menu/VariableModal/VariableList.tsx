@@ -11,6 +11,7 @@
 
 import React from 'react';
 import { Station } from '../../../../../../Types/config';
+import { Calibration } from '../../../../../../Types/calibration';
 
 /**
  * Props for the VariableList component.
@@ -29,6 +30,7 @@ interface VariableListProps {
       description: string;
       alias?: string;
       units?: string;
+      calibrations?: Calibration[];
     },
     key: string
   ) => void;
@@ -106,7 +108,8 @@ const VariableList: React.FC<VariableListProps> = ({
                               name: m.name,
                               description: m.description,
                               alias: m.alias,
-                              units: m.units?.toString(),
+                              units: m.units,
+                              calibrations: m.calibrations,
                             },
                             measurementKey
                           )

@@ -6,16 +6,17 @@
  * - Provides controls for setting `fromDate` and `toDate` using DateSelector components.
  * - Allows selection of an averaging interval.
  * - Allows dynamic addition and configuration of variable inputs via VariableSelector.
+ * - Directly opens the modal for a newly added variable when the Add Variable button is clicked.
+ * - Enforces a maximum of 2 variables.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import './Menu.css';
 import DateSelector from './Menu/DateSelector';
 import VariableSelector from './Menu/VariableSelector';
 import IntervalSelector from './Menu/IntervalSelector';
 import { getNow } from '../graphDateUtils';
 import { SelectedMeasurement } from '../graphTypes';
-
 
 /**
  * Props for the Menu component.
@@ -62,6 +63,15 @@ const Menu: React.FC<MenuProps> = ({
   interval,
   onIntervalChange,
 }) => {
+  // Tracks the index of the variable selector to auto-open on mount
+  const [openOnMountIndex, setOpenOnMountIndex] = useState<number | null>(null);
+
+  // Called when "+ Add Variable" is clicked
+  const handleAddVariable = () => {
+    onAddVariable();
+    setOpenOnMountIndex(variables.length); // index of the new variable
+  };
+
   return (
     <div className={`graph-menu ${className}`}>
       <div className="menu-content">
@@ -98,14 +108,22 @@ const Menu: React.FC<MenuProps> = ({
             <VariableSelector
               key={i}
               value={v}
-              onChange={(val) => onVariableChange(i, val)}
+              onChange={(val) => {
+                onVariableChange(i, val);
+                if (i === openOnMountIndex) {
+                  setOpenOnMountIndex(null); // clear flag after modal opens
+                }
+              }}
               onRemove={() => onRemoveVariable(i)}
+              openOnMount={i === openOnMountIndex}
             />
           ))}
 
-          <button className="add-variable-button" onClick={onAddVariable}>
-            + Add Variable
-          </button>
+          {variables.length < 2 && (
+            <button className="add-variable-button" onClick={handleAddVariable}>
+              + Add Variable
+            </button>
+          )}
         </div>
       </div>
     </div>

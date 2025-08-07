@@ -109,6 +109,7 @@ export function useFetchChartData({
   setYMin,
   setYMax,
   lastFetchKey,
+  setLoading,
 }: {
   id: number;
   variables: SelectedMeasurement[];
@@ -119,6 +120,7 @@ export function useFetchChartData({
   setYMin: (v: number) => void;
   setYMax: (v: number) => void;
   lastFetchKey: React.MutableRefObject<string>;
+  setLoading?: (loading: boolean) => void;
 }) {
   useEffect(() => {
     if (variables.length === 0) return;
@@ -126,6 +128,8 @@ export function useFetchChartData({
     const key = JSON.stringify({ variables, fromDate, toDate, interval });
     if (key === lastFetchKey.current) return;
     lastFetchKey.current = key;
+
+    setLoading?.(true);
 
     const groups = groupVariablesByInstrument(variables);
     const allData: { [key: string]: string }[] = [];
@@ -166,6 +170,7 @@ export function useFetchChartData({
       const max = Math.max(...allValues);
       setYMin(isFinite(min) ? min : 0);
       setYMax(isFinite(max) ? max : 1);
+       setLoading?.(false);
     });
   }, [id, variables, fromDate, toDate, interval, setChartData, setYMin, setYMax, lastFetchKey]);
 }
