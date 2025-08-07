@@ -34,6 +34,7 @@ interface GraphProps {
 /** Main component representing one full graph unit */
 const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange }) => {
   const [menuExpanded, setMenuExpanded] = useState(true);
+  const [loading, setLoading] = useState(true);
   const { config } = useConfig();
 
   const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgo());
@@ -84,6 +85,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
     setYMin,
     setYMax,
     lastFetchKey,
+    setLoading,
   });
 
   // --- Handlers ---
@@ -148,11 +150,21 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
       <div className="graph-expand-toggle">
         <ExpandToggle
           expanded={menuExpanded}
-          onToggle={() => setMenuExpanded(!menuExpanded)}
+          onToggle={() => setMenuExpanded(  !menuExpanded)}
         />
       </div>
 
-      <div className="graph-chart">
+     <div className="graph-chart position-relative" >
+            {loading && (
+            <div className="position-absolute top-50 start-50 translate-middle" style={{ zIndex: 9999  }}>
+              <div className="spinner-border text-dark" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+        )}
+
+
+
         <Chart
           id={id}
           fromDate={new Date(selection[0]).toISOString()}
@@ -170,6 +182,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
       <div className="graph-control-bar">
         <ControlBar onRemove={onRemove} />
       </div>
+
     </div>
   );
 };
