@@ -49,7 +49,7 @@ function App() {
     <ConfigProvider config={config}>
       <div className="app">
         <header className="app-header">
-        <h1>SPUR Air Quality</h1>
+        <h1> <b>S</b>pur <b>R</b>egional <b>A</b>ir <b>M</b>onitoring <b>S</b>ite (<b>RAMS</b>)</h1>
           <img
             src="/Photos/InfoCardPhotos/CSUSpur_horiz_campus_rev_rgb.webp"
             alt="CSU Spur Logo" 
