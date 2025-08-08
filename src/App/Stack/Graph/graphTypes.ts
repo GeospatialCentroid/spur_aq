@@ -20,8 +20,8 @@ export function createBlankMeasurement(): SelectedMeasurement {
     name: '',
     alias: '',
     units: '',
-    min: null,
-    max: null,
+    min: 0,
+    max: 0,
     description: '',
     calibrations: [],
     public_display: false,
@@ -29,6 +29,9 @@ export function createBlankMeasurement(): SelectedMeasurement {
     ranges: null,
     stationId: -1,
     instrumentId: -1,
+    calibrations: [],
+    public_display: false,
   };
 }
+
 

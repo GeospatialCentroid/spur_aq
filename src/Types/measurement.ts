@@ -1,5 +1,6 @@
 // File: src/types/measurement.ts
 
+import {Calibration} from './calibration'
 /**
  * Represents a measurable variable collected by an instrument.
  *

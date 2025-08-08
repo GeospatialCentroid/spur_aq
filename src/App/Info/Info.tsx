@@ -3,10 +3,10 @@ import './Info.css';
 import InfoCard from './InfoCard/InfoCard';
 import RecentValCard from './RecentValCard/RecentValCard';
 import { useConfig } from '../../context/ConfigContext';
+import MapCard from './MapCard/MapCard';
 
 const Info: React.FC = () => {
-  const { config, timeSeriesData } = useConfig(); // ✅ Destructure both
-
+  const { config, timeSeriesData } = useConfig(); 
   return (
     <div className="App-info container-fluid my-4">
       <div className="row g-4">
@@ -15,8 +15,7 @@ const Info: React.FC = () => {
         <div className="col-md-4">
           <div className="card h-100">
             <div className="card-body">
-              <h5 className="card-title">Map</h5>
-              <p>[Your map component or placeholder goes here]</p>
+               <MapCard />
             </div>
           </div>
         </div>

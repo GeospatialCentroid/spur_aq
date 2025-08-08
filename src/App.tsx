@@ -8,6 +8,7 @@ import Info from './App/Info/Info';
 import Stack from './App/Stack/Stack';
 import { Config } from './Types/config';
 import { ConfigProvider } from './context/ConfigContext';
+import { ModeProvider } from './context/ModeContext';
 
 function App() {
   const [config, setConfig] = useState<Config | null>(null);
@@ -63,6 +64,7 @@ function App() {
   }
 
   return (
+   <ModeProvider>
     <ConfigProvider config={config} timeSeriesData={timeSeriesData}>
       <div className="app">
         <header
@@ -97,7 +99,11 @@ function App() {
         </footer>
       </div>
     </ConfigProvider>
+
+
+    </ModeProvider>
   );
 }
 
 export default App;
+
