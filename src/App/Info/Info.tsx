@@ -5,7 +5,7 @@ import RecentValCard from './RecentValCard/RecentValCard';
 import { useConfig } from '../../context/ConfigContext';
 
 const Info: React.FC = () => {
-  const { config, timeSeriesData } = useConfig(); // ✅ Destructure both
+  const { config, timeSeriesData } = useConfig();
 
   return (
     <div className="App-info container-fluid my-4">
