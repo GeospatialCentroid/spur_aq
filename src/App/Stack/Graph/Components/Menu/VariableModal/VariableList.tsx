@@ -31,6 +31,7 @@ interface VariableListProps {
       alias?: string;
       units?: string;
       calibrations?: Calibration[];
+      public_display?:boolean;
     },
     key: string
   ) => void;
@@ -126,6 +127,7 @@ const VariableList: React.FC<VariableListProps> = ({
                         }
                       >
                         {m.alias || m.name}
+                         {m.public_display}
                       </li>
                     );
                   })}
