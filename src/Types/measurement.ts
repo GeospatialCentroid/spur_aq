@@ -14,12 +14,6 @@ import {Calibration} from './calibration'
  */
 // src/types/measurement.ts
 
-export interface Calibration {
-  slope: number;
-  offset: number;
-  start_date: string;
-}
-
 export interface Range {
   color: string;
   range: [number, number];
