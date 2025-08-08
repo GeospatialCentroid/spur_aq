@@ -17,6 +17,7 @@ import Info from './App/Info/Info';
 import Stack from './App/Stack/Stack';
 import { Config } from './Types/config';
 import { ConfigProvider } from './context/ConfigContext';
+import { ModeProvider } from './context/ModeContext';
 
 function App() {
   const [config, setConfig] = useState<Config | null>(null);
@@ -46,6 +47,7 @@ function App() {
   }
  // added the logo to the right temporarily can change if needed. 
   return (
+   <ModeProvider>
     <ConfigProvider config={config}>
       <div className="app">
 
@@ -55,7 +57,7 @@ function App() {
           justifyContent: 'space-between',
           padding:'1rem'
         }}>
-        <h1> <b>S</b>pur <b>R</b>egional <b>A</b>ir <b>M</b>onitoring <b>S</b>ite (<b>RAMS</b>)</h1>
+        <h1> Spur <b>R</b>egional <b>A</b>ir <b>M</b>onitoring <b>S</b>ite (<b>RAMS</b>)</h1>
 
           <img
             src="/Photos/InfoCardPhotos/CSUSpur_horiz_campus_rev_rgb.webp"
@@ -82,6 +84,9 @@ function App() {
         </footer>
       </div>
     </ConfigProvider>
+
+
+    </ModeProvider>
   );
 }
 
