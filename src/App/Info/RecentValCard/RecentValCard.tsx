@@ -51,60 +51,38 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
 
   return (
     <div className="recent-values-wrapper" {...swipeHandlers}>
+      <div className="arrow-button left" onClick={() =>
+        setCurrentIndex((currentIndex - 1 + parsedMeasurements.length) % parsedMeasurements.length)
+      }>
+        <FadingLeftArrow />
+      </div>
+
+      <div className="arrow-button right" onClick={() =>
+        setCurrentIndex((currentIndex + 1) % parsedMeasurements.length)
+      }>
+        <FadingRightArrow />
+      </div>
+
       <div className="card recent-values-card">
         <div className="card-body">
-          <div
-            className="swipe-nav"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '1rem',
-              marginBottom: '1rem'
-            }}
-          >
-            <button
-              onClick={() =>
-                setCurrentIndex((currentIndex - 1 + parsedMeasurements.length) % parsedMeasurements.length)
-              }
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: 0
-              }}
-            >
-              <FadingLeftArrow />
-            </button>
-
-            <h5 style={{ textAlign: 'center', flex: '1' }}>
-              {selected?.measurementName.charAt(0).toUpperCase() + selected?.measurementName.slice(1)}
-            </h5>
-
-            <button
-              onClick={() =>
-                setCurrentIndex((currentIndex + 1) % parsedMeasurements.length)
-              }
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: 0
-              }}
-            >
-              <FadingRightArrow />
-            </button>
-          </div>
-
           {selected && (
             <div className="selected-variable-display gauge-section">
               <GaugeDial value={latestValue} ranges={selected.ranges} />
-              <p style={{ fontWeight: 'bold', color: '#000', marginTop: '1rem' }}>
+
+              {/* Air quality category (e.g., Good) */}
+              <p style={{ fontWeight: 'bold', color: '#000', marginTop: '0.8rem', marginBottom: '0.1rem' }}>
                 {match?.category || 'Unknown'}
               </p>
-              <p style={{ fontSize: '1rem', fontWeight: 'normal', marginTop: '0.25rem' }}>
-                {latestValue} {selected.units || ''}
+
+              {/* Value with units, rounded to 1 decimal */}
+              <p style={{ fontSize: '1rem', fontWeight: 'normal', marginTop: '0.1rem' }}>
+                {latestValue.toFixed(1)} {selected.units || ''}
               </p>
+
+              {/* Measurement name (now at the bottom) */}
+              <h5 style={{ textAlign: 'center', marginTop: '0.6rem' }}>
+                {selected.measurementName.charAt(0).toUpperCase() + selected.measurementName.slice(1)}
+              </h5>
             </div>
           )}
         </div>

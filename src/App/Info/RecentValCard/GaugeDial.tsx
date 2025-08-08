@@ -10,100 +10,108 @@ interface GaugeDialProps {
 const GaugeDial: React.FC<GaugeDialProps> = ({ value, ranges }) => {
   const ref = useRef<SVGSVGElement>(null);
 
-  // Sort the provided ranges by their starting value
+  // SVG layout configuration
+  const width = 400;
+  const height = 180;
+  const centerX = width / 2;
+  const centerY = height * 0.9;
+  const radius = 120;
+
+  // Ensure ranges are sorted left-to-right
   const sortedRanges = [...ranges].sort((a, b) => a.range[0] - b.range[0]);
 
   useEffect(() => {
     if (!ref.current || sortedRanges.length === 0) return;
 
     const svg = d3.select(ref.current);
-    svg.selectAll('*').remove(); // Clear previous SVG elements
+    svg.selectAll('*').remove(); // Clear previous content
 
-    // Set up SVG dimensions and center point
-    const width = 300;
-    const height = 180;
-    const centerX = width / 2;
-    const centerY = height * 0.9;
-    const radius = 100;
+    // Define gauge angle range
+    // Use radians for the correct full half-circle layout
+// Arc layout: evenly divide full arc by number of color segments
+const startAngleRad = -Math.PI/2; // -180 degrees
+const endAngleRad = Math.PI/2;          //   0 degrees
+const totalArc = endAngleRad - startAngleRad;
+const arcCount = sortedRanges.length;
+const arcSpan = totalArc / arcCount;
 
-    // Define angular range for the semi-circle dial
-    const startAngleDeg = -90;
-    const endAngleDeg = 90;
-    const arcCount = sortedRanges.length;
-    const arcSpan = ((endAngleDeg - startAngleDeg) * Math.PI) / 180 / arcCount;
+// Draw arc segments for each color, evenly distributed
+sortedRanges.forEach((r, i) => {
+  const arcStart = startAngleRad + i * arcSpan;
+  const arcEnd = arcStart + arcSpan;
 
-    // Draw each colored range arc based on index
-    sortedRanges.forEach((r, i) => {
-      const startAngle = (startAngleDeg + i * (180 / arcCount)) * (Math.PI / 180);
-      const endAngle = startAngle + arcSpan;
+  const arcPath = d3.arc()
+    .innerRadius(radius - 35)
+    .outerRadius(radius)
+    .startAngle(arcStart)
+    .endAngle(arcEnd);
 
-      const arcPath = d3.arc()
-        .innerRadius(radius - 25)
-        .outerRadius(radius)
-        .startAngle(startAngle)
-        .endAngle(endAngle);
+  svg.append('path')
+    .attr('transform', `translate(${centerX},${centerY})`)
+   .attr('d', arcPath({
+    startAngle: arcStart,
+    endAngle: arcEnd,
+    innerRadius: radius - 35,
+    outerRadius: radius
+    })!)
 
-      svg.append('path')
-        .attr('transform', `translate(${centerX},${centerY})`)
-        .attr('d', arcPath({
-          innerRadius: radius - 25,
-          outerRadius: radius,
-          startAngle,
-          endAngle
-        })!)
-        .attr('fill', r.color || '#ccc')
-        .attr('stroke', '#000')
-        .attr('stroke-width', 0.5);
-    });
 
-    // Determine scale for converting value to angle
-    const rangeMin = Math.min(...sortedRanges.map(r => r.range[0]));
-    const rangeMax = Math.max(...sortedRanges.map(r => r.range[1]));
-    const scale = d3.scaleLinear()
-      .domain([rangeMin, rangeMax])
-      .range([startAngleDeg * (Math.PI / 180), endAngleDeg * (Math.PI / 180)]);
+   .attr('fill', r.color || '#ccc');
 
-    // Find which range the value falls into
-    const matchedIndex = sortedRanges.findIndex(r => value >= r.range[0] && value <= r.range[1]);
+});
 
-    // Fallback to center if no match
-    const segmentIndex = matchedIndex !== -1 ? matchedIndex : Math.floor(sortedRanges.length / 2);
 
-    // Compute the center angle of that segment
-    const segmentAngleDeg = startAngleDeg + (segmentIndex + 0.5) * ((endAngleDeg - startAngleDeg) / arcCount);
-    const segmentAngleRad = segmentAngleDeg * (Math.PI / 180);
+// Visually fixed needle arc from -Math.PI (left) to 0 (right)
+const needleStartAngle = -Math.PI;
+const needleEndAngle = 0;
+const totalNeedleArc = needleEndAngle - needleStartAngle;
 
-    // Needle endpoint
-    const needleLength = radius - 30;
-    const x2 = centerX + Math.cos(segmentAngleRad) * needleLength;
-    const y2 = centerY + Math.sin(segmentAngleRad) * needleLength;
+// Clamp value within bounds
+const rangeMin = sortedRanges[0].range[0];
+const rangeMax = sortedRanges[sortedRanges.length - 1].range[1];
+const clampedValue = Math.max(rangeMin, Math.min(rangeMax, value));
+
+// Find segment where value belongs
+let needleAngle = needleStartAngle;
+for (let i = 0; i < sortedRanges.length; i++) {
+  const [minVal, maxVal] = sortedRanges[i].range;
+  const segmentStartAngle = needleStartAngle + (i / sortedRanges.length) * totalNeedleArc;
+  const segmentEndAngle = needleStartAngle + ((i + 1) / sortedRanges.length) * totalNeedleArc;
+
+  if (clampedValue >= minVal && clampedValue <= maxVal) {
+    const localRatio = (clampedValue - minVal) / (maxVal - minVal);
+    needleAngle = segmentStartAngle + localRatio * (segmentEndAngle - segmentStartAngle);
+    break;
+  }
+}
+
+
+
+// Needle tip position
+const needleLength = radius - 30;
+const x2 = centerX + Math.cos(needleAngle) * needleLength;
+const y2 = centerY + Math.sin(needleAngle) * needleLength;
+
+
 
     // Draw the needle
     svg.append('line')
-    .attr('x1', centerX)
-    .attr('y1', centerY)
-    .attr('x2', x2)
-    .attr('y2', y2)
-    .attr('stroke', '#333')
-    .attr('stroke-width', 3)
-    .attr('stroke-linecap', 'round');
+      .attr('x1', centerX)
+      .attr('y1', centerY)
+      .attr('x2', x2)
+      .attr('y2', y2)
+      .attr('stroke', '#333')
+      .attr('stroke-width', 3)
+      .attr('stroke-linecap', 'round');
 
-    // Draw needle base circle
-    svg.append('circle')
-    .attr('cx', centerX)
-    .attr('cy', centerY)
-    .attr('r', 6)
-    .attr('fill', '#333');
-
-
-    // Draw needle base circle
+    // Center dot on the needle
     svg.append('circle')
       .attr('cx', centerX)
       .attr('cy', centerY)
       .attr('r', 6)
       .attr('fill', '#333');
 
-    // Add tick labels for the start of each range
+    // Add labels (fixed position)
     sortedRanges.forEach((r, i) => {
       const labelAngle = -Math.PI + i * arcSpan;
       const x = centerX + Math.cos(labelAngle) * (radius + 20);
@@ -118,7 +126,7 @@ const GaugeDial: React.FC<GaugeDialProps> = ({ value, ranges }) => {
         .style('font-weight', 'bold')
         .text(r.range[0]);
 
-      // Add the end label for the final range
+      // Add the final upper bound label
       if (i === sortedRanges.length - 1) {
         const endLabelAngle = -Math.PI + (i + 1) * arcSpan;
         const endX = centerX + Math.cos(endLabelAngle) * (radius + 20);
@@ -136,8 +144,15 @@ const GaugeDial: React.FC<GaugeDialProps> = ({ value, ranges }) => {
     });
   }, [value, sortedRanges]);
 
-  // Render SVG container for the gauge
-  return <svg ref={ref} width={300} height={180}></svg>;
+ return (
+  <svg
+    ref={ref}
+    viewBox={`0 0 ${width} ${height}`}
+    preserveAspectRatio="xMidYMid meet"
+    style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
+  />
+);
+
 };
 
 export default GaugeDial;
