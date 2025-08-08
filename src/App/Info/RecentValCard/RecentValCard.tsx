@@ -1,253 +1,97 @@
-import React, { useState, useEffect } from 'react';
-import * as d3 from 'd3';
-import VariableModal from '../../Stack/Graph/Components/Menu/VariableModal/VariableModal';
-import './RecentValCard.css';
-export {};
+import React, { useState } from 'react';
+import GaugeDial from './GaugeDial'; // Custom gauge component for visualizing a numeric value
+import { extractMeasurementsWithRanges, ParsedMeasurement } from './MeasurementUtils'; // Utility for extracting measurements with range metadata
+import './RecentValCard.css'; // Styling for the card layout and visuals
 
-interface Range {
-  color: string;
-  range: [number, number];
-  category: string;
-}
-
+// Props expected from the parent, specifically an array of station data (with children and measurements)
 interface RecentValuesCardProps {
   stationData: any[];
-  timeSeriesData: Record<string, { timestamp: string; value: number }[]>;
 }
 
-const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData, timeSeriesData }) => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedVariable, setSelectedVariable] = useState<any>(null);
-  const [hasData, setHasData] = useState(false);
+/**
+ * Displays a card component that:
+ * - Allows the user to select a measurement variable
+ * - Fetches the latest value from the backend
+ * - Visualizes the value on a D3-based gauge dial
+ * 
+ * Assumes stationData contains nested structure: stations -> children -> measurements
+ */
+const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
+  // Extract measurements with defined ranges
+  const parsedMeasurements = extractMeasurementsWithRanges(stationData).filter(p => p.ranges.length > 0);
 
-  useEffect(() => {
-    let intervalId: NodeJS.Timeout;
+  // State to track the currently selected measurement
+  const [selected, setSelected] = useState<ParsedMeasurement | null>(parsedMeasurements[0] || null);
 
-    const fetchAndUpdate = async () => {
-      if (!stationData || stationData.length === 0) return;
+  // State to hold the most recent value for the selected variable
+  const [latestValue, setLatestValue] = useState<number>(0);
 
-      const allMeasurements = stationData
-        .flatMap((station: any) => station.children || [])
-        .flatMap((child: any) =>
-          (child.measurements || []).map((m: any) => ({
-            ...m,
-            instrument_id: child.id,
-          }))
-        );
+  // Match the current value to a category, based on the range it falls into
+  const match = selected?.ranges.find(r => latestValue >= r.range[0] && latestValue <= r.range[1]);
 
-      const firstFeatureMeasure = allMeasurements.find((m: any) => {
-        return m.feature_measure && m.instrument_id && Array.isArray(m.ranges) && m.ranges.length > 0;
-      });
+  /**
+   * Handles dropdown selection of a variable.
+   * Fetches the most recent value for that variable from the backend,
+   * parses it, and updates the dial and category display.
+   */
+  const handleDropdownChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedName = e.target.value;
 
-      if (!firstFeatureMeasure) return;
+    // Match selected variable by name
+    const matched = parsedMeasurements.find(m => m.measurementName === selectedName);
+    if (!matched) return;
 
-      try {
-        const url = `http://129.82.30.24:8001/latest_measurement/${firstFeatureMeasure.instrument_id}/60/`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`Fetch failed with status ${response.status}`);
-        const raw = await response.json();
-        const latestEntry = Array.isArray(raw) ? raw[0] : raw;
-        const parsed = JSON.parse(latestEntry.data || '{}');
+    try {
+      // Request the most recent value using instrument ID
+      const res = await fetch(`http://129.82.30.24:8001/latest_measurement/${matched.instrumentId}/60/`);
+      const json = await res.json();
 
-        const latestValue = parsed[firstFeatureMeasure.name] ?? 0;
+      // Handle stringified `data` field from backend
+      const latestEntry = Array.isArray(json) ? json[0] : json;
+      const parsedData = JSON.parse(latestEntry.data || '{}');
 
-        setSelectedVariable({
-          ...firstFeatureMeasure,
-          latest_value: latestValue,
-        });
-        setHasData(true);
-      } catch (err) {
-        console.error('Error fetching latest measurement:', err);
-      }
-    };
+      // Extract the actual value using measurement name as key
+      const fetchedValue = parsedData[matched.measurementName] ?? 0;
 
-    fetchAndUpdate();
-    intervalId = setInterval(fetchAndUpdate, 300000);
-    return () => clearInterval(intervalId);
-  }, [stationData]);
-
-  const GaugeDial: React.FC<{ value: number; ranges: Range[] }> = ({ value, ranges }) => {
-    const ref = React.useRef<SVGSVGElement>(null);
-    const sortedRanges = [...ranges].sort((a, b) => a.range[0] - b.range[0]);
-
-    useEffect(() => {
-      if (!ref.current || sortedRanges.length === 0) return;
-
-      const svg = d3.select(ref.current);
-      svg.selectAll('*').remove();
-
-      const width = 300;
-      const height = 180;
-      const centerX = width / 2;
-      const centerY = height * 0.9;
-      const radius = 100;
-
-      const startAngleDeg = -90;
-      const endAngleDeg = 90;
-      const totalAngle = (endAngleDeg - startAngleDeg) * (Math.PI / 180);
-      const arcCount = sortedRanges.length;
-      const arcSpan = totalAngle / arcCount;
-
-      sortedRanges.forEach((r, i) => {
-        const startAngle = (startAngleDeg + i * (180 / arcCount)) * (Math.PI / 180);
-        const endAngle = startAngle + arcSpan;
-
-        const arcPath = d3.arc()
-          .innerRadius(radius - 25)
-          .outerRadius(radius)
-          .startAngle(startAngle)
-          .endAngle(endAngle);
-
-        svg.append('path')
-          .attr('transform', `translate(${centerX},${centerY})`)
-          .attr('d', arcPath({
-            startAngle,
-            endAngle,
-            innerRadius: radius - 25,
-            outerRadius: radius,
-          })!)
-          .attr('fill', r.color || '#ccc')
-          .attr('stroke', '#000')
-          .attr('stroke-width', 0.5);
-      });
-
-      const scale = d3.scaleLinear()
-        .domain([sortedRanges[0].range[0], sortedRanges[sortedRanges.length - 1].range[1]])
-        .range([startAngleDeg * (Math.PI / 180), endAngleDeg * (Math.PI / 180)]);
-
-      const valueAngle = scale(value);
-      const needleLength = radius - 30;
-      const x2 = centerX + Math.cos(valueAngle) * needleLength;
-      const y2 = centerY + Math.sin(valueAngle) * needleLength;
-
-      svg.append('line')
-        .attr('x1', centerX)
-        .attr('y1', centerY)
-        .attr('x2', x2)
-        .attr('y2', y2)
-        .attr('stroke', '#333')
-        .attr('stroke-width', 3)
-        .attr('stroke-linecap', 'round');
-
-      svg.append('circle')
-        .attr('cx', centerX)
-        .attr('cy', centerY)
-        .attr('r', 6)
-        .attr('fill', '#333');
-
-      sortedRanges.forEach((r, i) => {
-        const labelAngle = -Math.PI + i * arcSpan;
-        const x = centerX + Math.cos(labelAngle) * (radius + 20);
-        const y = centerY + Math.sin(labelAngle) * (radius + 20);
-
-        svg.append('text')
-          .attr('x', x)
-          .attr('y', y)
-          .attr('text-anchor', 'middle')
-          .attr('alignment-baseline', 'middle')
-          .style('font-size', '12px')
-          .style('font-weight', 'bold')
-          .text(r.range[0]);
-
-        if (i === sortedRanges.length - 1) {
-          const endLabelAngle = -Math.PI + (i + 1) * arcSpan;
-          const endX = centerX + Math.cos(endLabelAngle) * (radius + 20);
-          const endY = centerY + Math.sin(endLabelAngle) * (radius + 20);
-
-          svg.append('text')
-            .attr('x', endX)
-            .attr('y', endY)
-            .attr('text-anchor', 'middle')
-            .attr('alignment-baseline', 'middle')
-            .style('font-size', '12px')
-            .style('font-weight', 'bold')
-            .text(r.range[1]);
-        }
-      });
-    }, [value, sortedRanges]);
-
-    return <svg ref={ref} width={300} height={180}></svg>;
+      // Update UI state
+      setSelected(matched);
+      setLatestValue(fetchedValue);
+    } catch (err) {
+      console.error('Error fetching latest value:', err);
+      setLatestValue(0); // Fallback to 0 if error
+    }
   };
-
-  const handleVariableSelect = (variable: any) => {
-    const series = timeSeriesData[variable.name] || [];
-    const latest = series.length > 0 ? series[series.length - 1].value : 0;
-
-    setSelectedVariable({
-      ...variable,
-      latest_value: latest,
-    });
-    setModalOpen(false);
-  };
-
-  if (!hasData) {
-    return (
-      <div className="recent-values-wrapper">
-        <div className="card recent-values-card">
-          <div className="card-body">
-            <p>Loading data...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const latestValue = selectedVariable?.latest_value || 0;
-  const ranges: Range[] = selectedVariable?.ranges || [];
-
-  const unitAbbreviations: Record<string, string> = {
-    'parts-per-million': 'ppm',
-    'parts-per-billion': 'ppb',
-    'degrees-celsius': '°C',
-    'micrograms-per-cubic-meter': 'µg/m³',
-    'milligrams-per-liter': 'mg/L',
-  };
-
-  const match = [...ranges].sort((a, b) => a.range[0] - b.range[0]).find(
-    (r) => latestValue >= r.range[0] && latestValue <= r.range[1]
-  );
 
   return (
     <div className="recent-values-wrapper">
       <div className="card recent-values-card">
         <div className="card-body">
-          <button
-            onClick={() => setModalOpen(true)}
-            className="variable-button"
+          {/* Dropdown for selecting measurement variable */}
+          <select
+            className="form-select mb-3"
+            onChange={handleDropdownChange}
+            value={selected?.measurementName || ''}
           >
-            {selectedVariable?.name ? selectedVariable.name.charAt(0).toUpperCase() + selectedVariable.name.slice(1) : 'Change Variable'}
-          </button>
+            {parsedMeasurements.map((m, i) => (
+              <option key={i} value={m.measurementName}>
+                {/* Capitalize the first letter of the variable name */}
+                {m.measurementName.charAt(0).toUpperCase() + m.measurementName.slice(1)}
+              </option>
+            ))}
+          </select>
 
-          {selectedVariable && (
+          {/* Gauge and label display for selected variable */}
+          {selected && (
             <div className="selected-variable-display gauge-section">
-              {ranges.length > 0 && <GaugeDial value={latestValue} ranges={ranges} />}
-
-              {match && (
-                <p style={{ fontWeight: 'bold', color: '#000', marginTop: '1rem' }}>
-                  {match.category}
-                </p>
-              )}
-
+              <GaugeDial value={latestValue} ranges={selected.ranges} />
+              <p style={{ fontWeight: 'bold', color: '#000', marginTop: '1rem' }}>
+                {match?.category || 'Unknown'} {/* Category label (e.g., "Good", "Moderate") */}
+              </p>
               <p style={{ fontSize: '1rem', fontWeight: 'normal', marginTop: '0.25rem' }}>
-                {latestValue} {unitAbbreviations[selectedVariable.units] || selectedVariable.units || ''}
+                {latestValue} {selected.units || ''} {/* Numeric value + units (if any) */}
               </p>
             </div>
           )}
-
-          <VariableModal
-            isOpen={modalOpen}
-            onClose={() => setModalOpen(false)}
-            onConfirmSelection={handleVariableSelect}
-            stationsOverride={
-              stationData.map((station: any) => ({
-                ...station,
-                children: (station.children || []).map((child: any) => ({
-                  ...child,
-                  measurements: (child.measurements || []).filter((m: any) => m.feature_measure === true)
-                }))
-              }))
-            }
-          />
         </div>
       </div>
     </div>

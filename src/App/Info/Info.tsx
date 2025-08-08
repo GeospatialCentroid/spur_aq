@@ -28,7 +28,7 @@ const Info: React.FC = () => {
               {config ? (
                 <RecentValCard
                   stationData={config}
-                  timeSeriesData={timeSeriesData} // ✅ ADD THIS
+        
                 />
               ) : (
                 <p>Loading data...</p>
