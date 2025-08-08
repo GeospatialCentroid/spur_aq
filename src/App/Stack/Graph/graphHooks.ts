@@ -170,7 +170,7 @@ export function useFetchChartData({
       const max = Math.max(...allValues);
       setYMin(isFinite(min) ? min : 0);
       setYMax(isFinite(max) ? max : 1);
-       setLoading?.(false);
+      setLoading?.(false);
     });
   }, [id, variables, fromDate, toDate, interval, setChartData, setYMin, setYMax, lastFetchKey]);
 }
@@ -187,6 +187,7 @@ export function useLiveChartUpdates({
   setChartData,
   isLive,
   setDomain,
+  setSelection,
 }: {
   variables: SelectedMeasurement[];
   interval: string;
@@ -194,6 +195,7 @@ export function useLiveChartUpdates({
   setChartData: (d: { [key: string]: string }[]) => void;
   isLive: boolean;
   setDomain: React.Dispatch<React.SetStateAction<[number, number]>>;
+  setSelection: React.Dispatch<React.SetStateAction<[number, number]>>;
 }) {
 
   const seenTimestamps = useRef<Set<string>>(new Set());
@@ -247,11 +249,14 @@ export function useLiveChartUpdates({
         setChartData([...chartData, ...newRows]);
 
         // Expand domain upper bound
+        const newEnd = latestTimestamp + 60_000;
+
         setDomain((prev) => {
-          if (latestTimestamp > prev[1]) {
-            return [prev[0], latestTimestamp];
-          }
-          return prev;
+          if (newEnd <= prev[1]) return prev;
+
+          const newDomain: [number, number] = [prev[0], newEnd];
+          setSelection([prev[0], newEnd]); // same window size
+          return newDomain;
         });
       }
     };
@@ -260,5 +265,5 @@ export function useLiveChartUpdates({
     poll(); // initial
 
     return () => clearInterval(handle);
-  }, [variables, interval, chartData, isLive, setChartData, setDomain]);
+  }, [variables, interval, chartData, isLive, setChartData, setDomain, setSelection]);
 }

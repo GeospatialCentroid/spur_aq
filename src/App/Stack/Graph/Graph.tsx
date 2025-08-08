@@ -94,7 +94,8 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   chartData,
   setChartData,
   isLive: !toDate,
-  setDomain
+  setDomain,
+  setSelection
 });
 
   // --- Handlers ---
