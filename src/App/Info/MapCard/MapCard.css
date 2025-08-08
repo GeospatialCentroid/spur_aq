@@ -15,7 +15,6 @@
 /* Set max width and center the map */
 .map-container {
   width: 100%;
-  max-width: 500px;
   height: 300px;
   transition: all 0.3s ease;
   position: relative;
@@ -75,4 +74,41 @@ body.map-fullscreen-active {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+/* Basic legend styling */
+
+.legend {
+    background: white;
+    padding: 10px;
+    line-height: 18px;
+    color: #333;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    max-height:200px;
+   overflow-y: auto;
+  }
+
+.legend .legend-item {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+  padding: 2px 4px;
+}
+
+.legend .legend-item i {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  border: 1px solid #666;
+}
+
+/* selected style */
+.legend .selected-legend {
+  font-weight: 600;
+  outline: 2px solid rgba(0,0,0,0.08);
+  border-radius: 3px;
+  background: rgba(0,0,0,0.03);
 }
