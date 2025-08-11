@@ -26,7 +26,6 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
       const parsedData = JSON.parse(latestEntry.data || '{}');
       const fetchedValue = parsedData[measurement.measurementName] ?? 0;
       setLatestValue(fetchedValue);
-      console.log(`parsedData`)
     } catch (err) {
       console.error('Error fetching latest value:', err);
       setLatestValue(0);
