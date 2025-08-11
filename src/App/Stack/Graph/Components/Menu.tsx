@@ -39,7 +39,7 @@ interface MenuProps {
   toDate: string;
   onFromDateChange: (date: string) => void;
   onToDateChange: (date: string) => void;
-  variables: SelectedMeasurement[];
+  variables: SelectedMeasurement[]; // Should include public_display
   onVariableChange: (index: number, v: SelectedMeasurement) => void;
   onAddVariable: () => void;
   onRemoveVariable: (index: number) => void;

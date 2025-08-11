@@ -26,5 +26,6 @@ export function createBlankMeasurement(): SelectedMeasurement {
     stationId: -1,
     instrumentId: -1,
     calibrations: [],
+    public_display: false,
   };
 }

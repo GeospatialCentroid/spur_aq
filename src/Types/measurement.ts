@@ -21,5 +21,5 @@ export interface Measurement {
   max: number;
   description: string;
   calibrations:Calibration[];
-
+  public_display: boolean;
   }

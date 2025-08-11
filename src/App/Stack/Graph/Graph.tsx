@@ -38,15 +38,36 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const [loading, setLoading] = useState(true);
   const { config } = useConfig();
 
+  // Helper to find a measurement in config by name, stationId, and instrumentId
+  function getMeasurementFromConfig(name: string, stationId: number, instrumentId: number) {
+    if (!config) return undefined;
+    const station = config.find(s => s.id === stationId);
+    if (!station) return undefined;
+    const instrument = station.children.find(i => i.id === instrumentId);
+    if (!instrument || !instrument.measurements) return undefined;
+    // Use case-insensitive comparison for name matching
+    return instrument.measurements.find(m => m.name.toLowerCase() === name.toLowerCase());
+  }
+
   const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgo() || '');
   const [toDate, setToDate] = useState<string>(initialState?.toDate || '');
   const [variables, setVariables] = useState<SelectedMeasurement[]>(
-    (initialState?.variableNames || []).map((name) => ({
-      ...createBlankMeasurement(),
-      name,
-      stationId: initialState?.stationId ?? 0,
-      instrumentId: initialState?.instrumentId ?? 0,
-    }))
+    (initialState?.variableNames || []).map((name) => {
+      const stationId = initialState?.stationId ?? 0;
+      const instrumentId = initialState?.instrumentId ?? 0;
+      const measurement = getMeasurementFromConfig(name, stationId, instrumentId);
+      if (!measurement) {
+        console.warn(`Measurement not found for name: ${name}, stationId: ${stationId}, instrumentId: ${instrumentId}`);
+      }
+      // Transfer all measurement attributes, plus name/stationId/instrumentId
+      return {
+        ...createBlankMeasurement(),
+        ...measurement,
+        name,
+        stationId,
+        instrumentId,
+      };
+    })
   );
   const [interval, setInterval] = useState<string>(initialState?.interval || '60');
 
@@ -150,9 +171,15 @@ const handleToDateChange = (newToDate: string) => {
   const handleIntervalChange = (newInterval: string) => setInterval(newInterval);
 
   const handleVariableChange = (index: number, value: SelectedMeasurement) => {
+    const measurement = getMeasurementFromConfig(value.name, value.stationId, value.instrumentId);
+    const mergedValue = measurement
+      ? { ...value, ...measurement }
+      : value;
+    // Log the selected measurement's attributes to the console
+    console.log('Selected Measurement:', mergedValue);
     setVariables((prev) => {
       const updated = [...prev];
-      updated[index] = value;
+      updated[index] = mergedValue;
       return updated;
     });
   };
@@ -162,7 +189,24 @@ const handleToDateChange = (newToDate: string) => {
   };
 
   const addVariable = () => {
-    setVariables((prev) => [...prev, { ...createBlankMeasurement() }]);
+    // You should prompt/select a valid name, stationId, instrumentId
+    // For demonstration, use the first available measurement from config
+    if (!config || config.length === 0) return;
+    const stationId = config[0].id;
+    const instrument = config[0].children[0];
+    const instrumentId = instrument.id;
+    const measurement = instrument.measurements?.[0];
+    const name = measurement?.name ?? "";
+    setVariables((prev) => [
+      ...prev,
+      {
+        ...createBlankMeasurement(),
+        ...measurement,
+        name,
+        stationId,
+        instrumentId,
+      }
+    ]);
   };
 
   if (!config) return null;
