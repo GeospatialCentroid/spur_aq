@@ -9,7 +9,7 @@
 /* Input field styling */
 .custom-dtpicker {
   width: 100%;
-  max-width: 240px;
+  padding-right: 3px;
   /* padding: 1px 12px; */
   font-size: 1rem;
   border: 1px solid #ccc;
@@ -54,6 +54,13 @@
   background-color: #4a90e2;
   color: white;
 }
+
+.react-datepicker__close-icon {
+  right: -14px;
+  top: 50%;
+  transform: translateY(-95%);
+}
+
 
 /* Mobile override (better spacing) */
 @media (max-width: 600px) {

@@ -18,10 +18,11 @@ import Chart from './Components/Chart';
 import ExpandToggle from './Components/Menu/ExpandToggle';
 import { useConfig } from '../../../context/ConfigContext';
 import { EncodedGraphState } from './graphStateUtils';
-import { getStartOfTodayOneWeekAgo, getNow } from './graphDateUtils';
+import { getStartOfTodayOneWeekAgo} from './graphDateUtils';
 import { syncDateRange, validateSliderRange } from './graphHandlers';
-import { useEmitGraphState, useClampDomainEffect, useFetchChartData } from './graphHooks';
+import { useEmitGraphState, useClampDomainEffect, useFetchChartData, useLiveChartUpdates } from './graphHooks';
 import { SelectedMeasurement, createBlankMeasurement } from './graphTypes';
+import { DateTime } from 'luxon';
 
 /** Props for the Graph component */
 interface GraphProps {
@@ -37,15 +38,36 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const [loading, setLoading] = useState(true);
   const { config } = useConfig();
 
-  const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgo());
-  const [toDate, setToDate] = useState<string>(initialState?.toDate || getNow());
+  // Helper to find a measurement in config by name, stationId, and instrumentId
+  function getMeasurementFromConfig(name: string, stationId: number, instrumentId: number) {
+    if (!config) return undefined;
+    const station = config.find(s => s.id === stationId);
+    if (!station) return undefined;
+    const instrument = station.children.find(i => i.id === instrumentId);
+    if (!instrument || !instrument.measurements) return undefined;
+    // Use case-insensitive comparison for name matching
+    return instrument.measurements.find(m => m.name.toLowerCase() === name.toLowerCase());
+  }
+
+  const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgo() || '');
+  const [toDate, setToDate] = useState<string>(initialState?.toDate || '');
   const [variables, setVariables] = useState<SelectedMeasurement[]>(
-    (initialState?.variableNames || []).map((name) => ({
-      ...createBlankMeasurement(),
-      name,
-      stationId: initialState?.stationId ?? 0,
-      instrumentId: initialState?.instrumentId ?? 0,
-    }))
+    (initialState?.variableNames || []).map((name) => {
+      const stationId = initialState?.stationId ?? 0;
+      const instrumentId = initialState?.instrumentId ?? 0;
+      const measurement = getMeasurementFromConfig(name, stationId, instrumentId);
+      if (!measurement) {
+        console.warn(`Measurement not found for name: ${name}, stationId: ${stationId}, instrumentId: ${instrumentId}`);
+      }
+      // Transfer all measurement attributes, plus name/stationId/instrumentId
+      return {
+        ...createBlankMeasurement(),
+        ...measurement,
+        name,
+        stationId,
+        instrumentId,
+      };
+    })
   );
   const [interval, setInterval] = useState<string>(initialState?.interval || '60');
 
@@ -53,8 +75,20 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const [yMax, setYMax] = useState(1);
   const [chartData, setChartData] = useState<{ [key: string]: string }[]>([]);
 
-  const [domain, setDomain] = useState<[number, number]>([new Date(fromDate).getTime(), new Date(toDate).getTime()]);
-  const [selection, setSelection] = useState<[number, number]>(initialState?.selection || domain);
+  const [domain, setDomain] = useState<[number, number]>([
+    fromDate ? DateTime.fromISO(fromDate, { zone: 'America/Denver' }).toMillis() : 0,
+    toDate
+      ? DateTime.fromISO(toDate, { zone: 'America/Denver' }).toMillis()
+      : DateTime.now().toMillis(),
+  ]);
+  const [selection, setSelection] = useState<[number, number]>(
+    initialState?.selection || [
+      fromDate ? DateTime.fromISO(fromDate, { zone: 'America/Denver' }).toMillis() : 0,
+      toDate
+        ? DateTime.fromISO(toDate, { zone: 'America/Denver' }).toMillis()
+        : DateTime.now().toMillis(),
+    ]
+  );
 
   const lastEmitted = useRef<string>('');
   const lastFetchKey = useRef<string>('');
@@ -72,7 +106,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   });
 
   /** Validate and clamp domain/selection on date change */
-  useClampDomainEffect(fromDate, toDate, domain, setDomain, setSelection);
+  useClampDomainEffect(fromDate, toDate, setDomain, setSelection);
 
   /** Fetch chart data only when dependencies change meaningfully */
   useFetchChartData({
@@ -88,19 +122,46 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
     setLoading,
   });
 
+  useLiveChartUpdates({
+  variables,
+  interval,
+  chartData,
+  setChartData,
+  isLive: !toDate,
+  setDomain,
+  setSelection
+});
+
   // --- Handlers ---
 
-  const handleFromDateChange = (newFromDate: string) => {
-    const [from, to] = syncDateRange(newFromDate, toDate, true);
-    setFromDate(from);
-    setToDate(to);
-  };
+const handleFromDateChange = (newFromDate: string) => {
+  // Always convert to Mountain Time ISO string
+  const mtFromDate = newFromDate
+    ? DateTime.fromISO(newFromDate).setZone('America/Denver').toISO({ suppressMilliseconds: true })
+    : '';
+  if (!toDate || !mtFromDate) {
+    setFromDate(mtFromDate);
+    return;
+  }
+  const [from, to] = syncDateRange(mtFromDate, toDate, true);
+  setFromDate(from);
+  setToDate(to);
+};
 
-  const handleToDateChange = (newToDate: string) => {
-    const [from, to] = syncDateRange(fromDate, newToDate, false);
-    setFromDate(from);
-    setToDate(to);
-  };
+const handleToDateChange = (newToDate: string) => {
+  // Always convert to Mountain Time ISO string
+  const mtToDate = newToDate
+    ? DateTime.fromISO(newToDate).setZone('America/Denver').toISO({ suppressMilliseconds: true })
+    : '';
+  if (!mtToDate || !fromDate) {
+    setToDate(mtToDate);
+    return;
+  }
+  const [from, to] = syncDateRange(fromDate, mtToDate, false);
+  setFromDate(from);
+  setToDate(to);
+};
+
 
   const handleSliderChange = (range: [number, number]) => {
     const validated = validateSliderRange(range);
@@ -110,9 +171,15 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const handleIntervalChange = (newInterval: string) => setInterval(newInterval);
 
   const handleVariableChange = (index: number, value: SelectedMeasurement) => {
+    const measurement = getMeasurementFromConfig(value.name, value.stationId, value.instrumentId);
+    const mergedValue = measurement
+      ? { ...value, ...measurement }
+      : value;
+    // Log the selected measurement's attributes to the console
+    console.log('Selected Measurement:', mergedValue);
     setVariables((prev) => {
       const updated = [...prev];
-      updated[index] = value;
+      updated[index] = mergedValue;
       return updated;
     });
   };
@@ -122,7 +189,24 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   };
 
   const addVariable = () => {
-    setVariables((prev) => [...prev, { ...createBlankMeasurement() }]);
+    // You should prompt/select a valid name, stationId, instrumentId
+    // For demonstration, use the first available measurement from config
+    if (!config || config.length === 0) return;
+    const stationId = config[0].id;
+    const instrument = config[0].children[0];
+    const instrumentId = instrument.id;
+    const measurement = instrument.measurements?.[0];
+    const name = measurement?.name ?? "";
+    setVariables((prev) => [
+      ...prev,
+      {
+        ...createBlankMeasurement(),
+        ...measurement,
+        name,
+        stationId,
+        instrumentId,
+      }
+    ]);
   };
 
   if (!config) return null;
@@ -167,8 +251,8 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
 
         <Chart
           id={id}
-          fromDate={new Date(selection[0]).toISOString()}
-          toDate={new Date(selection[1]).toISOString()}
+          fromDate={DateTime.fromMillis(selection[0], { zone: 'America/Denver' }).toISO({ suppressMilliseconds: true })}
+          toDate={DateTime.fromMillis(selection[1], { zone: 'America/Denver' }).toISO({ suppressMilliseconds: true })}
           interval={interval}
           yDomain={[yMin, yMax]}
           chartData={chartData}

@@ -48,7 +48,6 @@ const Stack: React.FC = () => {
 
     const decoded = decodeGraphList(gParam);
     const hydrated = decoded.map((state) => {
-      // If the encoded ID is missing or unparsable, assign a new one
       let parsedId = parseInt(state.id || '', 36);
       if (isNaN(parsedId)) {
         parsedId = nextIdRef.current++;
@@ -57,8 +56,23 @@ const Stack: React.FC = () => {
         nextIdRef.current = Math.max(nextIdRef.current, parsedId + 1);
       }
 
-      return { id: parsedId, state };
+      const domainStart = new Date(state.fromDate).getTime();
+      const domainEnd = state.toDate ? new Date(state.toDate).getTime() : Date.now();
+      const sorted = state.selection?.sort((a, b) => a - b) ?? [domainStart, domainEnd];
+      const clamped: [number, number] = [
+        Math.max(domainStart, sorted[0]),
+        Math.min(domainEnd, sorted[1]),
+      ];
+
+      return {
+        id: parsedId,
+        state: {
+          ...state,
+          selection: clamped,
+        },
+      };
     });
+
 
     return hydrated;
   });

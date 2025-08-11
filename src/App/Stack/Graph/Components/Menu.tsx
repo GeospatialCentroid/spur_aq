@@ -15,7 +15,7 @@ import './Menu.css';
 import DateSelector from './Menu/DateSelector';
 import VariableSelector from './Menu/VariableSelector';
 import IntervalSelector from './Menu/IntervalSelector';
-import { getNow } from '../graphDateUtils';
+import { getNowMountain } from '../graphDateUtils';
 import { SelectedMeasurement } from '../graphTypes';
 
 /**
@@ -39,7 +39,7 @@ interface MenuProps {
   toDate: string;
   onFromDateChange: (date: string) => void;
   onToDateChange: (date: string) => void;
-  variables: SelectedMeasurement[];
+  variables: SelectedMeasurement[]; // Should include public_display
   onVariableChange: (index: number, v: SelectedMeasurement) => void;
   onAddVariable: () => void;
   onRemoveVariable: (index: number) => void;
@@ -78,21 +78,28 @@ const Menu: React.FC<MenuProps> = ({
 
         {/* Time and interval controls */}
         <div className="dt-button-group">
-          From:
-          <DateSelector
-            value={fromDate}
-            onChange={onFromDateChange}
-            maxDate={toDate}
-          />
-          To:
-          <DateSelector
-            value={toDate}
-            onChange={onToDateChange}
-            minDate={fromDate}
-            maxDate={getNow()}
-          />
-          Interval:
-          <IntervalSelector value={interval} onChange={onIntervalChange} />
+            From:
+            <DateSelector
+              value={fromDate}
+              onChange={onFromDateChange}
+              maxDate={toDate}
+            />
+            To:
+            <DateSelector
+              value={toDate}
+              onChange={onToDateChange}
+              minDate={fromDate}
+              maxDate={getNowMountain() || undefined}
+              isClearable={true}
+            />
+
+          <div className="interval-group">
+            Interval:
+            <IntervalSelector
+              value={interval}
+              onChange={onIntervalChange}
+            />
+          </div>
         </div>
 
         {/* Variable selectors and "Add Variable" button */}

@@ -34,4 +34,3 @@ export interface Measurement {
   ranges: Range[] | null;
   instrument_id?: number; // add this if you're injecting it when parsing
 }
-

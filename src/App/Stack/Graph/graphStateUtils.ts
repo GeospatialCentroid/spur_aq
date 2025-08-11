@@ -69,16 +69,20 @@ export function encodeGraphState(g: EncodedGraphState): string {
 export function decodeGraphState(encoded: string): EncodedGraphState | null {
   try {
     const parts = encoded.split('_');
-    const id = parts[0].split('=')[1];
+    const id = parts[0].split('.')[1];
     const stationId = parseInt(parts[1].split('.')[1]);
     const instrumentId = parseInt(parts[2].split('.')[1]);
     const variableNames = parts[3].split('.')[1].split('~');
     const fromDate = parts[4].split('.')[1];
-    const toDate = parts[5].split('.')[1];
+    const toDatePart = parts[5].split('.')[1];
     const interval = parts[6].split('.')[1];
+
+    const toDate = toDatePart === 'null' || toDatePart === 'undefined' || toDatePart === '' ? '' : toDatePart;
+
     const [selStartSec, selEndSec] = parts[7].split('.')[1].split('~').map(Number);
     const start = new Date(fromDate).getTime();
-    const end = new Date(toDate).getTime();
+    const now = Date.now();
+    const end = toDate ? new Date(toDate).getTime() : now;
 
     const rawSelection: [number, number] = [selStartSec * 1000, selEndSec * 1000];
     const clampedStart = Math.max(start, Math.min(end, rawSelection[0]));
@@ -102,6 +106,7 @@ export function decodeGraphState(encoded: string): EncodedGraphState | null {
     return null;
   }
 }
+
 
 
 /**

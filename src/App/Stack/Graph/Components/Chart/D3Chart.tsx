@@ -26,8 +26,9 @@ const D3Chart: React.FC<D3ChartProps> = ({
   const ref = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
-
-
+  var variables= selectedMeasurements
+  // console.log(variables,"variables")
+  
   //drop milliseconds
    const normalizedData: typeof data = {};
     for (const [key, values] of Object.entries(data)) {
