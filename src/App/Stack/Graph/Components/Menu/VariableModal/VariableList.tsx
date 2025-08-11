@@ -12,7 +12,7 @@
 import React from 'react';
 import { Station } from '../../../../../../Types/config';
 import { Calibration } from '../../../../../../Types/calibration';
-
+import { useMode } from '../../../../../../context/ModeContext';
 /**
  * Props for the VariableList component.
  *
@@ -31,6 +31,7 @@ interface VariableListProps {
       alias?: string;
       units?: string;
       calibrations?: Calibration[];
+      public_display?:boolean;
     },
     key: string
   ) => void;
@@ -47,6 +48,7 @@ const VariableList: React.FC<VariableListProps> = ({
   selectedKey,
   selectedColor,
 }) => {
+  const { mode } = useMode();
   return (
     <div>
       {stations.map((station) => (
@@ -74,6 +76,7 @@ const VariableList: React.FC<VariableListProps> = ({
             {station.children.map((instrument) => (
               <li key={instrument.id}>
                 {/* Instrument Level */}
+                <div style={{ display: mode === 'researcher' ? 'block' : 'none' }}>
                 <div
                   className={`selectable instrument ${
                     selectedKey === `instrument-${instrument.id}` ? 'selected' : ''
@@ -91,7 +94,7 @@ const VariableList: React.FC<VariableListProps> = ({
                 >
                   {instrument.name}
                 </div>
-
+                </div>
                 <ul>
                   {instrument.measurements.map((m) => {
                     const measurementKey = `${station.id}:${instrument.id}:${m.name}`;
@@ -103,14 +106,13 @@ const VariableList: React.FC<VariableListProps> = ({
                         className={`selectable measurement ${isSelected ? 'selected' : ''}`}
                         onClick={() =>
                           onSelect(
-                            {
-                              type: 'measurement',
-                              name: m.name,
-                              description: m.description,
-                              alias: m.alias,
-                              units: m.units,
-                              calibrations: m.calibrations,
-                            },
+                         {
+                            type: 'measurement',
+                            name: m.name,
+                            description: m.description ?? '',
+                            alias: m.alias ?? m.name,
+                            units: m.units?.toString(),
+                          },
                             measurementKey
                           )
                         }
@@ -124,6 +126,7 @@ const VariableList: React.FC<VariableListProps> = ({
                         }
                       >
                         {m.alias || m.name}
+                         {m.public_display}
                       </li>
                     );
                   })}

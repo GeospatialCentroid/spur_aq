@@ -1,7 +1,6 @@
 /** User-selected variable (station, instrument, and variable name) */
 import { Measurement } from "../../../Types/measurement"
 export type SelectedMeasurement = Measurement & {
-  name: string;
   stationId: number;
   instrumentId: number;
 };
@@ -13,6 +12,7 @@ export type VariableGroup = {
   variableNames: string[];
 };
 
+
 // Creates a blank measurement, allows a new unselected variable
 export function createBlankMeasurement(): SelectedMeasurement {
   return {
@@ -23,9 +23,15 @@ export function createBlankMeasurement(): SelectedMeasurement {
     min: 0,
     max: 0,
     description: '',
+    calibrations: [],
+    public_display: false,
+    feature_measure: false,
+    ranges: null,
     stationId: -1,
     instrumentId: -1,
     calibrations: [],
     public_display: false,
   };
 }
+
+

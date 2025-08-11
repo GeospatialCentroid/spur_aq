@@ -7,6 +7,25 @@
 import { Instrument } from './instrument';
 
 /**
+ * Represents a measurement variable collected by an instrument.
+ */
+export interface Measurement {
+  name: string;
+  units?: string;
+  description?: string;
+  ranges?: {
+    color: string;
+    range: [number, number];
+    category: string;
+  }[];
+  feature_measure?: boolean;
+  instrument_id?: number;
+}
+
+/**
+ * Represents a monitoring instrument associated with a station.
+ */
+/**
  * Represents a monitoring station.
  *
  * @property id - Unique identifier for the station.

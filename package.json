@@ -11,6 +11,7 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
+    "axios": "^1.11.0",
     "bootstrap": "^5.3.5",
     "bootstrap-icons": "^1.11.3",
     "d3": "^7.9.0",
@@ -30,6 +31,7 @@
     "react-router-dom": "^7.7.0",
     "react-scripts": "^5.0.1",
     "react-sortablejs": "^6.1.4",
+    "react-swipeable": "^7.0.2",
     "sortablejs": "^1.15.6",
     "web-vitals": "^2.1.4"
   },
