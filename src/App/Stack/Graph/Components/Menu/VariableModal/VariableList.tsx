@@ -99,7 +99,9 @@ const VariableList: React.FC<VariableListProps> = ({
                   {instrument.measurements.map((m) => {
                     const measurementKey = `${station.id}:${instrument.id}:${m.name}`;
                     const isSelected = selectedKey === measurementKey;
-
+                    if (mode === 'public' && !m.public_display) {
+                        return null;
+                      }
                     return (
                       <li
                         key={m.id}
@@ -126,7 +128,7 @@ const VariableList: React.FC<VariableListProps> = ({
                         }
                       >
                         {m.alias || m.name}
-                         {m.public_display}
+
                       </li>
                     );
                   })}

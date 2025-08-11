@@ -70,13 +70,16 @@ function App() {
         <header
           className="app-header"
           style={{
+            position: 'fixed',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '1rem',
+            zIndex: 1000,
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
           }}
         >
-          <h1>SPUR Air Quality</h1>
+          <h1>SPUR <b>R</b>egional <b>A</b>ir <b>M</b>onitoring <b>S</b>ite (<b>RAMS</b>)</h1>
           <img
             src="/Photos/InfoCardPhotos/CSUSpur_horiz_campus_rev_rgb.webp"
             alt="CSU Spur Logo"
@@ -84,7 +87,7 @@ function App() {
           />
         </header>
 
-        <main className="app-body">
+        <main className="app-body"  style={{paddingTop: '90px'}}>
           <section className="body-section">
             <Info />
           </section>

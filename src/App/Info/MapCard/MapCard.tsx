@@ -17,6 +17,8 @@ const customIcon = new L.Icon({
   popupAnchor: [0, -32],
 });
 
+
+
 let featureLayer: L.GeoJSON<any> | null = null;
 let clickedLayer: any = null;
 let currentHighlightGroup: any = null;
@@ -249,18 +251,39 @@ const LandUseLayer = ({
   return null;
 };
 
+
+
 /* --------------------- Legend control (click to highlight) --------------------- */
 const LegendControl = ({ geoJsonLayerRef }: { geoJsonLayerRef: React.MutableRefObject<L.GeoJSON | null> }) => {
-  const map = useMap();
-
+const map = useMap();
+const [legendVisible, setLegendVisible] = useState(false); // hide the legend by default
  useEffect(() => {
+
+    /* toggle legend visibility */
+    const ToggleLegend = L.Control.extend({
+      options: { position: "bottomright" },
+      onAdd: function () {
+        const button = L.DomUtil.create("button", "toggle-legend-btn") as HTMLButtonElement;
+        button.innerHTML = legendVisible ? "Hide Legend" : "Show Legend";
+        button.style.background = "white";
+        button.style.padding = "5px";
+        button.style.cursor = "pointer";
+
+        L.DomEvent.on(button, "click", () => {
+          setLegendVisible((prev) => !prev);
+        });
+
+        return button;
+      },
+    });
 
 
   const Legend = L.Control.extend({
     options: { position: "bottomright" },
     onAdd: function (this: L.Control, _map: L.Map) {
       const container = L.DomUtil.create("div", "legend") as HTMLDivElement;
-      container.innerHTML += "<strong>Click to Highlight</strong><br>";
+      container.style.display = legendVisible ? "block" : "none";
+      container.innerHTML += "<strong>Zones - Click to Highlight</strong><br>";
 
       for (const groupLabel of Object.keys(zoningGroups)) {
         const group = zoningGroups[groupLabel];
@@ -295,10 +318,15 @@ const LegendControl = ({ geoJsonLayerRef }: { geoJsonLayerRef: React.MutableRefO
   const legendControl = new (Legend as any)();
   map.addControl(legendControl);
 
+  const toggleLegendControl = new (ToggleLegend as any)();
+  map.addControl(toggleLegendControl);
+
+
   return () => {
     map.removeControl(legendControl);
+    map.removeControl(toggleLegendControl);
   };
-}, [map, geoJsonLayerRef, highlightFeatures]);
+}, [map, geoJsonLayerRef, highlightFeatures, legendVisible]);
 
   return null;
 };

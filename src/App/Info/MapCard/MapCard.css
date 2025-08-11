@@ -112,3 +112,9 @@ body.map-fullscreen-active {
   border-radius: 3px;
   background: rgba(0,0,0,0.03);
 }
+
+.toggle-legend-btn {
+  font-size: 12px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
