@@ -22,6 +22,7 @@ import { getStartOfTodayOneWeekAgo, getNow } from './graphDateUtils';
 import { syncDateRange, validateSliderRange } from './graphHandlers';
 import { useEmitGraphState, useClampDomainEffect, useFetchChartData, useLiveChartUpdates } from './graphHooks';
 import { SelectedMeasurement, createBlankMeasurement } from './graphTypes';
+import { DateTime } from 'luxon';
 
 /** Props for the Graph component */
 interface GraphProps {
@@ -37,8 +38,8 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const [loading, setLoading] = useState(true);
   const { config } = useConfig();
 
-  const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgo());
-  const [toDate, setToDate] = useState<string>(initialState?.toDate || getNow());
+  const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgo() || '');
+  const [toDate, setToDate] = useState<string>(initialState?.toDate || getNow() || '');
   const [variables, setVariables] = useState<SelectedMeasurement[]>(
     (initialState?.variableNames || []).map((name) => ({
       ...createBlankMeasurement(),
@@ -53,8 +54,16 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const [yMax, setYMax] = useState(1);
   const [chartData, setChartData] = useState<{ [key: string]: string }[]>([]);
 
-  const [domain, setDomain] = useState<[number, number]>([new Date(fromDate).getTime(), new Date(toDate).getTime()]);
-  const [selection, setSelection] = useState<[number, number]>(initialState?.selection || domain);
+  const [domain, setDomain] = useState<[number, number]>([
+    fromDate ? DateTime.fromISO(fromDate, { zone: 'America/Denver' }).toMillis() : 0,
+    toDate ? DateTime.fromISO(toDate, { zone: 'America/Denver' }).toMillis() : 0,
+  ]);
+  const [selection, setSelection] = useState<[number, number]>(
+    initialState?.selection || [
+      fromDate ? DateTime.fromISO(fromDate, { zone: 'America/Denver' }).toMillis() : 0,
+      toDate ? DateTime.fromISO(toDate, { zone: 'America/Denver' }).toMillis() : 0,
+    ]
+  );
 
   const lastEmitted = useRef<string>('');
   const lastFetchKey = useRef<string>('');
@@ -101,25 +110,29 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   // --- Handlers ---
 
 const handleFromDateChange = (newFromDate: string) => {
-  if (!toDate || !newFromDate) {
-    // live mode or invalid: just set as-is
-    setFromDate(newFromDate);
+  // Always convert to Mountain Time ISO string
+  const mtFromDate = newFromDate
+    ? DateTime.fromISO(newFromDate).setZone('America/Denver').toISO({ suppressMilliseconds: true })
+    : '';
+  if (!toDate || !mtFromDate) {
+    setFromDate(mtFromDate);
     return;
   }
-
-  const [from, to] = syncDateRange(newFromDate, toDate, true);
+  const [from, to] = syncDateRange(mtFromDate, toDate, true);
   setFromDate(from);
   setToDate(to);
 };
 
 const handleToDateChange = (newToDate: string) => {
-  if (!newToDate || !fromDate) {
-    // live mode or invalid: just set as-is
-    setToDate(newToDate);
+  // Always convert to Mountain Time ISO string
+  const mtToDate = newToDate
+    ? DateTime.fromISO(newToDate).setZone('America/Denver').toISO({ suppressMilliseconds: true })
+    : '';
+  if (!mtToDate || !fromDate) {
+    setToDate(mtToDate);
     return;
   }
-
-  const [from, to] = syncDateRange(fromDate, newToDate, false);
+  const [from, to] = syncDateRange(fromDate, mtToDate, false);
   setFromDate(from);
   setToDate(to);
 };
@@ -190,8 +203,8 @@ const handleToDateChange = (newToDate: string) => {
 
         <Chart
           id={id}
-          fromDate={new Date(selection[0]).toISOString()}
-          toDate={new Date(selection[1]).toISOString()}
+          fromDate={DateTime.fromMillis(selection[0], { zone: 'America/Denver' }).toISO({ suppressMilliseconds: true })}
+          toDate={DateTime.fromMillis(selection[1], { zone: 'America/Denver' }).toISO({ suppressMilliseconds: true })}
           interval={interval}
           yDomain={[yMin, yMax]}
           chartData={chartData}

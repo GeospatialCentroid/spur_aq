@@ -15,7 +15,7 @@ import './Menu.css';
 import DateSelector from './Menu/DateSelector';
 import VariableSelector from './Menu/VariableSelector';
 import IntervalSelector from './Menu/IntervalSelector';
-import { getNow } from '../graphDateUtils';
+import { getNowMountain } from '../graphDateUtils';
 import { SelectedMeasurement } from '../graphTypes';
 
 /**
@@ -89,7 +89,7 @@ const Menu: React.FC<MenuProps> = ({
               value={toDate}
               onChange={onToDateChange}
               minDate={fromDate}
-              maxDate={getNow()}
+              maxDate={getNowMountain() || undefined}
               isClearable={true}
             />
 

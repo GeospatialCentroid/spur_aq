@@ -1,12 +1,21 @@
-/** Utility: Get ISO string for midnight one week ago today */
-export function getStartOfTodayOneWeekAgo(): string {
-    const d = new Date();
-    d.setDate(d.getDate() - 7);
-    d.setHours(0, 0, 0, 0);
-    return d.toISOString();
+import { DateTime } from 'luxon';
+
+/** Utility: Get ISO string for midnight one week ago today in local time */
+export function getStartOfTodayOneWeekAgo(): string | null {
+    return DateTime.local().minus({ days: 7 }).startOf('day').toISO({ suppressMilliseconds: true });
 }
 
-/** Utility: Get ISO string for current time */
-export function getNow(): string {
-    return new Date().toISOString();
+/** Utility: Get ISO string for current local time */
+export function getNow(): string | null {
+    return DateTime.local().toISO({ suppressMilliseconds: true });
+}
+
+/** Utility: Get ISO string for midnight one week ago today in Mountain Time */
+export function getStartOfTodayOneWeekAgoMountain(): string | null {
+    return DateTime.now().setZone('America/Denver').minus({ days: 7 }).startOf('day').toISO({ suppressMilliseconds: true });
+}
+
+/** Utility: Get ISO string for current time in Mountain Time */
+export function getNowMountain(): string | null {
+    return DateTime.now().setZone('America/Denver').toISO({ suppressMilliseconds: true });
 }
