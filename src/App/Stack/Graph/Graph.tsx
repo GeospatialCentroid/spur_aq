@@ -18,7 +18,7 @@ import Chart from './Components/Chart';
 import ExpandToggle from './Components/Menu/ExpandToggle';
 import { useConfig } from '../../../context/ConfigContext';
 import { EncodedGraphState } from './graphStateUtils';
-import { getStartOfTodayOneWeekAgo, getNow } from './graphDateUtils';
+import { getStartOfTodayOneWeekAgo} from './graphDateUtils';
 import { syncDateRange, validateSliderRange } from './graphHandlers';
 import { useEmitGraphState, useClampDomainEffect, useFetchChartData, useLiveChartUpdates } from './graphHooks';
 import { SelectedMeasurement, createBlankMeasurement } from './graphTypes';
@@ -39,7 +39,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const { config } = useConfig();
 
   const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgo() || '');
-  const [toDate, setToDate] = useState<string>(initialState?.toDate || getNow() || '');
+  const [toDate, setToDate] = useState<string>(initialState?.toDate || '');
   const [variables, setVariables] = useState<SelectedMeasurement[]>(
     (initialState?.variableNames || []).map((name) => ({
       ...createBlankMeasurement(),
@@ -56,12 +56,16 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
 
   const [domain, setDomain] = useState<[number, number]>([
     fromDate ? DateTime.fromISO(fromDate, { zone: 'America/Denver' }).toMillis() : 0,
-    toDate ? DateTime.fromISO(toDate, { zone: 'America/Denver' }).toMillis() : 0,
+    toDate
+      ? DateTime.fromISO(toDate, { zone: 'America/Denver' }).toMillis()
+      : DateTime.now().toMillis(),
   ]);
   const [selection, setSelection] = useState<[number, number]>(
     initialState?.selection || [
       fromDate ? DateTime.fromISO(fromDate, { zone: 'America/Denver' }).toMillis() : 0,
-      toDate ? DateTime.fromISO(toDate, { zone: 'America/Denver' }).toMillis() : 0,
+      toDate
+        ? DateTime.fromISO(toDate, { zone: 'America/Denver' }).toMillis()
+        : DateTime.now().toMillis(),
     ]
   );
 
