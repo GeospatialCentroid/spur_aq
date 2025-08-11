@@ -11,8 +11,8 @@ const GaugeDial: React.FC<GaugeDialProps> = ({ value, ranges }) => {
   const ref = useRef<SVGSVGElement>(null);
 
   // SVG layout configuration
-  const width = 400;
-  const height = 180;
+  const width = 300;
+  const height = 150;
   const centerX = width / 2;
   const centerY = height * 0.9;
   const radius = 120;
