@@ -1,50 +1,94 @@
+/* File: src/App/App/Info/RecentValues/RecentValCard.css */
+/* (Adjust the path to match your project if different) */
+
+/* Wrapper & card */
 .recent-values-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 1rem;
-  position: relative; /* Enables absolute positioning for arrows */
+  position: relative; /* enables absolute positioning for arrows */
 }
+
 .card.recent-values-card {
   border: none !important;
   box-shadow: none !important;
   background-color: transparent !important;
 }
 
+.recent-values-card .card-body {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;     /* stack content top-to-bottom */
+  justify-content: flex-start;/* don’t stretch to fill tall space */
+  gap: 0.35rem;
+  padding: 0.5rem;
+}
+
+/* Gauge area */
+.recent-values-card .gauge-section {
+  width: 100%;
+  padding-top: var(--gaugeTopPad, 8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;/* File: src/App/Info/RecentValues/RecentValCard.css */
+
+/* Wrapper & card */
+.recent-values-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  position: relative; /* enables absolute positioning for arrows */
+}
+
+.card.recent-values-card {
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
 
 .recent-values-card .card-body {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  flex-direction: column;     /* stack content top-to-bottom */
+  justify-content: flex-start;/* don’t stretch to fill tall space */
+  gap: 0.35rem;
   padding: 0.5rem;
 }
 
-.gauge-section {
+/* Gauge area */
+.recent-values-card .gauge-section {
   width: 100%;
-  flex-grow: 1;
+  padding-top: var(--gaugeTopPad, 8px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
-
-.variable-button {
-  padding: 0.3rem 0.6rem;
-  font-size: 0.85rem;
-  border-radius: 8px;
-  border: none;
-  background-color: #0066cc;
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  font-weight: 500;
+/* Box that controls the dial size */
+.recent-values-card .gauge-box {
+  width: 100%;
+  aspect-ratio: 2 / 1;                /* semicircle space */
+  min-height: 100px;                  /* lower floor so the cap can shrink it */
+  max-height: var(--gaugeMaxHTop, 170px);
+  flex: 0 0 auto;                     /* don’t grow to fill leftovers */
 }
 
-.variable-button:hover {
-  background-color: #005bb5;
+/* Make the SVG fill the box and keep labels visible */
+.recent-values-card .gauge-box svg,
+.recent-values-card .gauge-box .gauge-svg {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: visible;
+  display: block;
 }
 
 /* Arrow buttons (left/right nav) */
@@ -58,16 +102,58 @@
   padding: 0.5rem;
   z-index: 10;
 }
+.arrow-button.left  { left: -10px; }
+.arrow-button.right { right: -10px; }
+.arrow-button svg   { width: 40px; height: 40px; }
 
-.arrow-button.left {
-  left: -10px;
+  gap: 0.35rem;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
-.arrow-button.right {
-  right: -10px;
+/* Box that controls the dial size */
+.recent-values-card .gauge-box {
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  min-height: 120px;                   /* you can lower this if needed */
+  max-height: var(--gaugeMaxHTop, 180px);
+  flex: 0 0 auto;
 }
 
-.arrow-button svg {
-  width: 40px;
-  height: 40px;
+/* Make the SVG fill the box and keep labels visible */
+.recent-values-card .gauge-box .gauge-svg {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: visible;
+  display: block;
 }
+
+
+/* Buttons (if used) */
+.variable-button {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #0066cc;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-weight: 500;
+}
+.variable-button:hover { background-color: #005bb5; }
+
+/* Arrow buttons (left/right nav) */
+.arrow-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 10;
+}
+.arrow-button.left  { left: -10px; }
+.arrow-button.right { right: -10px; }
+.arrow-button svg   { width: 40px; height: 40px; }

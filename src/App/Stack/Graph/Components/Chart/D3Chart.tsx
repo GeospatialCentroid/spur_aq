@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import './D3Chart.css';
 import { getColorForVariable } from '../../ColorUtils';
@@ -24,6 +24,25 @@ const D3Chart: React.FC<D3ChartProps> = ({
   selectedMeasurements,
 }) => {
   const ref = useRef<SVGSVGElement | null>(null);
+  const [sizeTick, setSizeTick] = useState(0);
+
+  useEffect(() => {
+  if (!ref.current) return;
+  const container = ref.current.parentElement;
+  if (!container) return;
+
+  const ro = new ResizeObserver(() => setSizeTick(t => t + 1));
+  ro.observe(container);
+
+  const onResize = () => setSizeTick(t => t + 1);
+  window.addEventListener('resize', onResize);
+
+  return () => {
+    ro.disconnect();
+    window.removeEventListener('resize', onResize);
+  };
+}, []);
+
 
   useEffect(() => {
   var variables= selectedMeasurements
@@ -365,7 +384,8 @@ const D3Chart: React.FC<D3ChartProps> = ({
         .style('font-size', '12px')
         .text(`${variable.name}: Last value ${lastValue.toFixed(2)}`);
     });
-  }, [id, fromDate, toDate, interval, yDomain, data, selectedMeasurements]);
+  }, [id, fromDate, toDate, interval, yDomain, data, selectedMeasurements, sizeTick]);
+
 
   return <svg ref={ref} className="d3-chart" style={{ width: '100%', height: '100%' }} />;
 };

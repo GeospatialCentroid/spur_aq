@@ -16,7 +16,7 @@ const GaugeDial: React.FC<GaugeDialProps> = ({ value, ranges }) => {
   const centerX = width / 2;
   const centerY = height * 0.9;
   const radius = 120;
-
+  const vbPad = 17;
   // Ensure ranges are sorted left-to-right
   const sortedRanges = [...ranges].sort((a, b) => a.range[0] - b.range[0]);
 
@@ -144,12 +144,12 @@ const y2 = centerY + Math.sin(needleAngle) * needleLength;
     });
   }, [value, sortedRanges]);
 
- return (
+return (
   <svg
     ref={ref}
+    className="gauge-svg"
     viewBox={`0 0 ${width} ${height}`}
     preserveAspectRatio="xMidYMid meet"
-    style={{ width: '100%', height: 'auto', maxWidth: '100%' }}
   />
 );
 

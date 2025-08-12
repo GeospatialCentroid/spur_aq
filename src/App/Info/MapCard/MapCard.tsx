@@ -441,6 +441,10 @@ const MapCard: React.FC = () => {
       <div className="map-container-wrapper">
         <div ref={mapContainerRef} className="map-container" style={{ height: 400 }}>
           <MapContainer center={initialCenter} zoom={initialZoom} style={{ width: "100%", height: "100%" }}>
+              className="map-container"
+                center={initialCenter}
+                zoom={initialZoom}
+                scrollWheelZoom={true}
             <RegisterMapRef mapRef={mapRef} />
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <ResizeMapOnExpand trigger={expanded} />

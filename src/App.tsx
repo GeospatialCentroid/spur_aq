@@ -1,8 +1,9 @@
 // File: src/App.tsx
 
 import React, { useEffect, useState } from 'react';
-import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './App.css';
+
 
 import Info from './App/Info/Info';
 import Stack from './App/Stack/Stack';
@@ -67,27 +68,31 @@ function App() {
    <ModeProvider>
     <ConfigProvider config={config} timeSeriesData={timeSeriesData}>
       <div className="app">
-        <header
+       <header
           className="app-header"
           style={{
-            position: 'fixed',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '1rem',
+            position: 'fixed',      // keep if you want it fixed; see note below
+            top: 0,
+            left: 0,
+            right: 0,
             zIndex: 1000,
-            boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
           }}
         >
-          <h1>SPUR <b>R</b>egional <b>A</b>ir <b>M</b>onitoring <b>S</b>ite (<b>RAMS</b>)</h1>
+          <h1 className="title">
+            SPUR <b>R</b>egional <b>A</b>ir <b>M</b>onitoring <b>S</b>ite (<b>RAMS</b>)
+          </h1>
           <img
             src="/Photos/InfoCardPhotos/CSUSpur_horiz_campus_rev_rgb.webp"
             alt="CSU Spur Logo"
-            style={{ height: '60px', objectFit: 'contain' }}
+            className="header-logo"
+            // no height here — let CSS control it
+            style={{ objectFit: 'contain' }}
           />
         </header>
 
-        <main className="app-body"  style={{paddingTop: '90px'}}>
+        <main className="app-body">
+
           <section className="body-section">
             <Info />
           </section>

@@ -17,6 +17,14 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
 
   const selected = parsedMeasurements[currentIndex] || null;
   const match = selected?.ranges.find(r => latestValue >= r.range[0] && latestValue <= r.range[1]);
+  // banner text + a slug we can use for category-based colors
+  const categoryLabel = match?.category ?? 'Unknown';
+  const categorySlug = categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  const variableName =
+    selected?.measurementName
+      ? selected.measurementName.charAt(0).toUpperCase() + selected.measurementName.slice(1)
+      : '—';
+
 
   const fetchLatestValue = async (measurement: ParsedMeasurement) => {
     try {
@@ -67,8 +75,9 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
         <div className="card-body">
           {selected && (
             <div className="selected-variable-display gauge-section">
+            <div className="gauge-box">  
               <GaugeDial value={latestValue} ranges={selected.ranges} />
-
+            </div>
               {/* Air quality category (e.g., Good) */}
               <p style={{ fontWeight: 'bold', color: '#000', marginTop: '0.8rem', marginBottom: '0.1rem' }}>
                 {match?.category || 'Unknown'}
@@ -80,9 +89,11 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
               </p>
 
               {/* Measurement name (now at the bottom) */}
-              <h5 style={{ textAlign: 'center', marginTop: '0.6rem' }}>
-                {selected.measurementName.charAt(0).toUpperCase() + selected.measurementName.slice(1)}
-              </h5>
+              {/* Measurement name (now at the bottom) */}
+<h5 style={{ textAlign: 'center', marginTop: '0.6rem' }}>
+  {selected.measurementName.charAt(0).toUpperCase() + selected.measurementName.slice(1)}
+</h5>
+
             </div>
           )}
         </div>

@@ -8,8 +8,8 @@ import MapCard from './MapCard/MapCard';
 const Info: React.FC = () => {
   const { config, timeSeriesData } = useConfig(); 
   return (
-    <div className="App-info container-fluid my-4">
-      <div className="row g-4">
+<div className="App-info container-fluid my-4">
+  <div className="row g-4 top-row">
         <InfoCard />
 
         <div className="col-md-4">

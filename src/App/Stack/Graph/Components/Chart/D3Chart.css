@@ -8,10 +8,10 @@
 
 .graph-chart {
     width: 100%;
-    height: 300px;
-    /* You can adjust this based on your layout needs */
+    height: 100%;   /* fill .graph-wrapper; we set that height via CSS var */
     position: relative;
 }
+
 
 .subtick-axis .tick line {
   stroke: #999;
