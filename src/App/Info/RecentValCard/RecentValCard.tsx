@@ -83,16 +83,11 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
                 {match?.category || 'Unknown'}
               </p>
 
-              {/* Value with units, rounded to 1 decimal */}
-              <p style={{ fontSize: '1rem', fontWeight: 'normal', marginTop: '0.1rem' }}>
-                {latestValue.toFixed(1)} {selected.units || ''}
-              </p>
 
               {/* Measurement name (now at the bottom) */}
-              {/* Measurement name (now at the bottom) */}
-<h5 style={{ textAlign: 'center', marginTop: '0.6rem' }}>
-  {selected.measurementName.charAt(0).toUpperCase() + selected.measurementName.slice(1)}
-</h5>
+            <h6 style={{ textAlign: 'center', marginTop: '0.6rem' }}>
+              {selected.measurementName} {/* Value with units, rounded to 1 decimal */} ({latestValue.toFixed(1)} {selected.units || ''})
+            </h6>
 
             </div>
           )}

@@ -163,7 +163,7 @@ const Stack: React.FC = () => {
 
       <button
         type="button"
-        className="btn btn-outline-primary align-self-center mt-4"
+        className="btn btn-outline-primary align-self-center mt-1"
         onClick={addGraph}
       >
         <Plus /> Add Graph

@@ -23,7 +23,7 @@ const Info: React.FC = () => {
         <div className="col-md-4">
           <div className="card h-100">
             <div className="card-body">
-              <h5 className="card-title">Recent Values</h5>
+              <h5 className="card-title">Recent Measurements</h5>
               {config ? (
                 <RecentValCard
                   stationData={config}
