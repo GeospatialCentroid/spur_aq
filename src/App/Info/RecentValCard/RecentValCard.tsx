@@ -28,7 +28,7 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
 
   const fetchLatestValue = async (measurement: ParsedMeasurement) => {
     try {
-      const res = await fetch(`http://129.82.30.24:8001/latest_measurement/${measurement.instrumentId}/60/`);
+      const res = await fetch(`http://10.1.77.22:8001/latest_measurement/${measurement.instrumentId}/60/`);
       const json = await res.json();
       const latestEntry = Array.isArray(json) ? json[0] : json;
       const parsedData = JSON.parse(latestEntry.data || '{}');

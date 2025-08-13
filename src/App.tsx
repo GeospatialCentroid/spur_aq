@@ -16,7 +16,7 @@ function App() {
   const [timeSeriesData, setTimeSeriesData] = useState<Record<string, { timestamp: string; value: number }[]>>({});
 
   useEffect(() => {
-    fetch('http://129.82.30.40:8001/stations/?format=json')
+    fetch('http://10.1.77.22:8001/stations/?format=json')
       .then(response => {
         if (!response.ok) throw new Error('Network response was not ok');
         return response.json();
@@ -37,7 +37,7 @@ function App() {
           for (const m of instrument.measurements || []) {
             if (m.feature_measure && m.instrument_id) {
               try {
-                const res = await fetch(`http://129.82.30.24:8001/latest_measurement/${m.instrument_id}/60/`);
+                const res = await fetch(`http://10.1.77.22:8001/latest_measurement/${m.instrument_id}/60/`);
                 const latest = await res.json();
                 newData[m.name] = [latest]; // stores under the variable name
               } catch (err) {

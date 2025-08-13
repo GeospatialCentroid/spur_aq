@@ -212,7 +212,7 @@ export function useLiveChartUpdates({
       let newRows: { [key: string]: string }[] = [];
 
       for (const v of variables) {
-        const url = `http://129.82.30.24:8001/latest_measurement/${v.instrumentId}/${interval}/`;
+        const url = `http://10.1.77.22:8001/latest_measurement/${v.instrumentId}/${interval}/`;
         try {
           const res = await fetch(url);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
