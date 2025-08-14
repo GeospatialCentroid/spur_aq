@@ -18,7 +18,7 @@ import Chart from './Components/Chart';
 import ExpandToggle from './Components/Menu/ExpandToggle';
 import { useConfig } from '../../../context/ConfigContext';
 import { EncodedGraphState } from './graphStateUtils';
-import { getStartOfTodayOneWeekAgo} from './graphDateUtils';
+import { getStartOfTodayOneWeekAgoMountain} from './graphDateUtils';
 import { syncDateRange, validateSliderRange } from './graphHandlers';
 import { useEmitGraphState, useClampDomainEffect, useFetchChartData, useLiveChartUpdates } from './graphHooks';
 import { SelectedMeasurement, createBlankMeasurement } from './graphTypes';
@@ -49,7 +49,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
     return instrument.measurements.find(m => m.name.toLowerCase() === name.toLowerCase());
   }
 
-  const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgo() || '');
+  const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgoMountain() || '');
   const [toDate, setToDate] = useState<string>(initialState?.toDate || '');
   const [variables, setVariables] = useState<SelectedMeasurement[]>(
     (initialState?.variableNames || []).map((name) => {
