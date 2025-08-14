@@ -98,8 +98,7 @@ const VariableModal: React.FC<VariableModalProps> = ({
    * Clears selection and key when canceling.
    */
   const handleCancel = () => {
-    setSelected(null);
-    setSelectedKey(null);
+    onClose();
   };
 
   /**
