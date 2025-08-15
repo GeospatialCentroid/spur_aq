@@ -1,6 +1,7 @@
 // File: src/App/Stack/Graph/graphApiUtils.
 
 import { SelectedMeasurement, VariableGroup } from './graphTypes';
+import { API_BASE_URL } from '../../../config/api'; 
 
 /** Utility: Build a fully encoded API URL for measurements */
 export function buildApiUrl(
@@ -11,7 +12,7 @@ export function buildApiUrl(
     endDate: string,
     interval: string
 ): string {
-    const baseUrl = 'http://10.1.77.22:8001';
+    const baseUrl = API_BASE_URL;
     const encodedStart = encodeURIComponent(formatDateForUrl(startDate));
     const variablePath = variableNames.join(',');
 

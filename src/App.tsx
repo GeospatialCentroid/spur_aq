@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import { apiUrl } from './config/api'; // TEAM: central API base + helper
+
 
 
 import Info from './App/Info/Info';
@@ -11,17 +13,24 @@ import { Config } from './Types/config';
 import { ConfigProvider } from './context/ConfigContext';
 import { ModeProvider } from './context/ModeContext';
 
+// TEAM: Dev-only StrictMode can re-run effects; this cache prevents duplicate network hits
+let stationsCache: Config | null = null;
+
 function App() {
   const [config, setConfig] = useState<Config | null>(null);
   const [timeSeriesData, setTimeSeriesData] = useState<Record<string, { timestamp: string; value: number }[]>>({});
 
   useEffect(() => {
-    fetch('http://10.1.77.22:8001/stations/?format=json')
+     if (stationsCache) {
+        setConfig(stationsCache);
+        return; // skip network in dev StrictMode's second mount
+      }
+    fetch(apiUrl('/stations/?format=json'))
       .then(response => {
         if (!response.ok) throw new Error('Network response was not ok');
         return response.json();
       })
-      .then(data => setConfig(data))
+      .then(data => { stationsCache = data; setConfig(data); })
       .catch(error => console.error('Error fetching config:', error));
   }, []);
 
@@ -37,7 +46,7 @@ function App() {
           for (const m of instrument.measurements || []) {
             if (m.feature_measure && m.instrument_id) {
               try {
-                const res = await fetch(`http://10.1.77.22:8001/latest_measurement/${m.instrument_id}/60/`);
+                const res = await fetch(apiUrl(`/latest_measurement/${m.instrument_id}/60/`));
                 const latest = await res.json();
                 newData[m.name] = [latest]; // stores under the variable name
               } catch (err) {

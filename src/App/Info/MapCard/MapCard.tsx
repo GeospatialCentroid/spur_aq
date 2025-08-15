@@ -9,6 +9,9 @@ import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import { useConfig } from "../../../context/ConfigContext";
 import "./MapCard.css";
 
+// TEAM: cache zoning features so dev StrictMode doesn’t double-fetch
+let zoningFeaturesCache: any[] | null = null;
+
 /* --------------------- Icon --------------------- */
 const customIcon = new L.Icon({
   iconUrl: "/Photos/MapCardPhotos/marker-icon-2x.png",
@@ -151,65 +154,63 @@ const LandUseLayer = ({
   const map = useMap();
 
   useEffect(() => {
-  let mounted = true;
+
 
 
   // ArcGIS FeatureServer URL
-  const layerUrl =
-    "https://services1.arcgis.com/zdB7qR0BtYrg0Xpl/arcgis/rest/services/ODC_ZONE_ZONING_A/FeatureServer/209/query";
+  // TEAM NOTE:
+// ArcGIS FeatureServer is paginated. Multiple network calls here are NORMAL.
+// We intentionally skip "count" and page until the last page is short.
+// We also cache the full set to avoid duplicate downloads in dev StrictMode.
 
-  async function getTotalFeatureCount() {
-    const params = new URLSearchParams({
-      where: "1=1",
-      returnCountOnly: "true",
-      f: "json",
-    });
-    const response = await fetch(`${layerUrl}?${params.toString()}`);
-    const data = await response.json();
-    return data.count;
+const layerUrl =
+  "https://services1.arcgis.com/zdB7qR0BtYrg0Xpl/arcgis/rest/services/ODC_ZONE_ZONING_A/FeatureServer/209/query";
+
+const maxPerRequest = 2000;
+const controller = new AbortController();
+let removed = false;
+
+async function fetchPage(offset: number) {
+  const params = new URLSearchParams({
+    where: "1=1",
+    outFields: "*",
+    f: "geojson",
+    resultOffset: String(offset),
+    resultRecordCount: String(maxPerRequest),
+  });
+  const res = await fetch(`${layerUrl}?${params.toString()}`, { signal: controller.signal });
+  if (!res.ok) throw new Error(`ArcGIS HTTP ${res.status}`);
+  const data = await res.json();
+  return (data?.features ?? []) as any[];
+}
+
+async function loadAllFeatures(): Promise<any[]> {
+  // ✅ Reuse cached features to avoid duplicate network hits in dev StrictMode
+  if (zoningFeaturesCache && zoningFeaturesCache.length) return zoningFeaturesCache;
+
+  const all: any[] = [];
+  let offset = 0;
+  while (true) {
+    const page = await fetchPage(offset);
+    all.push(...page);
+    if (page.length < maxPerRequest) break; // last page reached
+    offset += maxPerRequest;
   }
+  zoningFeaturesCache = all;
+  return all;
+}
 
-  async function fetchFeatures(offset: number, count: number) {
-    const params = new URLSearchParams({
-      where: "1=1",
-      outFields: "*",
-      f: "geojson",
-      resultOffset: offset.toString(),
-      resultRecordCount: count.toString(),
-    });
-    const response = await fetch(`${layerUrl}?${params.toString()}`);
-    const data = await response.json();
-    return data.features;
-  }
+// Load and render the full dataset once
 
-  async function fetchAllFeatures() {
-    const maxPerRequest = 2000;
-    const totalCount = await getTotalFeatureCount();
-    let allFeatures: any[] = [];
-    let offset = 0;
+loadAllFeatures()
+  .then((features) => {
+    if (removed) return;
 
-    while (offset < totalCount) {
-      const count = Math.min(maxPerRequest, totalCount - offset);
-      const features = await fetchFeatures(offset, count);
-      allFeatures = allFeatures.concat(features);
-      offset += count;
-    }
-    return allFeatures;
-  }
-
-  // Load and render the full dataset
-  fetchAllFeatures().then((allFeatures) => {
-    if (!mounted) return;
-
-    const geoJson = {
-      type: "FeatureCollection"  as const,
-      features: allFeatures,
-    };
+    const geoJson = { type: "FeatureCollection" as const, features };
 
     featureLayer = L.geoJSON(geoJson, {
       style: (feature) => {
-        const fullCode =
-          (feature?.properties?.ZONE_DISTRICT as string) || "";
+        const fullCode = (feature?.properties?.ZONE_DISTRICT as string) || "";
         const group = getGroupByCode(fullCode);
         return {
           fillColor: group?.color || "#cccccc",
@@ -218,17 +219,31 @@ const LandUseLayer = ({
           fillOpacity: 0.6,
         } as L.PathOptions;
       },
-     onEachFeature: onEachFeature, // keep your existing popup/interaction logic
+      onEachFeature: onEachFeature,
     }).addTo(map);
+
+    // ✅ keep the ref in sync so other effects/components can access the layer
+    geoJsonLayerRef.current = featureLayer;
+  })
+  .catch((err) => {
+    if ((err as any)?.name !== "AbortError") {
+      console.error("Failed to load zoning features:", err);
+    }
   });
 
-  return () => {
-    mounted = false;
-    if (featureLayer) {
-      map.removeLayer(featureLayer);
+
+return () => {
+  removed = true;
+  controller.abort();
+  if (featureLayer) {
+    map.removeLayer(featureLayer);
+    if (geoJsonLayerRef.current === featureLayer) {
+      geoJsonLayerRef.current = null; // keep the ref accurate
     }
-  };
-}, [map, geoJsonLayerRef]);
+  }
+};
+
+}, [map]);
 
 
   // if expanded changes, we can trigger a refresh (example maintains style)
@@ -440,11 +455,14 @@ const MapCard: React.FC = () => {
 
       <div className="map-container-wrapper">
         <div ref={mapContainerRef} className="map-container" style={{ height: 400 }}>
-          <MapContainer center={initialCenter} zoom={initialZoom} style={{ width: "100%", height: "100%" }}>
-              className="map-container"
-                center={initialCenter}
-                zoom={initialZoom}
-                scrollWheelZoom={true}
+          <MapContainer
+            className="map-container"
+            center={initialCenter}
+            zoom={initialZoom}
+            scrollWheelZoom
+            style={{ width: "100%", height: "100%" }}
+          >
+
             <RegisterMapRef mapRef={mapRef} />
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <ResizeMapOnExpand trigger={expanded} />
