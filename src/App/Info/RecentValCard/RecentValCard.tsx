@@ -14,6 +14,7 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
   const parsedMeasurements = extractMeasurementsWithRanges(stationData).filter(p => p.ranges.length > 0);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [latestValue, setLatestValue] = useState<number>(0);
+  const [latestTimestamp, setLatestTimestamp] = useState<string | null>(null);
 
   const selected = parsedMeasurements[currentIndex] || null;
   const match = selected?.ranges.find(r => latestValue >= r.range[0] && latestValue <= r.range[1]);
@@ -25,20 +26,36 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
       ? selected.measurementName.charAt(0).toUpperCase() + selected.measurementName.slice(1)
       : '—';
 
+const formattedTimestamp =
+  typeof latestTimestamp === 'string' && latestTimestamp
+    ? new Date(latestTimestamp).toLocaleString('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+        timeZone: 'America/Boise', // 👈 lock to Mountain Time
+      })
+    : '';
 
-  const fetchLatestValue = async (measurement: ParsedMeasurement) => {
-    try {
-      const res = await fetch(`http://10.1.77.22:8001/latest_measurement/${measurement.instrumentId}/60/`);
-      const json = await res.json();
-      const latestEntry = Array.isArray(json) ? json[0] : json;
-      const parsedData = JSON.parse(latestEntry.data || '{}');
-      const fetchedValue = parsedData[measurement.measurementName] ?? 0;
-      setLatestValue(fetchedValue);
-    } catch (err) {
-      console.error('Error fetching latest value:', err);
-      setLatestValue(0);
-    }
-  };
+
+
+const fetchLatestValue = async (measurement: ParsedMeasurement) => {
+  try {
+    const res = await fetch(`http://10.1.77.22:8001/latest_measurement/${measurement.instrumentId}/60/`);
+    const json = await res.json();
+    const latestEntry = Array.isArray(json) ? json[0] : json;
+
+    // B) Capture and store the ISO timestamp from the backend
+    setLatestTimestamp(latestEntry?.datetime ?? null);
+
+    const parsedData = JSON.parse(latestEntry?.data || '{}');
+    const fetchedValue = parsedData?.[measurement.measurementName] ?? 0;
+    setLatestValue(fetchedValue);
+  } catch (err) {
+    console.error('Error fetching latest value:', err);
+    setLatestValue(0);
+    setLatestTimestamp(null); // clear on error
+  }
+};
+
 
   useEffect(() => {
     if (selected) {
@@ -88,6 +105,12 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
             <h6 style={{ textAlign: 'center', marginTop: '0.6rem' }}>
               {selected.measurementName} {/* Value with units, rounded to 1 decimal */} ({latestValue.toFixed(1)} {selected.units || ''})
             </h6>
+            {formattedTimestamp && (
+              <div className="latest-timestamp" aria-live="polite">
+                Last updated {formattedTimestamp}
+              </div>
+            )}
+
 
             </div>
           )}
