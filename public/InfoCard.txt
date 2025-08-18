@@ -8,7 +8,7 @@
 # TEXT HOW TO: Try to keep it under 300 characters. Otherwise we loose visiblity of both graphs. This shows in a small info card.
 
 TEXT:
-The Spur Regional Air Monitoring Site (RAMS) is a long-term air quality monitoring station at the CSU Spur campus. We aim to bring awareness to pollutant concentrations in the area and communicate air quality observations with the community.
+The Spur Regional Air Monitoring Site (RAMS) is a long-term air quality monitoring station at the CSU Spur campus in Denver, Colorado. We aim to bring awareness to pollutant concentrations in the region and communicate air quality observations to the Spur community.
 
 # IMAGE: relative path to image is already given public/Photos/InfoCardPhotos/(place your file name here example: overview.mp4 or airQuality.jpg)
 IMAGE: 
