@@ -68,28 +68,28 @@ function App() {
    <ModeProvider>
     <ConfigProvider config={config} timeSeriesData={timeSeriesData}>
       <div className="app">
-       <header
-          className="app-header"
-          style={{
-            position: 'fixed',      // keep if you want it fixed; see note below
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 1000,
-            boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-          }}
-        >
-          <h1 className="title">
-            SPUR <b>R</b>egional <b>A</b>ir <b>M</b>onitoring <b>S</b>ite (<b>RAMS</b>)
-          </h1>
-          <img
-            src="/Photos/InfoCardPhotos/CSUSpur_horiz_campus_rev_rgb.webp"
-            alt="CSU Spur Logo"
-            className="header-logo"
-            // no height here — let CSS control it
-            style={{ objectFit: 'contain' }}
-          />
-        </header>
+     <header
+      className="app-header"
+      style={{
+        position: 'fixed',      // keep if you want it fixed; see note below
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+      }}
+    >
+      <img
+        src="/Photos/InfoCardPhotos/CSUSpur_horiz_campus_rev_rgb.webp"
+        alt="CSU Spur Logo"
+        className="header-logo"
+        style={{ objectFit: 'contain' }}
+      />
+      <h1 className="title">
+        Spur <b>R</b>egional <b>A</b>ir <b>M</b>onitoring <b>S</b>ite (<b>RAMS</b>)
+      </h1>
+    </header>
+
 
         <main className="app-body">
 
