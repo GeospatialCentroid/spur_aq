@@ -76,36 +76,89 @@ body.map-fullscreen-active {
   cursor: pointer;
 }
 
-/* Basic legend styling */
+/* Make sure the map container is the positioning context */
+.leaflet-container {
+  position: relative;
+}
 
+/* Standard Leaflet corner padding; used by script as CORNER_MARGIN */
+.leaflet-right .leaflet-control { margin-right: 10px; }
+.leaflet-bottom .leaflet-control { margin-bottom: 10px; }
+
+/* Legend panel lives INSIDE the map, bottom-right */
 .legend {
-    background: white;
-    padding: 10px;
-    line-height: 18px;
-    color: #333;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    max-height:200px;
-   overflow-y: auto;
-  }
+  background: white;
+  display: flex;
+  flex-direction: column;
+  color: #333;
+  font-size: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  border: 1px solid #ccc;
+  border-radius: 4px;
 
-.legend .legend-item {
-  cursor: pointer;
+  /* size + starting height (users can still resize) */
+  width: 220px;
+  max-width: 220px;
+  height: 120px;       /* 👈 starting height */
+  min-height: 60px;    /* don’t collapse */
+  max-height: 300px;   /* cap if you want */
+  overflow: hidden;    /* header stays fixed; body scrolls */
+}
+
+.legend-header {
+  position: relative;           
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin: 4px 0;
-  padding: 2px 4px;
+  justify-content: center;      /* center the title text */
+  padding: 4px 28px 4px 8px;    /* leave room for the ❌ on right */
+  font-weight: 600;
+  background: #f9f9f9;
+  border-bottom: 1px solid #eee;
+  cursor: move;                 /* draggable area */
+}
+
+/* make the scrollable area be only the items */
+.legend-body {
+  flex: 1 1 auto;      /* fill remaining height */
+  overflow-y: auto;    /* scroll when needed */
+  padding: 4px 8px;
+}
+
+
+
+
+.legend-close {
+  all: unset;
+  position: absolute;
+  right: 6px;
+  top: 4px;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.legend .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 2px;
+  cursor: pointer;
 }
 
 .legend .legend-item i {
+  width: 12px;
+  height: 12px;
   display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 2px;
-  border: 1px solid #666;
+  border: 1px solid rgba(0,0,0,0.15);
 }
 
-/* selected style */
 .legend .selected-legend {
   font-weight: 600;
   outline: 2px solid rgba(0,0,0,0.08);
@@ -113,8 +166,56 @@ body.map-fullscreen-active {
   background: rgba(0,0,0,0.03);
 }
 
+/* Floating legend variant (we position it ourselves) */
+.legend-floating {
+  position: absolute;           /* starts inside the map */
+  bottom: 40px;
+  right: 10px;
+  z-index: 1000;
+}
+
+/* Resize handle in bottom-right corner */
+.legend-resizer {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+  border: 1px solid #bbb;
+  border-radius: 3px;
+  background: linear-gradient(135deg, rgba(0,0,0,0.08) 0 50%, transparent 50% 100%);
+}
+
+/* Optional: style for the toggle button control */
 .toggle-legend-btn {
   font-size: 12px;
+  background: white;
   border: 1px solid #ccc;
   border-radius: 3px;
+  padding: 6px 8px;
+  cursor: pointer;
 }
+
+.legend-container {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 220px;
+
+  /* 👇 this is the key */
+  height: 1px;        /* starting height */
+  max-height: 300px;    /* optional cap */
+  min-height: 60px;     /* don’t let it collapse too tiny */
+
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  resize: vertical;     /* 👈 only vertical resize allowed */
+}
+
+

@@ -255,82 +255,229 @@ const LandUseLayer = ({
 
 /* --------------------- Legend control (click to highlight) --------------------- */
 const LegendControl = ({ geoJsonLayerRef }: { geoJsonLayerRef: React.MutableRefObject<L.GeoJSON | null> }) => {
-const map = useMap();
-const [legendVisible, setLegendVisible] = useState(false); // hide the legend by default
- useEffect(() => {
+  const map = useMap();
+  const [legendVisible, setLegendVisible] = useState(false);
 
-    /* toggle legend visibility */
+  useEffect(() => {
+    if (!map) return;
+
+    /* ------------ Toggle button (bottom-left) ------------ */
     const ToggleLegend = L.Control.extend({
-      options: { position: "bottomright" },
-      onAdd: function () {
-        const button = L.DomUtil.create("button", "toggle-legend-btn") as HTMLButtonElement;
-        button.innerHTML = legendVisible ? "Hide Legend" : "Show Legend";
-        button.style.background = "white";
-        button.style.padding = "5px";
-        button.style.cursor = "pointer";
+      options: { position: "bottomleft" },
+      onAdd: () => {
+        const btn = L.DomUtil.create("button", "toggle-legend-btn") as HTMLButtonElement;
+        btn.textContent = legendVisible ? "Hide Legend" : "Show Legend";
+        btn.style.background = "white";
+        btn.style.padding = "6px 8px";
+        btn.style.cursor = "pointer";
+        btn.style.border = "1px solid #ccc";
+        btn.style.borderRadius = "3px";
+        L.DomEvent.disableClickPropagation(btn);
+       L.DomEvent.on(btn, "click", (ev: any) => {
+       L.DomEvent.stop(ev);
+       // update the label immediately to avoid any flicker
+       btn.textContent = legendVisible ? "Show Legend" : "Hide Legend";
+       setLegendVisible(v => !v);
+   });
 
-        L.DomEvent.on(button, "click", () => {
-          setLegendVisible((prev) => !prev);
-        });
-
-        return button;
+        return btn;
       },
     });
 
+    const toggleCtrl = new (ToggleLegend as any)();
+    map.addControl(toggleCtrl);
 
-  const Legend = L.Control.extend({
-    options: { position: "bottomright" },
-    onAdd: function (this: L.Control, _map: L.Map) {
-      const container = L.DomUtil.create("div", "legend") as HTMLDivElement;
-      container.style.display = legendVisible ? "block" : "none";
-      container.innerHTML += "<strong>Zones - Click to Highlight</strong><br>";
+    /* ------------ Floating legend (draggable + resizable) ------------ */
+    let container: HTMLDivElement | null = null;
 
-      for (const groupLabel of Object.keys(zoningGroups)) {
-        const group = zoningGroups[groupLabel];
-        const item = document.createElement("div");
-        item.className = "legend-item";
-        item.dataset.group = groupLabel;
-        item.innerHTML = `<i style="background:${group.color}"></i> ${groupLabel}`;
-        container.appendChild(item);
-      }
+    const MARGIN = 10;
+    const MIN_W = 220, MIN_H = 140;
+    const MAX_FRAC = 0.6; // ≤ 60% of map size
+   const mapEl = map.getContainer();
+const viewportSize = () => ({ w: window.innerWidth, h: window.innerHeight });
 
-      container.addEventListener("click", (e) => {
-        const target = (e.target as HTMLElement).closest(".legend-item") as HTMLElement | null;
-        if (!target) return;
-        const groupKey = target.dataset.group!;
-        const isSelected = target.classList.contains("selected-legend");
+const applyMaxSize = () => {
+  if (!container) return;
+  const { w, h } = viewportSize();
+  const maxW = Math.max(MIN_W, Math.floor(Math.min(w - MARGIN * 2, w * MAX_FRAC)));
+  const maxH = Math.max(MIN_H, Math.floor(Math.min(h - MARGIN * 2, h * MAX_FRAC)));
+  container.style.maxWidth = `${maxW}px`;
+  container.style.maxHeight = `${maxH}px`;
+};
 
-        // Clear all selections
-        container.querySelectorAll(".legend-item").forEach((el) => el.classList.remove("selected-legend"));
+const clampIntoViewport = () => {
+  if (!container) return;
+  const { w, h } = viewportSize();
+  const legRect = container.getBoundingClientRect();
+  const currentLeft = parseFloat(container.style.left || "0");
+  const currentTop  = parseFloat(container.style.top  || "0");
+  const maxLeft = w - legRect.width - MARGIN;
+  const maxTop  = h - legRect.height - MARGIN;
+  const left = Math.min(Math.max(MARGIN, currentLeft), Math.max(MARGIN, maxLeft));
+  const top  = Math.min(Math.max(MARGIN, currentTop),  Math.max(MARGIN, maxTop));
+  container.style.left = `${left}px`;
+  container.style.top  = `${top}px`;
+};
 
-        if (!isSelected) {
-          target.classList.add("selected-legend");
-          highlightFeatures(groupKey);
-        } else {
-          highlightFeatures(null);
-        }
-      });
+const placeNearMap = () => {
+  if (!container) return;
+  const mapRect = mapEl.getBoundingClientRect();
+  const legRect = container.getBoundingClientRect();
+  let left = mapRect.right - legRect.width - MARGIN;
+  let top  = mapRect.bottom - legRect.height - MARGIN;
+  const { w, h } = viewportSize();
+  left = Math.max(MARGIN, Math.min(left, w - legRect.width - MARGIN));
+  top  = Math.max(MARGIN, Math.min(top,  h - legRect.height - MARGIN));
+  container.style.left = `${left}px`;
+  container.style.top  = `${top}px`;
+};
+    if (legendVisible) {
+  container = L.DomUtil.create("div", "legend legend-floating") as HTMLDivElement;
+  container.style.position = "fixed";
+  container.style.zIndex = "99999";
 
-      return container;
-    },
+  container.innerHTML = `
+    <div class="legend-header" title="Drag to move">
+      <strong>Zones — Click to Highlight</strong>
+      <button class="legend-close" aria-label="Hide legend" title="Hide legend">×</button>
+    </div>
+    <div class="legend-body"></div>
+  `;
+
+  const headerEl = container.querySelector(".legend-header") as HTMLDivElement;
+  const bodyEl   = container.querySelector(".legend-body") as HTMLDivElement;
+
+  // Items
+  for (const groupLabel of Object.keys(zoningGroups)) {
+    const group = zoningGroups[groupLabel];
+    const item = document.createElement("div");
+    item.className = "legend-item";
+    item.dataset.group = groupLabel;
+    item.innerHTML = `<i style="background:${group.color}"></i> ${groupLabel}`;
+    bodyEl.appendChild(item);
+  }
+
+  // Resizer
+  const resizer = document.createElement("div");
+  resizer.className = "legend-resizer";
+  container.appendChild(resizer);
+
+  // Close + select
+  container.addEventListener("click", (e) => {
+    const closeBtn = (e.target as HTMLElement).closest(".legend-close");
+    if (closeBtn) {
+      L.DomEvent.stop(e);
+      setLegendVisible(false);
+      return;
+    }
+    const target = (e.target as HTMLElement).closest(".legend-item") as HTMLElement | null;
+    if (!target) return;
+    const groupKey = target.dataset.group!;
+    const isSelected = target.classList.contains("selected-legend");
+    container!.querySelectorAll(".legend-item").forEach((el) => el.classList.remove("selected-legend"));
+    if (!isSelected) {
+      target.classList.add("selected-legend");
+      highlightFeatures(groupKey);
+    } else {
+      highlightFeatures(null);
+    }
   });
 
-  const legendControl = new (Legend as any)();
-  map.addControl(legendControl);
 
-  const toggleLegendControl = new (ToggleLegend as any)();
-  map.addControl(toggleLegendControl);
+  // Insert and size/position (only once)
+// Insert and size/position (only once)
+  document.body.appendChild(container);
+  applyMaxSize();
+  placeNearMap();
 
 
-  return () => {
-    map.removeControl(legendControl);
-    map.removeControl(toggleLegendControl);
+  // Dragging via header
+  const header = container.querySelector(".legend-header") as HTMLElement;
+  let dragging = false, sx = 0, sy = 0, sl = 0, st = 0;
+  const onMove = (ev: MouseEvent) => {
+    if (!dragging || !container) return;
+    container.style.left = `${sl + (ev.clientX - sx)}px`;
+    container.style.top = `${st + (ev.clientY - sy)}px`;
+    clampIntoViewport();
+
   };
-}, [map, geoJsonLayerRef, highlightFeatures, legendVisible]);
+  const onUp = () => {
+    dragging = false;
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onUp);
+  };
+  header.addEventListener("mousedown", (ev) => {
+    if ((ev.target as HTMLElement).closest(".legend-close")) return;
+    dragging = true;
+    sx = ev.clientX; sy = ev.clientY;
+    sl = parseFloat(container!.style.left || "0");
+    st = parseFloat(container!.style.top  || "0");
+
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  });
+
+  // Resizing via handle
+  let resizing = false, sw = 0, sh = 0;
+  const onRMove = (ev: MouseEvent) => {
+    if (!resizing || !container) return;
+    const { w, h } = viewportSize();
+    const dx = ev.clientX - sx;
+    const dy = ev.clientY - sy;
+    const currentLeft = parseFloat(container.style.left || "0");
+    const currentTop  = parseFloat(container.style.top  || "0");
+    let newW = Math.max(MIN_W, Math.min(sw + dx, w - currentLeft - MARGIN));
+    let newH = Math.max(MIN_H, Math.min(sh + dy, h - currentTop  - MARGIN));
+    container.style.width = `${newW}px`;
+    container.style.height = `${newH}px`;
+
+
+  };
+  const onRUp = () => {
+    resizing = false;
+    document.removeEventListener("mousemove", onRMove);
+    document.removeEventListener("mouseup", onRUp);
+  };
+  resizer.addEventListener("mousedown", (ev) => {
+    ev.preventDefault();
+    resizing = true;
+    sx = ev.clientX; sy = ev.clientY;
+    const rect = container!.getBoundingClientRect();
+    sw = rect.width; sh = rect.height;
+    document.addEventListener("mousemove", onRMove);
+    document.addEventListener("mouseup", onRUp);
+  });
+
+  // Map resize → re-clamp and re-cap sizes
+// Viewport resize → re-clamp and re-cap sizes
+const onViewportResize = () => {
+  applyMaxSize();
+  clampIntoViewport();
+
+};
+window.addEventListener("resize", onViewportResize);
+
+// Cleanup
+return () => {
+  window.removeEventListener("resize", onViewportResize);
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onUp);
+    document.removeEventListener("mousemove", onRMove);
+    document.removeEventListener("mouseup", onRUp);
+    if (container && container.parentElement) container.parentElement.removeChild(container);
+    map.removeControl(toggleCtrl);
+  };
+}
+
+
+    // If legend not visible, just cleanup toggle on unmount/re-render
+    return () => {
+      map.removeControl(toggleCtrl);
+    };
+  }, [map, legendVisible]);
 
   return null;
 };
-
 /* --------------------- Resize control (invalidateSize on expand) --------------------- */
 const ResizeMapOnExpand = ({ trigger }: { trigger: boolean }) => {
   const map = useMap();
@@ -440,11 +587,13 @@ const MapCard: React.FC = () => {
 
       <div className="map-container-wrapper">
         <div ref={mapContainerRef} className="map-container" style={{ height: 400 }}>
-          <MapContainer center={initialCenter} zoom={initialZoom} style={{ width: "100%", height: "100%" }}>
-              className="map-container"
-                center={initialCenter}
-                zoom={initialZoom}
-                scrollWheelZoom={true}
+          <MapContainer
+            className="map-container"
+            center={initialCenter}
+            zoom={initialZoom}
+            scrollWheelZoom={true}
+            style={{ width: "100%", height: "100%" }}
+          >
             <RegisterMapRef mapRef={mapRef} />
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             <ResizeMapOnExpand trigger={expanded} />
@@ -453,6 +602,7 @@ const MapCard: React.FC = () => {
             <LegendControl geoJsonLayerRef={geoJsonLayerRef} />
             <ExpandControl expanded={expanded} setExpanded={setExpanded} />
           </MapContainer>
+
         </div>
       </div>
     </div>
