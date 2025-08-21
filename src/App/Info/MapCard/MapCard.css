@@ -92,7 +92,7 @@ body.map-fullscreen-active { overflow: hidden; }
 .legend .legend-item { display:flex; align-items:center; gap:8px; padding:3px 2px; cursor:pointer; }
 .legend .legend-item i { width:12px; height:12px; display:inline-block; border:1px solid rgba(0,0,0,0.15); }
 .legend .selected-legend { font-weight:600; outline:2px solid rgba(0,0,0,0.08); border-radius:3px; background:rgba(0,0,0,0.03); }
-.legend-floating { position: fixed; z-index: 1000; }
+
 .legend-resizer { position:absolute; right:6px; bottom:6px; width:12px; height:12px; cursor:nwse-resize;
   border:1px solid #bbb; border-radius:3px; background:linear-gradient(135deg, rgba(0,0,0,0.08) 0 50%, transparent 50% 100%); }
 .toggle-legend-btn { font-size:12px; background:#fff; border:1px solid #ccc; border-radius:3px; padding:6px 8px; cursor:pointer; }
@@ -101,7 +101,10 @@ body.map-fullscreen-active { overflow: hidden; }
 .map-container.map-fullscreen .leaflet-top {
   top: 56px;        /* nudge down so they don't sit under the sticky header */
 }
-
+/* Legend scrolls with the page by default */
+.legend-floating { position: absolute; z-index: 1000;}
+/* When the map is fullscreen, pin the legend to the viewport */
+.legend-floating.fixed {position: fixed;}
 .map-container.map-fullscreen .leaflet-left  { left: 12px; }
 .map-container.map-fullscreen .leaflet-right { right: 12px; }
 
