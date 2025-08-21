@@ -53,6 +53,7 @@ export default function DateSelector({
   return (
     <div className="dtpicker-container">
       <DatePicker
+        portalId="root"
         selected={selectedDate}
         onChange={handleChange}
         showTimeSelect

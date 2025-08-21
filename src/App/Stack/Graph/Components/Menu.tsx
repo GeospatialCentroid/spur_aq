@@ -94,7 +94,7 @@ const Menu: React.FC<MenuProps> = ({
             />
 
           <div className="interval-group">
-            Interval:
+            Avg:
             <IntervalSelector
               value={interval}
               onChange={onIntervalChange}
