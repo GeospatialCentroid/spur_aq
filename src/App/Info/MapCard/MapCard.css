@@ -106,16 +106,17 @@ body.map-fullscreen-active {
 }
 
 .legend-header {
-  position: relative;           
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;      /* center the title text */
-  padding: 4px 28px 4px 8px;    /* leave room for the ❌ on right */
+  padding: 4px 52px 4px 8px;    /* room for ↺ and × on the right */
   font-weight: 600;
   background: #f9f9f9;
   border-bottom: 1px solid #eee;
-  cursor: move;                 /* draggable area */
+  cursor: move;
 }
+
 
 /* make the scrollable area be only the items */
 .legend-body {
@@ -123,9 +124,6 @@ body.map-fullscreen-active {
   overflow-y: auto;    /* scroll when needed */
   padding: 4px 8px;
 }
-
-
-
 
 .legend-close {
   all: unset;
@@ -168,9 +166,7 @@ body.map-fullscreen-active {
 
 /* Floating legend variant (we position it ourselves) */
 .legend-floating {
-  position: absolute;           /* starts inside the map */
-  bottom: 40px;
-  right: 10px;
+  position: fixed;           /* starts inside the map */
   z-index: 1000;
 }
 
@@ -217,5 +213,22 @@ body.map-fullscreen-active {
   overflow: hidden;
   resize: vertical;     /* 👈 only vertical resize allowed */
 }
+.legend-reset {
+  all: unset;
+  position: absolute;
+  right: 28px;     /* sits just left of the × (which is at right: 6px) */
+  top: 4px;
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+}
+
 
 
