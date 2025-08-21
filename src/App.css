@@ -27,6 +27,7 @@
 
   /* Map sizing */
   --mapMaxHTop: clamp(160px, 22vh, 200px);
+
   --legendScaleTop: 0.85;
 }
 

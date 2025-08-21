@@ -12,6 +12,8 @@ import { useEffect, useRef } from 'react';
 import { EncodedGraphState, encodeGraphState } from './graphStateUtils';
 import { groupVariablesByInstrument, buildApiUrl } from './graphApiUtils';
 import { SelectedMeasurement } from './graphTypes';
+import { API_BASE_URL } from '../../../config/api'; // TEAM: central base
+
 
 /**
  * Emits the current graph state to the parent when relevant parameters change.
@@ -212,7 +214,7 @@ export function useLiveChartUpdates({
       let newRows: { [key: string]: string }[] = [];
 
       for (const v of variables) {
-        const url = `http://10.1.77.22:8001/latest_measurement/${v.instrumentId}/${interval}/`;
+        const url = `${API_BASE_URL}/latest_measurement/${v.instrumentId}/${interval}/`;
         try {
           const res = await fetch(url);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);

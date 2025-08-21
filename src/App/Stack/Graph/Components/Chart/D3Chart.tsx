@@ -362,7 +362,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
     const legend = svg.append('g').attr('class', 'legend').attr('transform', `translate(${margin.left}, 10)`);
 
     selectedMeasurements.forEach((variable, i) => {
-      const x = i * 190;
+      const x = i * 120+40;
 
       // Circle for color
       legend
@@ -382,7 +382,8 @@ const D3Chart: React.FC<D3ChartProps> = ({
         .attr('y', 0)
         .attr('dy', '0.35em')
         .style('font-size', '12px')
-        .text(`${variable.name}: Last value ${lastValue.toFixed(2)}`);
+        .text(`${variable.name}`);
+        //.text(`${variable.name}: Last value ${lastValue.toFixed(2)}`);
     });
   }, [id, fromDate, toDate, interval, yDomain, data, selectedMeasurements, sizeTick]);
 
