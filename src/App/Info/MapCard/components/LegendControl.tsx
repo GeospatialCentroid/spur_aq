@@ -140,11 +140,27 @@ const LegendControl: React.FC = () => {
     left = Math.min(Math.max(MARGIN, left), vw - legendRect0.width - MARGIN);
     top = Math.min(Math.max(MARGIN, top), vh - legendRect0.height - MARGIN);
 
-    container.style.left = `${left}px`;
+       container.style.left = `${left}px`;
     container.style.top = `${top}px`;
     container.style.right = "";
     container.style.bottom = "";
     container.style.visibility = "visible";
+
+    // Helper: anchor to map's bottom-right and clamp
+    const anchorToMap = () => {
+      if (!container) return;
+      const r0 = container.getBoundingClientRect();
+      const mapRect2 = map.getContainer().getBoundingClientRect();
+      let l = mapRect2.right - r0.width - MARGIN;
+      let t = mapRect2.bottom - r0.height - MARGIN;
+
+      const vw2 = window.innerWidth, vh2 = window.innerHeight;
+      l = Math.min(Math.max(MARGIN, l), vw2 - r0.width - MARGIN);
+      t = Math.min(Math.max(MARGIN, t), vh2 - r0.height - MARGIN);
+
+      container.style.left = `${l}px`;
+      container.style.top  = `${t}px`;
+    };
 
     // Reset button handler
     const resetBtn = container.querySelector<HTMLButtonElement>(".legend-reset");
@@ -167,6 +183,49 @@ const LegendControl: React.FC = () => {
       container.style.left = `${l}px`;
       container.style.top = `${t}px`;
     });
+        // Observe fullscreen class changes and reset position on exit
+    const mapEl = map.getContainer();
+    const bodyEl = document.body;
+
+    let wasFullscreen =
+      mapEl.classList.contains("map-fullscreen") ||
+      bodyEl.classList.contains("map-fullscreen-active");
+
+    const onFullscreenClassChange = () => {
+      const isFullscreen =
+        mapEl.classList.contains("map-fullscreen") ||
+        bodyEl.classList.contains("map-fullscreen-active");
+
+      // Only reset when EXITING fullscreen
+   // Only reset when EXITING fullscreen
+    if (wasFullscreen && !isFullscreen) {
+    clearSavedPos();
+
+    // re-anchor now, then again after layout settles
+    anchorToMap();
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+        anchorToMap();
+        });
+    });
+    setTimeout(anchorToMap, 200); // extra safety after transitions
+    }
+
+wasFullscreen = isFullscreen;
+
+    };
+
+    const mo = new MutationObserver(onFullscreenClassChange);
+    mo.observe(mapEl,  { attributes: true, attributeFilter: ["class"] });
+    mo.observe(bodyEl, { attributes: true, attributeFilter: ["class"] });
+    // Re-anchor when the map's DOM box size changes (e.g., after exiting fullscreen)
+// Only do this if user hasn't dragged it yet (no saved position)
+const ro = new ResizeObserver(() => {
+  if (!getSavedPos()) {
+    anchorToMap();
+  }
+});
+ro.observe(mapEl);
 
     // Prevent map interactions when interacting with legend
     L.DomEvent.disableClickPropagation(container);
@@ -331,6 +390,8 @@ const LegendControl: React.FC = () => {
 
     // Cleanup
     return () => {
+      mo.disconnect(); // stop observing fullscreen changes
+      ro.disconnect();
       window.removeEventListener("resize", onResize);
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseup", onUp);

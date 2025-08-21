@@ -46,14 +46,14 @@ const MapCard: React.FC = () => {
   return (
     <div className="map-wrapper">
       <div className="map-container-wrapper">
-        <div ref={mapContainerRef} className="map-container" style={{ height: 400 }}>
-          <MapContainer
-            className="map-container"
-            center={initialCenter}
-            zoom={initialZoom}
-            scrollWheelZoom
-            style={{ width: "100%", height: "100%" }}
-          >
+       <div ref={mapContainerRef} className="map-container" style={{ height: 480 }}>  {/* try 440–480 */}
+        <MapContainer
+          /* no className here */
+         center={initialCenter}
+          zoom={initialZoom}
+          scrollWheelZoom
+          style={{ width: "100%", height: "100%" }}
+              >
             <RegisterMapRef mapRef={mapRef} />
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
