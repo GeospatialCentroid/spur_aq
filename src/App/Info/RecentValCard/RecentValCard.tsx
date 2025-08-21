@@ -5,6 +5,8 @@ import { extractMeasurementsWithRanges, ParsedMeasurement } from './MeasurementU
 import FadingLeftArrow from './FadingLeftArrow';
 import FadingRightArrow from './FadingRightArrow';
 import './RecentValCard.css';
+import { apiUrl } from '../../../config/api'; // TEAM: use one base everywhere
+
 
 interface RecentValuesCardProps {
   stationData: any[];
@@ -39,7 +41,7 @@ const formattedTimestamp =
 
 const fetchLatestValue = async (measurement: ParsedMeasurement) => {
   try {
-    const res = await fetch(`http://10.1.77.22:8001/latest_measurement/${measurement.instrumentId}/60/`);
+    const res = await fetch(apiUrl(`/latest_measurement/${measurement.instrumentId}/60/`));
     const json = await res.json();
     const latestEntry = Array.isArray(json) ? json[0] : json;
 
