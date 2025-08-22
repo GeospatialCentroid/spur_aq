@@ -46,7 +46,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
 
   useEffect(() => {
   var variables= selectedMeasurements
-  // console.log(variables,"variables")
+  //console.log(variables,"variables")
   
   //drop milliseconds
    const normalizedData: typeof data = {};
@@ -176,10 +176,10 @@ const D3Chart: React.FC<D3ChartProps> = ({
 
     // Left Y-axis label (primary unit)
     if (primaryMeasurement) {
-    var left_axis_name = primaryMeasurement.name
+    var left_axis_name = primaryMeasurement.alias
     if (selectedMeasurements.length>1 &&  primaryMeasurement.units == selectedMeasurements[1].units){
         // if the units match. append the secondary measurement name to the left axis
-       left_axis_name+=", "+selectedMeasurements[1].name
+       left_axis_name+=", "+selectedMeasurements[1].alias
     }
       g.append('text')
         .attr('transform', 'rotate(-90)')
@@ -200,7 +200,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
         .attr('dy', '.7em')
         .style('text-anchor', 'middle')
         .style('font-size', '1em')
-        .text(`${secondaryMeasurement.name} (${secondaryMeasurement.units})`);
+        .text(`${secondaryMeasurement.alias} (${secondaryMeasurement.units})`);
     }
 
     // Prepare all timestamps (unique sorted)
@@ -382,7 +382,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
         .attr('y', 0)
         .attr('dy', '0.35em')
         .style('font-size', '12px')
-        .text(`${variable.name}`);
+        .text(`${variable.alias}`);
         //.text(`${variable.name}: Last value ${lastValue.toFixed(2)}`);
     });
   }, [id, fromDate, toDate, interval, yDomain, data, selectedMeasurements, sizeTick]);

@@ -76,6 +76,7 @@
 /* Offset the fixed header automatically */
 .app-body {
   padding-top: calc(var(--headerPadY) * 2 + var(--logoH) + var(--headerExtra));
+  flex: 1;
 }
 
 .body-section {
