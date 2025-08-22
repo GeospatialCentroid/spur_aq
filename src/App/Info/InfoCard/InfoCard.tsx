@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import './InfoCard.css';
 
-// these are the different types that can be added to the info card. They are all ? optional so you do not need any of them but can use all of them if you want. 
 type InfoData = {
   text?: string;
   image?: string;
   video?: string;
 };
-// this is parsing the info entered into the txt file and stores it in an infoData array as text, image, or video. 
+
 const parseInfoCardText = (raw: string): InfoData => {
   const lines = raw.split('\n');
   const data: InfoData = {};
@@ -29,57 +29,56 @@ const parseInfoCardText = (raw: string): InfoData => {
       data.text += (data.text ? ' ' : '') + line.trim();
     }
   }
-
   return data;
 };
 
-// Actual layout of the info card. This adds in the text, image or video and returns the final product to info.tsx
 const InfoCard: React.FC = () => {
-  const [info, setInfo] = useState<{ text?: string; image?: string; video?: string }>({});
+  const [info, setInfo] = useState<InfoData>({});
 
   useEffect(() => {
     fetch('/InfoCard.txt')
       .then((res) => res.text())
-      .then((text) => {
-        const parsed = parseInfoCardText(text);
-        setInfo(parsed);
-      })
+      .then((text) => setInfo(parseInfoCardText(text)))
       .catch((err) => console.error('Failed to load InfoCard.txt', err));
   }, []);
-// I also added the capabilty to add the logo to the info section in the return statement. 
-// Its currently commented out thought because I think it may look better in the top banner. 
+
+  const hasMedia = Boolean(info.image || info.video);
+
   return (
     <div className="col-md-4">
-      <div className="card h-100">    
-        {/* <div style={{textAlign: 'left'}}> 
-            <img
-                src="/Photos/InfoCardPhotos/CSUSpur_horiz_campus_rev_rgb.webp"
-                alt="CSU Spur Logo"
-                style={{
-                    height: '50px',
-                    objectFit: 'contain',
-                    padding: '0.5rem',
-                    backgroundColor: '#f0f0f0' // optional for contrast
-                }}
-                />
-        </div> */}
-
-        <div className="card-body">
-             <h5 className="card-title">About</h5>
-          <p className="card-text">{info.text || 'Loading...'}</p>
-          {info.image && (
-            <img
-              src={info.image}
-              alt="Info"
-              className="img-fluid rounded mt-2"
-              style={{ maxHeight: '200px', objectFit: 'cover' }}
-            />
+      <div className={`card h-100 info-card ${hasMedia ? 'info-card--split' : ''}`}>
+        <div className="card-body info-card__body">
+          {/* TEXT half */}
+          {info.text && (
+            <div className="info-card__textWrap">
+              <h5 className="card-title info-card__title">About</h5>
+              <p className="card-text info-card__text">{info.text}</p>
+            </div>
           )}
-          {info.video && (
-            <video controls className="w-100 mt-2" style={{ maxHeight: '200px' }}>
-              <source src={info.video} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+
+          {/* MEDIA half */}
+          {info.image && (
+            <div className="info-card__mediaWrap">
+              <img
+                src={info.image}
+                alt="Info"
+                className="info-card__media"
+                loading="lazy"
+              />
+            </div>
+          )}
+          {(!info.image && info.video) && (
+            <div className="info-card__mediaWrap">
+              <video className="info-card__media" controls preload="metadata">
+                <source src={info.video} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
+
+          {/* If no text, still show title small for consistency (optional) */}
+          {!info.text && hasMedia && (
+            <h5 className="card-title info-card__title info-card__title--floating">About</h5>
           )}
         </div>
       </div>
