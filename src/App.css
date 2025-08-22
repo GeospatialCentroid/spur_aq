@@ -18,7 +18,7 @@
   --bottomReserve: calc(var(--graphHReserve) * 2 + var(--graphGap) + var(--extra));
 
   /* Top-row/card scaling */
-  --topRowMax: clamp(260px, 30vh, 340px);
+  --topRowMax: clamp(240px, 13.5vh, 280px);
 
   /* Gauge controls (single source of truth) */
   --gaugeTopPad: 8px;
@@ -26,7 +26,8 @@
   --gaugeMaxHTop: clamp(1px, 1vh, 1px);
 
   /* Map sizing */
-  --mapMaxHTop: clamp(180px, 30vh, 270px);
+  --mapMaxHTop: clamp(160px, 22vh, 200px);
+
   --legendScaleTop: 0.85;
 }
 
@@ -48,6 +49,14 @@
   gap: clamp(6px, 1.2vw, 16px);
   padding-block: var(--headerPadY);
   padding-inline: var(--headerPadX);
+  position: sticky;
+  z-index: 5000;  /* higher than Leaflet controls (~1000) */
+  top:0;
+}
+
+.App-info {
+  position: relative;
+  z-index: 1;         /* stays beneath the header */
 }
 
 .app-header h1,

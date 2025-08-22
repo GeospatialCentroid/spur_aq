@@ -1,120 +1,119 @@
-/* Map layout base */
-/* Map layout base */
+/* =========================
+   Map layout base (true 100% fill)
+   ========================= */
+
+/* Makes the map section act like a flex column so it can grow */
 .map-wrapper {
   width: 100%;
-  margin: 1rem 0;
+  margin: 1rem 0;           
 }
-
-/* Heading stays left-aligned by default */
-
-.map-container-wrapper {
+.map-card .card-body {
+  padding: 0;
   display: flex;
-  justify-content: center; /* Center the map */
+  flex-direction: column;
 }
 
-/* Set max width and center the map */
+.map-card .map-wrapper { margin: 0; }
+/* This wrapper just stretches; no centering shrink */
+.map-container-wrapper {
+  display: flex;             
+  justify-content: center;  
+  align-items: center;      
+}
+
+.map-card .map-container > .leaflet-container {
+  position: absolute !important;
+  inset: 0 !important;     /* top/right/bottom/left = 0 */
+  width: auto !important;
+  height: auto !important;
+}
+
+
+/* The map wrapper now truly fills available height */
 .map-container {
+  flex: 1 1 auto;     /* <-- key: fills the card-body vertically */
   width: 100%;
-  height: 300px;
-  transition: all 0.3s ease;
-  position: relative;
-  z-index: 1;
+  height: 100%
+}
+
+/* Leaflet canvas fills the wrapper minus the rim */
+.map-container > .leaflet-container {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Standard Leaflet control margins  */
+.leaflet-right .leaflet-control { margin-right: 10px; }
+.leaflet-bottom .leaflet-control { margin-bottom: 10px; }
+/* Keep Leaflet controls below the header */
+.leaflet-top, .leaflet-bottom, .leaflet-control-container {
+  z-index: 1000;      /* lower than header’s 5000 */
 }
 
 
-/* Fullscreen overlay */
+
+/* =========================
+   Fullscreen behavior 
+   ========================= */
 .map-container.map-fullscreen {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  margin: 0;
-  padding: 0;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  margin: 0; padding: 0;
   background: white;
   z-index: 9999;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
-
-/* Ensure map and Leaflet container fill full screen */
-.map-fullscreen,
-.map-fullscreen .leaflet-container {
+.map-container.map-fullscreen > .leaflet-container {
+  position: static;
+  inset: 0;
   width: 100vw !important;
   height: 100vh !important;
-  max-width: 100vw;
-  max-height: 100vh;
+}
+.map-fullscreen .leaflet-container { animation: fadeIn 0.3s ease-in; }
+@keyframes fadeIn { from {opacity:0; transform:scale(1.01);} to {opacity:1; transform:scale(1);} }
+body.map-fullscreen-active { overflow: hidden; }
+.map-expand-button { background:#fff; padding:6px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+
+/* =========================
+   Legend styling
+   ========================= */
+.legend { background:#fff; display:flex; flex-direction:column; color:#333; font-size:12px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.2); border:1px solid #ccc; border-radius:4px;
+  width:220px; max-width:220px; height:120px; min-height:60px; max-height:300px; overflow:hidden; }
+.legend-header { position:relative; display:flex; align-items:center; justify-content:center;
+  padding:4px 52px 4px 8px; font-weight:600; background:#f9f9f9; border-bottom:1px solid #eee; cursor:move; }
+.legend-body { flex:1 1 auto; overflow-y:auto; padding:4px 8px; }
+.legend-close { all:unset; position:absolute; right:6px; top:4px; width:18px; height:18px; display:inline-flex;
+  align-items:center; justify-content:center; border:1px solid #ccc; border-radius:3px; font-size:11px; line-height:1; cursor:pointer; }
+.legend-reset { all:unset; position:absolute; right:28px; top:4px; width:18px; height:18px; display:inline-flex;
+  align-items:center; justify-content:center; border:1px solid #ccc; border-radius:3px; font-size:11px; line-height:1; cursor:pointer; }
+.legend .legend-item { display:flex; align-items:center; gap:8px; padding:3px 2px; cursor:pointer; }
+.legend .legend-item i { width:12px; height:12px; display:inline-block; border:1px solid rgba(0,0,0,0.15); }
+.legend .selected-legend { font-weight:600; outline:2px solid rgba(0,0,0,0.08); border-radius:3px; background:rgba(0,0,0,0.03); }
+
+.legend-resizer { position:absolute; right:6px; bottom:6px; width:12px; height:12px; cursor:nwse-resize;
+  border:1px solid #bbb; border-radius:3px; background:linear-gradient(135deg, rgba(0,0,0,0.08) 0 50%, transparent 50% 100%); }
+.toggle-legend-btn { font-size:12px; background:#fff; border:1px solid #ccc; border-radius:3px; padding:6px 8px; cursor:pointer; }
+/* legacy .legend-container left as-is */
+/* Move Leaflet controls ONLY in fullscreen */
+.map-container.map-fullscreen .leaflet-top {
+  top: 56px;        /* nudge down so they don't sit under the sticky header */
+}
+/* Legend scrolls with the page by default */
+.legend-floating { position: absolute; z-index: 1000;}
+/* When the map is fullscreen, pin the legend to the viewport */
+.legend-floating.fixed {position: fixed;}
+.map-container.map-fullscreen .leaflet-left  { left: 12px; }
+.map-container.map-fullscreen .leaflet-right { right: 12px; }
+
+/* Optional: small extra spacing for the zoom control stack itself */
+.map-container.map-fullscreen .leaflet-control-zoom {
+  margin-top: 8px;
 }
 
-/* Prevent body scroll when expanded */
-body.map-fullscreen-active {
-  overflow: hidden;
-}
-
-/* Expand/collapse animation */
-.map-fullscreen .leaflet-container {
-  animation: fadeIn 0.3s ease-in;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(1.01);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Control button styling */
-.map-expand-button {
-  background: white;
-  padding: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-/* Basic legend styling */
-
-.legend {
-    background: white;
-    padding: 10px;
-    line-height: 18px;
-    color: #333;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    max-height:200px;
-   overflow-y: auto;
-  }
-
-.legend .legend-item {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 4px 0;
-  padding: 2px 4px;
-}
-
-.legend .legend-item i {
-  display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 2px;
-  border: 1px solid #666;
-}
-
-/* selected style */
-.legend .selected-legend {
-  font-weight: 600;
-  outline: 2px solid rgba(0,0,0,0.08);
-  border-radius: 3px;
-  background: rgba(0,0,0,0.03);
-}
-
-.toggle-legend-btn {
-  font-size: 12px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
+/* If your legend toggle is a Leaflet control too, give it the same nudge */
+.map-container.map-fullscreen .toggle-legend-btn {
+  margin-top: 8px;
 }
