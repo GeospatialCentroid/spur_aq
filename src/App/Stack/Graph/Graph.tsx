@@ -18,9 +18,14 @@ import Chart from './Components/Chart';
 import ExpandToggle from './Components/Menu/ExpandToggle';
 import { useConfig } from '../../../context/ConfigContext';
 import { EncodedGraphState } from './graphStateUtils';
-import { getStartOfTodayOneWeekAgoMountain} from './graphDateUtils';
+import { getStartOfTodayOneWeekAgoMountain } from './graphDateUtils';
 import { syncDateRange, validateSliderRange } from './graphHandlers';
-import { useEmitGraphState, useClampDomainEffect, useFetchChartData, useLiveChartUpdates } from './graphHooks';
+import {
+  useEmitGraphState,
+  useClampDomainEffect,
+  useFetchChartData,
+  useLiveChartUpdates,
+} from './graphHooks';
 import { SelectedMeasurement, createBlankMeasurement } from './graphTypes';
 import { DateTime } from 'luxon';
 
@@ -41,34 +46,45 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   // Helper to find a measurement in config by name, stationId, and instrumentId
   function getMeasurementFromConfig(name: string, stationId: number, instrumentId: number) {
     if (!config) return undefined;
-    const station = config.find(s => s.id === stationId);
+    const station = config.find((s) => s.id === stationId);
     if (!station) return undefined;
-    const instrument = station.children.find(i => i.id === instrumentId);
+    const instrument = station.children.find((i) => i.id === instrumentId);
     if (!instrument || !instrument.measurements) return undefined;
     // Use case-insensitive comparison for name matching
-    return instrument.measurements.find(m => m.name.toLowerCase() === name.toLowerCase());
+    return instrument.measurements.find((m) => m.name.toLowerCase() === name.toLowerCase());
   }
 
-  const [fromDate, setFromDate] = useState<string>(initialState?.fromDate || getStartOfTodayOneWeekAgoMountain() || '');
+  const [fromDate, setFromDate] = useState<string>(
+    initialState?.fromDate || getStartOfTodayOneWeekAgoMountain() || ''
+  );
   const [toDate, setToDate] = useState<string>(initialState?.toDate || '');
-  const [variables, setVariables] = useState<SelectedMeasurement[]>(
-    (initialState?.variableNames || []).map((name) => {
-      const stationId = initialState?.stationId ?? 0;
-      const instrumentId = initialState?.instrumentId ?? 0;
-      const measurement = getMeasurementFromConfig(name, stationId, instrumentId);
+
+  /**
+   * Variables state (selected measurements).
+   * NOTE: with the v2 URL format, `initialState` carries `measurements` where each entry
+   * embeds its own `instrumentId` alongside the `variableName`. We hydrate from that here.
+   */
+  const [variables, setVariables] = useState<SelectedMeasurement[]>(() => {
+    const stationId = initialState?.stationId ?? 0;
+    const ms = initialState?.measurements ?? [];
+    return ms.map(({ instrumentId, variableName }) => {
+      const measurement = getMeasurementFromConfig(variableName, stationId, instrumentId);
       if (!measurement) {
-        console.warn(`Measurement not found for name: ${name}, stationId: ${stationId}, instrumentId: ${instrumentId}`);
+        console.warn(
+          `Measurement not found for name: ${variableName}, stationId: ${stationId}, instrumentId: ${instrumentId}`
+        );
       }
       // Transfer all measurement attributes, plus name/stationId/instrumentId
       return {
         ...createBlankMeasurement(),
         ...measurement,
-        name,
+        name: variableName,
         stationId,
         instrumentId,
       };
-    })
-  );
+    });
+  });
+
   const [interval, setInterval] = useState<string>(initialState?.interval || '60');
 
   const [yMin, setYMin] = useState(0);
@@ -77,16 +93,12 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
 
   const [domain, setDomain] = useState<[number, number]>([
     fromDate ? DateTime.fromISO(fromDate, { zone: 'America/Denver' }).toMillis() : 0,
-    toDate
-      ? DateTime.fromISO(toDate, { zone: 'America/Denver' }).toMillis()
-      : DateTime.now().toMillis(),
+    toDate ? DateTime.fromISO(toDate, { zone: 'America/Denver' }).toMillis() : DateTime.now().toMillis(),
   ]);
   const [selection, setSelection] = useState<[number, number]>(
     initialState?.selection || [
       fromDate ? DateTime.fromISO(fromDate, { zone: 'America/Denver' }).toMillis() : 0,
-      toDate
-        ? DateTime.fromISO(toDate, { zone: 'America/Denver' }).toMillis()
-        : DateTime.now().toMillis(),
+      toDate ? DateTime.fromISO(toDate, { zone: 'America/Denver' }).toMillis() : DateTime.now().toMillis(),
     ]
   );
 
@@ -122,46 +134,49 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
     setLoading,
   });
 
+  /**
+   * Polls `/latest_measurement/<instrument>/<interval>/` if toDate is empty (live mode),
+   * appending new data points to chartData.
+   */
   useLiveChartUpdates({
-  variables,
-  interval,
-  chartData,
-  setChartData,
-  isLive: !toDate,
-  setDomain,
-  setSelection
-});
+    variables,
+    interval,
+    chartData,
+    setChartData,
+    isLive: !toDate,
+    setDomain,
+    setSelection,
+  });
 
   // --- Handlers ---
 
-const handleFromDateChange = (newFromDate: string) => {
-  // Always convert to Mountain Time ISO string
-  const mtFromDate = newFromDate
-    ? DateTime.fromISO(newFromDate).setZone('America/Denver').toISO({ suppressMilliseconds: true })
-    : '';
-  if (!toDate || !mtFromDate) {
-    setFromDate(mtFromDate);
-    return;
-  }
-  const [from, to] = syncDateRange(mtFromDate, toDate, true);
-  setFromDate(from);
-  setToDate(to);
-};
+  const handleFromDateChange = (newFromDate: string) => {
+    // Always convert to Mountain Time ISO string
+    const mtFromDate = newFromDate
+      ? DateTime.fromISO(newFromDate).setZone('America/Denver').toISO({ suppressMilliseconds: true })
+      : '';
+    if (!toDate || !mtFromDate) {
+      setFromDate(mtFromDate);
+      return;
+    }
+    const [from, to] = syncDateRange(mtFromDate, toDate, true);
+    setFromDate(from);
+    setToDate(to);
+  };
 
-const handleToDateChange = (newToDate: string) => {
-  // Always convert to Mountain Time ISO string
-  const mtToDate = newToDate
-    ? DateTime.fromISO(newToDate).setZone('America/Denver').toISO({ suppressMilliseconds: true })
-    : '';
-  if (!mtToDate || !fromDate) {
-    setToDate(mtToDate);
-    return;
-  }
-  const [from, to] = syncDateRange(fromDate, mtToDate, false);
-  setFromDate(from);
-  setToDate(to);
-};
-
+  const handleToDateChange = (newToDate: string) => {
+    // Always convert to Mountain Time ISO string
+    const mtToDate = newToDate
+      ? DateTime.fromISO(newToDate).setZone('America/Denver').toISO({ suppressMilliseconds: true })
+      : '';
+    if (!mtToDate || !fromDate) {
+      setToDate(mtToDate);
+      return;
+    }
+    const [from, to] = syncDateRange(fromDate, mtToDate, false);
+    setFromDate(from);
+    setToDate(to);
+  };
 
   const handleSliderChange = (range: [number, number]) => {
     const validated = validateSliderRange(range);
@@ -172,9 +187,7 @@ const handleToDateChange = (newToDate: string) => {
 
   const handleVariableChange = (index: number, value: SelectedMeasurement) => {
     const measurement = getMeasurementFromConfig(value.name, value.stationId, value.instrumentId);
-    const mergedValue = measurement
-      ? { ...value, ...measurement }
-      : value;
+    const mergedValue = measurement ? { ...value, ...measurement } : value;
     // Log the selected measurement's attributes to the console
     console.log('Selected Measurement:', mergedValue);
     setVariables((prev) => {
@@ -196,7 +209,7 @@ const handleToDateChange = (newToDate: string) => {
     const instrument = config[0].children[0];
     const instrumentId = instrument.id;
     const measurement = instrument.measurements?.[0];
-    const name = measurement?.name ?? "";
+    const name = measurement?.name ?? '';
     setVariables((prev) => [
       ...prev,
       {
@@ -205,7 +218,7 @@ const handleToDateChange = (newToDate: string) => {
         name,
         stationId,
         instrumentId,
-      }
+      },
     ]);
   };
 
@@ -226,7 +239,6 @@ const handleToDateChange = (newToDate: string) => {
             onAddVariable={addVariable}
             interval={interval}
             onIntervalChange={handleIntervalChange}
-
           />
         </div>
       )}
@@ -234,25 +246,27 @@ const handleToDateChange = (newToDate: string) => {
       <div className="graph-expand-toggle">
         <ExpandToggle
           expanded={menuExpanded}
-          onToggle={() => setMenuExpanded(  !menuExpanded)}
+          onToggle={() => setMenuExpanded(!menuExpanded)}
         />
       </div>
 
-     <div className="graph-chart position-relative" >
-            {loading && (
-            <div className="position-absolute top-50 start-50 translate-middle" style={{ zIndex: 9999  }}>
-              <div className="spinner-border text-dark" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
+      <div className="graph-chart position-relative">
+        {loading && (
+          <div className="position-absolute top-50 start-50 translate-middle" style={{ zIndex: 9999 }}>
+            <div className="spinner-border text-dark" role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
+          </div>
         )}
-
-
 
         <Chart
           id={id}
-          fromDate={DateTime.fromMillis(selection[0], { zone: 'America/Denver' }).toISO({ suppressMilliseconds: true })}
-          toDate={DateTime.fromMillis(selection[1], { zone: 'America/Denver' }).toISO({ suppressMilliseconds: true })}
+          fromDate={DateTime.fromMillis(selection[0], { zone: 'America/Denver' }).toISO({
+            suppressMilliseconds: true,
+          })}
+          toDate={DateTime.fromMillis(selection[1], { zone: 'America/Denver' }).toISO({
+            suppressMilliseconds: true,
+          })}
           interval={interval}
           yDomain={[yMin, yMax]}
           chartData={chartData}
@@ -266,7 +280,6 @@ const handleToDateChange = (newToDate: string) => {
       <div className="graph-control-bar">
         <ControlBar onRemove={onRemove} />
       </div>
-
     </div>
   );
 };

@@ -102,8 +102,7 @@ const Stack: React.FC = () => {
       state: {
         id: newId.toString(36),
         stationId: 0,
-        instrumentId: 0,
-        variableNames: [],
+        measurements: [], // v2: each item { instrumentId, variableName }
         fromDate: oneWeekAgo.toISOString(),
         toDate: now.toISOString(),
         interval: '60',
