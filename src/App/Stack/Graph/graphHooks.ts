@@ -12,6 +12,7 @@ import { useEffect, useRef } from 'react';
 import { EncodedGraphState, encodeGraphState } from './graphStateUtils';
 import { groupVariablesByInstrument, buildApiUrl } from './graphApiUtils';
 import { SelectedMeasurement } from './graphTypes';
+import { API_BASE_URL } from '../../../config/api'; // TEAM: central base
 import { DateTime } from 'luxon';
 import {
   MT_ZONE,
@@ -227,9 +228,8 @@ export function useFetchChartData({
       setLoading?.(false);
     });
 
-  }, [id, variables, fromDate, toDate, interval, setChartData, setYMin, setYMax, lastFetchKey]);
+  }, [id, variables, fromDate, toDate, interval, setChartData, setYMin, setYMax, lastFetchKey, setLoading]);
 }
-
 
 
 /**
@@ -237,6 +237,7 @@ export function useFetchChartData({
  * appending new data points to chartData.
  */
 type Row = { [key: string]: string };
+
 export function useLiveChartUpdates({
   variables,
   interval,
@@ -259,13 +260,15 @@ export function useLiveChartUpdates({
 
   useEffect(() => {
     if (!isLive || variables.length === 0) return;
-
-    // Reset seen on dependency changes to avoid unbounded growth or stale entries.
+    // Reset seen on dependency changes to avoid unbounded growth/stale entries
     const seen = (seenTimestamps.current = new Set<string>());
-    chartData.forEach(d => seen.add(normalizeToMtISO(d.datetime)));
+    for (const d of chartData) {
+      const ts = normalizeToMtISO(d.datetime);
+      if (ts) seen.add(ts);
+    }
 
     const pollMinutes = Number.isFinite(parseInt(interval, 10)) ? parseInt(interval, 10) : 1;
-    const baseIntervalMs = Math.max(15_000, pollMinutes * 60_000); // guard against too-frequent polls
+    const baseIntervalMs = Math.max(15_000, pollMinutes * 60_000);
 
     let timer: number | undefined;
     let aborter: AbortController | null = null;
@@ -277,7 +280,7 @@ export function useLiveChartUpdates({
     };
 
     const tick = async () => {
-      if (document.hidden) { // pause when tab hidden
+      if (document.hidden) {
         scheduleNext(baseIntervalMs);
         return;
       }
@@ -292,12 +295,15 @@ export function useLiveChartUpdates({
 
       const staged: Row[] = [];
       aborter = new AbortController();
+
+
       try {
         await Promise.all(
           Array.from(byInstrument.entries()).map(async ([instrumentId, sels]) => {
-            const url = `http://10.1.77.22:8001/latest_measurement/${instrumentId}/${interval}/`;
+            const url = `${API_BASE_URL}/latest_measurement/${instrumentId}/${interval}/`;
             const res = await fetch(url, { signal: aborter!.signal });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
             const latest: { instrument_id: number; datetime: string; data: string }[] = await res.json();
 
             for (const entry of latest) {
@@ -313,6 +319,7 @@ export function useLiveChartUpdates({
 
               const row: Row = { datetime: tsIso };
               let hasAny = false;
+
               // only pick selected variables for this instrument
               for (const sel of sels) {
                 const val = (dataObj as any)[sel.name];
@@ -329,12 +336,10 @@ export function useLiveChartUpdates({
           })
         );
 
-        // Success → reset backoff
+        // success → reset backoff
         consecutiveErrors.current = 0;
       } catch (err) {
-        if (err instanceof DOMException && err.name === 'AbortError') {
-          // normal on cleanup
-        } else {
+        if (!(err instanceof DOMException && err.name === 'AbortError')) {
           console.error('Live data fetch failed', err);
           consecutiveErrors.current += 1;
         }
@@ -343,8 +348,9 @@ export function useLiveChartUpdates({
       }
 
       if (staged.length > 0) {
-        // Merge & sort functionally to avoid stale closures
-        setChartData((prev: any) => {
+
+        // Merge rows by timestamp (functional update to avoid stale closures)
+        setChartData(prev => {
           const byTs = new Map<string, Row>();
           for (const r of prev) byTs.set(r.datetime, r);
           for (const r of staged) {
@@ -358,7 +364,7 @@ export function useLiveChartUpdates({
           );
         });
 
-        // Expand domain to newest +60s, preserving current window width
+        // Expand domain to newest +60s, preserving window width
         const latestMs = DateTime.fromISO(staged[staged.length - 1].datetime, { zone: MT_ZONE }).toMillis();
         const newEnd = latestMs + 60_000;
 
@@ -372,8 +378,9 @@ export function useLiveChartUpdates({
         });
       }
 
-      // Backoff on errors to avoid hammering the server
-      const backoffFactor = Math.min(4, consecutiveErrors.current); // 1x, 2x, 3x, 4x
+
+      // backoff on errors to avoid hammering the server
+      const backoffFactor = Math.min(4, consecutiveErrors.current); // 0..4
       const delay = baseIntervalMs * (1 + backoffFactor);
       scheduleNext(delay);
     };
@@ -386,6 +393,7 @@ export function useLiveChartUpdates({
       if (timer) clearTimeout(timer);
       if (aborter) aborter.abort();
     };
-    // Intentionally exclude chartData to avoid interval churn
-  }, [isLive, variables, interval, setChartData, setDomain, setSelection]);
+
+
+  }, [isLive, variables, interval, setChartData, setDomain, setSelection, chartData]);
 }

@@ -13,9 +13,9 @@ const Info: React.FC = () => {
         <InfoCard />
 
         <div className="col-md-4">
-          <div className="card h-100">
+          <div className="card map-card h-100">
             <div className="card-body">
-               <MapCard />
+              <MapCard />
             </div>
           </div>
         </div>
