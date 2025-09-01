@@ -27,7 +27,9 @@ type ParsedMeasurement = {
 export const extractMeasurementsWithRanges = (stations: any[]): ParsedMeasurement[] => {
   return stations.flatMap((station: any) =>
     (station.children || []).flatMap((child: any) =>
-      (child.measurements || []).map((measurement: any) => ({
+      (child.measurements || [])
+        .filter((measurement: any) => measurement?.feature_measure === true)
+        .map((measurement: any) => ({
         stationName: station.name,
         instrumentName: child.name,
         instrumentId: child.id,
@@ -47,3 +49,7 @@ export const extractMeasurementsWithRanges = (stations: any[]): ParsedMeasuremen
 
 // Export the types for use in other modules
 export type { ParsedMeasurement, RangeEntry };
+// ADD: shared filter for feature-measure items
+export const onlyFeatureMeasures = <T extends { feature_measure?: boolean | null }>(list: T[] = []) =>
+  list.filter(m => m?.feature_measure === true);
+
