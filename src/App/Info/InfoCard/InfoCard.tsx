@@ -42,47 +42,41 @@ const InfoCard: React.FC = () => {
       .catch((err) => console.error('Failed to load InfoCard.txt', err));
   }, []);
 
-  const hasMedia = Boolean(info.image || info.video);
-
   return (
     <div className="col-md-4">
-      <div className={`card h-100 info-card ${hasMedia ? 'info-card--split' : ''}`}>
-        <div className="card-body info-card__body">
-          {/* TEXT half */}
-          {info.text && (
-            <div className="info-card__textWrap">
-              <h5 className="card-title info-card__title">About</h5>
-              <p className="card-text info-card__text">{info.text}</p>
-            </div>
-          )}
+    <div className="card info-card">
+          <div className="card-body info-card__body">
+            <div className="info-scroll" role="region" aria-label="Information">
+              {info.text && (
+                <>
+                  <h5 className="card-title info-card__title">About</h5>
+                  <p className="card-text info-card__text">{info.text}</p>
+                </>
+              )}
 
-          {/* MEDIA half */}
-          {info.image && (
-            <div className="info-card__mediaWrap">
-              <img
-                src={info.image}
-                alt="Info"
-                className="info-card__media"
-                loading="lazy"
-              />
-            </div>
-          )}
-          {(!info.image && info.video) && (
-            <div className="info-card__mediaWrap">
-              <video className="info-card__media" controls preload="metadata">
-                <source src={info.video} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          )}
+              {info.image && (
+                <img
+                  src={info.image}
+                  alt="Info"
+                  className="info-card__media info-card__media--bottom"
+                  loading="lazy"
+                />
+              )}
 
-          {/* If no text, still show title small for consistency (optional) */}
-          {!info.text && hasMedia && (
-            <h5 className="card-title info-card__title info-card__title--floating">About</h5>
-          )}
+              {!info.image && info.video && (
+                <video className="info-card__media info-card__media--bottom" controls preload="metadata">
+                  <source src={info.video} type="video/mp4" />
+                  Your browser does not support the video tag.
+                </video>
+              )}
+
+              {!info.text && (info.image || info.video) && (
+                <h5 className="card-title info-card__title info-card__title--floating">About</h5>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+        </div>
   );
 };
 
