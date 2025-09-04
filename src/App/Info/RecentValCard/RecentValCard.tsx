@@ -37,29 +37,47 @@ const formattedTimestamp =
 
 const fetchLatestValue = async (measurement: ParsedMeasurement) => {
   try {
-    const res = await fetch(apiUrl(`/latest_measurement/${measurement.instrumentId}/60/`));
+    // cache-buster so we don’t get a cached response
+    const res = await fetch(apiUrl(`/latest_measurement/${measurement.instrumentId}/60/?_=${Date.now()}`));
     const json = await res.json();
     const latestEntry = Array.isArray(json) ? json[0] : json;
 
-    // B) Capture and store the ISO timestamp from the backend
-    setLatestTimestamp(latestEntry?.datetime ?? null);
+    // Use the time we fetched as the “last updated” time (client clock)
+    // If you prefer server time, see the commented lines below.
+    setLatestTimestamp(new Date().toISOString());
 
+    // If value lives inside latestEntry.data as JSON, read it
     const parsedData = JSON.parse(latestEntry?.data || '{}');
-    const fetchedValue = parsedData?.[measurement.measurementName] ?? 0;
-    setLatestValue(fetchedValue);
+    const fetchedValue = parsedData?.[measurement.measurementName];
+    const num = Number(fetchedValue);
+    setLatestValue(Number.isFinite(num) ? num : 0);
+
+    // ---- OPTIONAL: If you prefer the server's time instead of the client clock:
+    // const serverDate = res.headers.get('Date');
+    // if (serverDate) setLatestTimestamp(new Date(serverDate).toISOString());
   } catch (err) {
     console.error('Error fetching latest value:', err);
     setLatestValue(0);
-    setLatestTimestamp(null); // clear on error
+    setLatestTimestamp(null);
   }
 };
 
 
-  useEffect(() => {
-    if (selected) {
-      fetchLatestValue(selected);
-    }
-  }, [currentIndex]);
+
+ // Fetch immediately, then pull every 5 minutes for the currently selected instrument
+useEffect(() => {
+  if (!selected) return;
+
+  fetchLatestValue(selected); // immediate fetch
+
+  const id = setInterval(() => {
+    fetchLatestValue(selected);
+  }, 5 * 60 * 1000); // 5 minutes
+
+  return () => clearInterval(id);
+  // Recreate the timer when the selected instrument changes
+}, [selected?.instrumentId]);
+
 
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => {
