@@ -11,6 +11,7 @@ type ParsedMeasurement = {
   instrumentName: string;        // Name of the instrument reporting the measurement
   instrumentId: number;          // Unique identifier for the instrument
   measurementName: string;       // Variable name (e.g., "ozone", "no2")
+  alias?: string;                // Prefered display name
   units: string | null;          // Units of the measurement (e.g., "ppb"), or null if not available
   ranges: RangeEntry[];          // Array of color-coded ranges associated with this variable
 };
@@ -34,6 +35,7 @@ export const extractMeasurementsWithRanges = (stations: any[]): ParsedMeasuremen
         instrumentName: child.name,
         instrumentId: child.id,
         measurementName: measurement.name,
+        alias: measurement.alias ?? undefined, 
         units: measurement.units || null,
         ranges: Array.isArray(measurement.ranges)
           ? measurement.ranges.map((r: any) => ({

@@ -23,11 +23,7 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
   // banner text + a slug we can use for category-based colors
   const categoryLabel = match?.category ?? 'Unknown';
   const categorySlug = categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-  const variableName =
-    selected?.measurementName
-      ? selected.measurementName.charAt(0).toUpperCase() + selected.measurementName.slice(1)
-      : '—';
-
+  const displayLabel = selected?.alias ?? selected?.measurementName ?? '_';
 const formattedTimestamp =
   typeof latestTimestamp === 'string' && latestTimestamp
     ? new Date(latestTimestamp).toLocaleString('en-US', {
@@ -104,9 +100,12 @@ const fetchLatestValue = async (measurement: ParsedMeasurement) => {
 
 
               {/* Measurement name (now at the bottom) */}
-            <h6 style={{ textAlign: 'center', marginTop: '0.6rem' }}>
-              {selected.measurementName} {/* Value with units, rounded to 1 decimal */} ({latestValue.toFixed(1)} {selected.units || ''})
-            </h6>
+        <h6 style={{ textAlign: 'center', marginTop: '0.6rem' }}>
+          {displayLabel} ({latestValue.toFixed(1)} {selected.units || ''})
+        </h6>
+
+
+
             {formattedTimestamp && (
               <div className="latest-timestamp" aria-live="polite">
                 Last updated {formattedTimestamp}

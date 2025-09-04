@@ -176,10 +176,12 @@ const D3Chart: React.FC<D3ChartProps> = ({
 
     // Left Y-axis label (primary unit)
     if (primaryMeasurement) {
-    var left_axis_name = primaryMeasurement.alias
-    if (selectedMeasurements.length>1 &&  primaryMeasurement.units == selectedMeasurements[1].units){
+    var left_axis_name = primaryMeasurement.alias ?? primaryMeasurement.name ?? '';
+    if (selectedMeasurements.length > 1 && 
+       primaryMeasurement.units == selectedMeasurements[1]?.units){
         // if the units match. append the secondary measurement name to the left axis
-       left_axis_name+=", "+selectedMeasurements[1].alias
+        const secondLabel = selectedMeasurements[1]?.alias ?? selectedMeasurements[1]?.name?? '';
+        if(secondLabel) left_axis_name += `, ${secondLabel}`;
     }
       g.append('text')
         .attr('transform', 'rotate(-90)')
@@ -188,11 +190,12 @@ const D3Chart: React.FC<D3ChartProps> = ({
         .attr('dy', '.7em')
         .style('text-anchor', 'middle')
         .style('font-size', '1em')
-        .text(`${left_axis_name} (${primaryMeasurement.units})`);
+        .text(`${left_axis_name} (${primaryMeasurement.units ?? ''})`);
     }
 
     // Right Y-axis label (secondary unit)
     if (secondaryMeasurement) {
+      const rightLabel = secondaryMeasurement.alias ?? secondaryMeasurement.name ??'';
       g.append('text')
         .attr('transform', 'rotate(-90)')
         .attr('y', innerWidth + margin.right - 25)
@@ -200,7 +203,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
         .attr('dy', '.7em')
         .style('text-anchor', 'middle')
         .style('font-size', '1em')
-        .text(`${secondaryMeasurement.alias} (${secondaryMeasurement.units})`);
+        .text(`${secondaryMeasurement.alias} (${secondaryMeasurement.units ??''})`);
     }
 
     // Prepare all timestamps (unique sorted)
