@@ -90,7 +90,6 @@
 .stack {
   flex: 1;
   min-height: fit-content;
-  background-color: #f1f1f1;
   box-shadow: #282c34;
 }
 

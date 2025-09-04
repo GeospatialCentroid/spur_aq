@@ -75,10 +75,11 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
         );
       }
       // Transfer all measurement attributes, plus name/stationId/instrumentId
-      return {
+   return {
         ...createBlankMeasurement(),
         ...measurement,
-        name: variableName,
+        name: measurement?.name ?? variableName,   // canonical key used for data lookups
+        alias: measurement?.alias ?? null,         // alias for UI
         stationId,
         instrumentId,
       };
@@ -187,7 +188,15 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
 
   const handleVariableChange = (index: number, value: SelectedMeasurement) => {
     const measurement = getMeasurementFromConfig(value.name, value.stationId, value.instrumentId);
-    const mergedValue = measurement ? { ...value, ...measurement } : value;
+    const mergedValue = measurement
+      ? {
+          ...value,
+          ...measurement,
+          name: measurement.name ?? value.name,          // keep canonical
+          alias: measurement.alias ?? value.alias ?? null, // display
+        }
+      : value;
+
     // Log the selected measurement's attributes to the console
     console.log('Selected Measurement:', mergedValue);
     setVariables((prev) => {
