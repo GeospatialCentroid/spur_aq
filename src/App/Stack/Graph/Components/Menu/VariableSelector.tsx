@@ -78,7 +78,7 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
               : undefined
           }
         >
-          {value?.name || 'Select Variable'}
+          {value?.alias ?? value?.name ?? 'Select Variable'}
         </button>
 
         {/* Optional remove button */}
