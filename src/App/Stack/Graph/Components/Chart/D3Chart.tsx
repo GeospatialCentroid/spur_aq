@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import './D3Chart.css';
 import { getColorForVariable } from '../../ColorUtils';
 import { SelectedMeasurement } from '../../graphTypes';
+import { formatAxisLabel, formatTick } from '../../Utils/LabelFormat';
 
 interface D3ChartProps {
   id: number;
@@ -78,11 +79,8 @@ const D3Chart: React.FC<D3ChartProps> = ({
     // enforce first variable uses left axis, second uses right if units differ
     const primaryMeasurement = selectedMeasurements[0];
 
-    const secondaryMeasurement =
-      selectedMeasurements[1] &&
-      selectedMeasurements[1].units !== primaryMeasurement?.units
-        ? selectedMeasurements[1]
-        : null;
+    const secondaryMeasurement = selectedMeasurements[1] ?? null;
+
 
     // Create X scale (time)
     const xScale = d3.scaleTime().domain([start, end]).range([0, innerWidth]);
@@ -95,17 +93,20 @@ const D3Chart: React.FC<D3ChartProps> = ({
       .range([innerHeight, 0]);
 
     // Secondary Y scale domain from actual data if second variable exists
-    const secondaryYScale =
-      secondaryMeasurement && data[secondaryMeasurement.name]
-        ? d3
-            .scaleLinear()
-            .domain([
-              d3.min(data[secondaryMeasurement.name].map((d) => d.value)) ?? 0,
-              d3.max(data[secondaryMeasurement.name].map((d) => d.value)) ?? 100,
-            ])
-            .nice()
-            .range([innerHeight, 0])
-        : null;
+    const secondaryYScale = secondaryMeasurement
+      ? (secondaryMeasurement.units === primaryMeasurement?.units
+          ? primaryYScale // share the same scale if units match
+          : (data[secondaryMeasurement.name]
+              ? d3.scaleLinear()
+                  .domain([
+                    d3.min(data[secondaryMeasurement.name].map((d) => d.value)) ?? 0,
+                    d3.max(data[secondaryMeasurement.name].map((d) => d.value)) ?? 100,
+                  ])
+                  .nice()
+                  .range([innerHeight, 0])
+              : null))
+      : null;
+
 
     // Main group translated by margins
     const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
@@ -167,43 +168,53 @@ const D3Chart: React.FC<D3ChartProps> = ({
     });
 
     // Draw left Y-axis (primary)
-    g.append('g').call(d3.axisLeft(primaryYScale).ticks(6));
+    g.append('g')
+      .attr('class', 'y-axis-left')
+      .call(d3.axisLeft(primaryYScale).ticks(6));
+    
+      // Ellipsis shortens the left Y
+    g.selectAll('.y-axis-left .tick text')
+      .text((d: any) => formatTick(String(d)));
 
     // Draw right Y-axis (secondary), if exists
     if (secondaryYScale) {
-      g.append('g').attr('transform', `translate(${innerWidth}, 0)`).call(d3.axisRight(secondaryYScale).ticks(6));
-    }
+      g.append('g')
+        .attr('class', 'y-axis-right')
+        .attr('transform', `translate(${innerWidth}, 0)`)
+        .call(d3.axisRight(secondaryYScale).ticks(6));
 
-    // Left Y-axis label (primary unit)
-    if (primaryMeasurement) {
-    var left_axis_name = primaryMeasurement.alias ?? primaryMeasurement.name ?? '';
-    if (selectedMeasurements.length > 1 && 
-       primaryMeasurement.units == selectedMeasurements[1]?.units){
-        // if the units match. append the secondary measurement name to the left axis
-        const secondLabel = selectedMeasurements[1]?.alias ?? selectedMeasurements[1]?.name?? '';
-        if(secondLabel) left_axis_name += `, ${secondLabel}`;
+      g.selectAll('.y-axis-right .tick text')
+        .text((d: any) => formatTick(String(d)));
     }
-      g.append('text')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', 0 - margin.left + 15)
-        .attr('x', -innerHeight / 2)
-        .attr('dy', '.7em')
-        .style('text-anchor', 'middle')
-        .style('font-size', '1em')
-        .text(`${left_axis_name} (${primaryMeasurement.units ?? ''})`);
-    }
+  // Left Y-axis label (primary unit)
+// Left Y-axis label (primary unit)
+  if (primaryMeasurement) {
+    const left_axis_name = primaryMeasurement.alias ?? primaryMeasurement.name ?? '';
 
-    // Right Y-axis label (secondary unit)
+    g.append('text')
+      .attr('transform', `translate(${-margin.left + 15}, ${innerHeight / 2}) rotate(-90)`)
+      .style('text-anchor', 'middle')
+      .style('font-size', '1em')
+      .text(
+        formatAxisLabel(
+          `${left_axis_name}${primaryMeasurement?.units ? ` (${primaryMeasurement.units})` : ''}`
+        )
+      );
+  }
+
+
+  // Right Y-axis label (secondary unit)
     if (secondaryMeasurement) {
-      const rightLabel = secondaryMeasurement.alias ?? secondaryMeasurement.name ??'';
+      const rightLabel = secondaryMeasurement.alias ?? secondaryMeasurement.name ?? '';
       g.append('text')
-        .attr('transform', 'rotate(-90)')
-        .attr('y', innerWidth + margin.right - 25)
-        .attr('x', -innerHeight / 2)
-        .attr('dy', '.7em')
+        .attr('transform', `translate(${innerWidth + margin.right - 15}, ${innerHeight / 2}) rotate(-90)`)
         .style('text-anchor', 'middle')
         .style('font-size', '1em')
-        .text(`${secondaryMeasurement.alias} (${secondaryMeasurement.units ??''})`);
+        .text(
+          formatAxisLabel(
+            `${rightLabel}${secondaryMeasurement?.units ? ` (${secondaryMeasurement.units})` : ''}`
+          )
+        );
     }
 
     // Prepare all timestamps (unique sorted)
