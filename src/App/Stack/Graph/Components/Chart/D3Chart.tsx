@@ -186,36 +186,70 @@ const D3Chart: React.FC<D3ChartProps> = ({
       g.selectAll('.y-axis-right .tick text')
         .text((d: any) => formatTick(String(d)));
     }
+
   // Left Y-axis label (primary unit)
-// Left Y-axis label (primary unit)
   if (primaryMeasurement) {
     const left_axis_name = primaryMeasurement.alias ?? primaryMeasurement.name ?? '';
+    const fullLeftLabel =
+      `${left_axis_name}${primaryMeasurement?.units ? ` (${primaryMeasurement.units})` : ''}`;
+    const formattedLeft = formatAxisLabel(fullLeftLabel);
 
-    g.append('text')
+    const leftTitle = g.append('text')
       .attr('transform', `translate(${-margin.left + 15}, ${innerHeight / 2}) rotate(-90)`)
       .style('text-anchor', 'middle')
       .style('font-size', '1em')
-      .text(
-        formatAxisLabel(
-          `${left_axis_name}${primaryMeasurement?.units ? ` (${primaryMeasurement.units})` : ''}`
-        )
-      );
+      // keep arrow cursor, prevent text selection (always)
+      .style('cursor', 'default')
+      .style('user-select', 'none')
+      .attr('aria-label', fullLeftLabel)
+      .text(formattedLeft);
+
+    // Only show tooltip + bold-on-hover if we actually truncated
+    if (formattedLeft !== fullLeftLabel) {
+      leftTitle.append('title').text(fullLeftLabel);
+
+      leftTitle
+        .on('mouseover', function () {
+          d3.select(this).style('font-weight', 'bold');
+        })
+        .on('mouseout', function () {
+          d3.select(this).style('font-weight', 'normal');
+        });
+    }
   }
 
 
   // Right Y-axis label (secondary unit)
-    if (secondaryMeasurement) {
-      const rightLabel = secondaryMeasurement.alias ?? secondaryMeasurement.name ?? '';
-      g.append('text')
-        .attr('transform', `translate(${innerWidth + margin.right - 15}, ${innerHeight / 2}) rotate(-90)`)
-        .style('text-anchor', 'middle')
-        .style('font-size', '1em')
-        .text(
-          formatAxisLabel(
-            `${rightLabel}${secondaryMeasurement?.units ? ` (${secondaryMeasurement.units})` : ''}`
-          )
-        );
+  if (secondaryMeasurement) {
+    const rightLabel = secondaryMeasurement.alias ?? secondaryMeasurement.name ?? '';
+    const fullRightLabel =
+      `${rightLabel}${secondaryMeasurement?.units ? ` (${secondaryMeasurement.units})` : ''}`;
+    const formattedRight = formatAxisLabel(fullRightLabel);
+
+    const rightTitle = g.append('text')
+      .attr('transform', `translate(${innerWidth + margin.right - 15}, ${innerHeight / 2}) rotate(-90)`)
+      .style('text-anchor', 'middle')
+      .style('font-size', '1em')
+      // keep arrow cursor, prevent text selection (always)
+      .style('cursor', 'default')
+      .style('user-select', 'none')
+      .attr('aria-label', fullRightLabel)
+      .text(formattedRight);
+
+    // Only show tooltip + bold-on-hover if truncated
+    if (formattedRight !== fullRightLabel) {
+      rightTitle.append('title').text(fullRightLabel);
+
+      rightTitle
+        .on('mouseover', function () {
+          d3.select(this).style('font-weight', 'bold');
+        })
+        .on('mouseout', function () {
+          d3.select(this).style('font-weight', 'normal');
+        });
     }
+  }
+
 
     // Prepare all timestamps (unique sorted)
     const allTimestamps = Array.from(
