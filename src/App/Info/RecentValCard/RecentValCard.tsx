@@ -6,6 +6,7 @@ import FadingLeftArrow from './FadingLeftArrow';
 import FadingRightArrow from './FadingRightArrow';
 import './RecentValCard.css';
 import { apiUrl } from '../../../config/api'; // TEAM: use one base everywhere
+import { calibrateValueForMeasurement } from '../../../utils/calibration';  
 
 
 interface RecentValuesCardProps {
@@ -24,7 +25,7 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
   const categoryLabel = match?.category ?? 'Unknown';
   const categorySlug = categoryLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-');
   const displayLabel = selected?.alias ?? selected?.measurementName ?? '_';
-const formattedTimestamp =
+  const formattedTimestamp =
   typeof latestTimestamp === 'string' && latestTimestamp
     ? new Date(latestTimestamp).toLocaleString('en-US', {
         dateStyle: 'medium',
@@ -42,19 +43,37 @@ const fetchLatestValue = async (measurement: ParsedMeasurement) => {
     const json = await res.json();
     const latestEntry = Array.isArray(json) ? json[0] : json;
 
-    // Use the time we fetched as the “last updated” time (client clock)
-    // If you prefer server time, see the commented lines below.
-    setLatestTimestamp(new Date().toISOString());
+  // Prefer the reading's own timestamp if present; otherwise fall back to server date or client now.
+  const readingTime =
+    latestEntry?.datetime ??
+    res.headers.get('Date') ??
+    new Date().toISOString();
 
-    // If value lives inside latestEntry.data as JSON, read it
-    const parsedData = JSON.parse(latestEntry?.data || '{}');
-    const fetchedValue = parsedData?.[measurement.measurementName];
-    const num = Number(fetchedValue);
-    setLatestValue(Number.isFinite(num) ? num : 0);
+  // If value lives inside latestEntry.data as JSON, read it.
+  // NOTE: Your backend returns stringified JSON in `data`.
+  const parsedData = JSON.parse(latestEntry?.data || '{}');
 
-    // ---- OPTIONAL: If you prefer the server's time instead of the client clock:
-    // const serverDate = res.headers.get('Date');
-    // if (serverDate) setLatestTimestamp(new Date(serverDate).toISOString());
+  // Keys like "no", "no2", "ozone" are case-sensitive; use the config name directly.
+  const rawValue = parsedData?.[measurement.measurementName];
+  const rawNum = Number(rawValue);
+
+  // Apply calibration (no-op if there are none)
+  const calibrated = Number.isFinite(rawNum)
+    ? calibrateValueForMeasurement(measurement, rawNum, readingTime)
+    : 0;
+
+  setLatestValue(calibrated);
+  setLatestTimestamp(new Date(readingTime).toISOString());
+
+  //(Optional) Debug during integration
+  console.debug("Calibration", {
+    measurement: measurement.measurementName,
+    readingTime,
+    raw: rawNum,
+    calibrations: measurement.calibrations,
+    calibrated,
+  });
+
   } catch (err) {
     console.error('Error fetching latest value:', err);
     setLatestValue(0);
@@ -76,7 +95,8 @@ useEffect(() => {
 
   return () => clearInterval(id);
   // Recreate the timer when the selected instrument changes
-}, [selected?.instrumentId]);
+}, [selected?.instrumentId, selected?.measurementName]);
+
 
 
   const swipeHandlers = useSwipeable({
