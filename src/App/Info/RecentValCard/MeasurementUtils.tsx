@@ -1,3 +1,6 @@
+import type { Calibration } from "../../../Types/calibration";
+
+
 // Represents a color-coded category with a numeric range and label
 type RangeEntry = {
   color: string;                 // Hex or named color string for the gauge segment
@@ -7,13 +10,15 @@ type RangeEntry = {
 
 // Represents a parsed measurement including its source station and instrument metadata
 type ParsedMeasurement = {
-  stationName: string;           // Name of the station the instrument belongs to
-  instrumentName: string;        // Name of the instrument reporting the measurement
-  instrumentId: number;          // Unique identifier for the instrument
-  measurementName: string;       // Variable name (e.g., "ozone", "no2")
-  alias?: string;                // Prefered display name
-  units: string | null;          // Units of the measurement (e.g., "ppb"), or null if not available
-  ranges: RangeEntry[];          // Array of color-coded ranges associated with this variable
+  stationName: string;          
+  instrumentName: string;        
+  instrumentId: number;          
+  measurementId: number;
+  measurementName: string;      
+  alias?: string;                 
+  units: string | null;          
+  ranges: RangeEntry[];     
+  calibrations?: Calibration[];      
 };
 
 /**
@@ -34,6 +39,7 @@ export const extractMeasurementsWithRanges = (stations: any[]): ParsedMeasuremen
         stationName: station.name,
         instrumentName: child.name,
         instrumentId: child.id,
+        measurementId: measurement.id,
         measurementName: measurement.name,
         alias: measurement.alias ?? undefined, 
         units: measurement.units || null,
@@ -44,6 +50,7 @@ export const extractMeasurementsWithRanges = (stations: any[]): ParsedMeasuremen
               category: r.category || '',
             }))
           : [], // If no valid ranges, return an empty array
+          calibrations: Array.isArray(measurement.calibrations) ? measurement.calibrations : [], 
       }))
     )
   );
