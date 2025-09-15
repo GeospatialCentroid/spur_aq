@@ -10,7 +10,7 @@
  * - Emits compact state to parent when relevant settings change.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import './Graph.css';
 import Menu from './Components/Menu';
 import ControlBar from './Components/ControlBar';
@@ -44,15 +44,39 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const { config } = useConfig();
 
   // Helper to find a measurement in config by name, stationId, and instrumentId
-  function getMeasurementFromConfig(name: string, stationId: number, instrumentId: number) {
-    if (!config) return undefined;
-    const station = config.find((s) => s.id === stationId);
-    if (!station) return undefined;
-    const instrument = station.children.find((i) => i.id === instrumentId);
-    if (!instrument || !instrument.measurements) return undefined;
-    // Use case-insensitive comparison for name matching
-    return instrument.measurements.find((m) => m.name.toLowerCase() === name.toLowerCase());
+function getMeasurementFromConfig(name: string, stationId: number, instrumentId: number) {
+  if (!config) return undefined;
+  const station = config.find((s) => s.id === stationId);
+  if (!station) return undefined;
+  const instrument = station.children.find((i) => i.id === instrumentId);
+  if (!instrument || !instrument.measurements) return undefined;
+
+  const needle = name.trim().toLowerCase();
+  return instrument.measurements.find((m) => {
+    const byName = (m.name ?? '').trim().toLowerCase() === needle;
+    const byAlias = (m.alias ?? '').trim().toLowerCase() === needle;
+    return byName || byAlias;
+  });
+}
+
+function findMeasurementByInstrument(
+  key: string,
+  instrumentId: number
+): { measurement?: any; stationId?: number } {
+  if (!config) return {};
+  const needle = (key ?? '').trim().toLowerCase();
+  for (const station of config) {
+    const inst = station.children?.find(i => i.id === instrumentId);
+    if (!inst?.measurements) continue;
+    const m = inst.measurements.find(mm => {
+      const byName  = (mm.name  ?? '').trim().toLowerCase() === needle;
+      const byAlias = (mm.alias ?? '').trim().toLowerCase() === needle;
+      return byName || byAlias;
+    });
+    if (m) return { measurement: m, stationId: station.id };
   }
+  return {};
+}
 
   const [fromDate, setFromDate] = useState<string>(
     initialState?.fromDate || getStartOfTodayOneWeekAgoMountain() || ''
@@ -64,27 +88,55 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
    * NOTE: with the v2 URL format, `initialState` carries `measurements` where each entry
    * embeds its own `instrumentId` alongside the `variableName`. We hydrate from that here.
    */
-  const [variables, setVariables] = useState<SelectedMeasurement[]>(() => {
-    const stationId = initialState?.stationId ?? 0;
+ const [variables, setVariables] = useState<SelectedMeasurement[]>(() => {
+    const stationIdDefault = initialState?.stationId ?? 0;
     const ms = initialState?.measurements ?? [];
     return ms.map(({ instrumentId, variableName }) => {
-      const measurement = getMeasurementFromConfig(variableName, stationId, instrumentId);
-      if (!measurement) {
-        console.warn(
-          `Measurement not found for name: ${variableName}, stationId: ${stationId}, instrumentId: ${instrumentId}`
-        );
-      }
-      // Transfer all measurement attributes, plus name/stationId/instrumentId
-   return {
+      const within = getMeasurementFromConfig(variableName, stationIdDefault, instrumentId);
+      const across = findMeasurementByInstrument(variableName, instrumentId);
+      const m = within ?? across.measurement ?? null;
+      const resolvedStationId = within ? stationIdDefault : (across.stationId ?? stationIdDefault);
+
+      return {
         ...createBlankMeasurement(),
-        ...measurement,
-        name: measurement?.name ?? variableName,   // canonical key used for data lookups
-        alias: measurement?.alias ?? null,         // alias for UI
-        stationId,
+        ...(m ?? {}),
+        name:  m?.name  ?? variableName,  // canonical for API/data
+        alias: m?.alias ?? null,          // prefer alias for UI
+        stationId: resolvedStationId,
         instrumentId,
       };
     });
   });
+
+
+    // Re-hydrate variables with full metadata once config is loaded (fixes alias after refresh)
+ // Re-hydrate variables with full metadata once config is loaded (fixes alias after refresh)
+useEffect(() => {
+  if (!config || variables.length === 0) return;
+
+  setVariables(prev =>
+    prev.map(v => {
+      const byName  = getMeasurementFromConfig(v.name,  v.stationId, v.instrumentId);
+      const byAlias = v.alias ? getMeasurementFromConfig(v.alias, v.stationId, v.instrumentId) : undefined;
+      const xName   = findMeasurementByInstrument(v.name,  v.instrumentId);
+      const xAlias  = v.alias ? findMeasurementByInstrument(v.alias, v.instrumentId) : {};
+
+      const m    = byName ?? byAlias ?? xName.measurement ?? xAlias.measurement;
+      const stId = (byName || byAlias) ? v.stationId : (xName.stationId ?? xAlias.stationId ?? v.stationId);
+      if (!m) return v;
+
+      return {
+        ...v,
+        ...m,
+        name:  m.name  ?? v.name,            // keep canonical
+        alias: m.alias ?? v.alias ?? v.name, // show alias if available
+        stationId: stId,                     // <- fix mismatched stationId
+      };
+    })
+  );
+  
+}, [config]); // runs once when config hydrates
+
 
   const [interval, setInterval] = useState<string>(initialState?.interval || '60');
 
@@ -187,24 +239,31 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const handleIntervalChange = (newInterval: string) => setInterval(newInterval);
 
   const handleVariableChange = (index: number, value: SelectedMeasurement) => {
-    const measurement = getMeasurementFromConfig(value.name, value.stationId, value.instrumentId);
-    const mergedValue = measurement
-      ? {
-          ...value,
-          ...measurement,
-          name: measurement.name ?? value.name,          // keep canonical
-          alias: measurement.alias ?? value.alias ?? null, // display
-        }
-      : value;
+    const byName  = getMeasurementFromConfig(value.name,  value.stationId, value.instrumentId);
+    const byAlias = value.alias ? getMeasurementFromConfig(value.alias, value.stationId, value.instrumentId) : undefined;
+    const xName   = findMeasurementByInstrument(value.name,  value.instrumentId);
+    const xAlias  = value.alias ? findMeasurementByInstrument(value.alias, value.instrumentId) : {};
 
-    // Log the selected measurement's attributes to the console
+    const measurement = byName ?? byAlias ?? xName.measurement ?? xAlias.measurement;
+    const stId = (byName || byAlias) ? value.stationId : (xName.stationId ?? xAlias.stationId ?? value.stationId);
+
+    const mergedValue = measurement ? {
+      ...value,
+      ...measurement,
+      name:  measurement.name  ?? value.name,
+      alias: measurement.alias ?? value.alias ?? null,
+      stationId: stId, // <- ensure correct
+    } : value;
+
     console.log('Selected Measurement:', mergedValue);
-    setVariables((prev) => {
+    setVariables(prev => {
       const updated = [...prev];
       updated[index] = mergedValue;
       return updated;
     });
   };
+
+
 
   const handleRemoveVariable = (index: number) => {
     setVariables((prev) => prev.filter((_, i) => i !== index));
