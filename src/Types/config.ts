@@ -20,6 +20,7 @@ export interface Measurement {
   }[];
   feature_measure?: boolean;
   instrument_id?: number;
+  formula?: string | null;
 }
 
 /**
