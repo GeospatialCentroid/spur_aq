@@ -41,6 +41,7 @@ export interface Station {
   description: string;
   lat: string;
   lng: string;
+  icon_svg?: string;
   children: Instrument[];
 }
 

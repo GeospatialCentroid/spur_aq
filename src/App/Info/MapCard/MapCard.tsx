@@ -5,6 +5,10 @@ import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+import "./components/cluster.css";
+import './icons/stationIcons.css';
+
+
 
 import { useConfig } from "../../../context/ConfigContext";
 import "./MapCard.css";
