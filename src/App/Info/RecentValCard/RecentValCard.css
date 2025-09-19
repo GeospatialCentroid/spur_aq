@@ -152,7 +152,7 @@
    ────────────────────────── */
 .qr-code {
   position: absolute;
-  top: 0px;        /* start at the top edge of .card-body */
+  top: px;        /* start at the top edge of .card-body */
   right: 6px;    /* adjust as needed */
   width: 60px;
   height: auto;
