@@ -124,9 +124,17 @@ useEffect(() => {
         <FadingRightArrow />
       </div>
 
-      <div className="card recent-values-card">
-        <div className="card-body">
-          {selected && (
+    <div className="card recent-values-card">
+      <div className="card-body">
+        {/* QR Code in top right */}
+        <img
+          src="/Photos/recentValPhotos/ordorReportQR.png"
+          alt="QR Code"
+          className="qr-code"
+        />
+
+        {selected && (
+
             <div className="selected-variable-display gauge-section">
             <div className="gauge-box">  
               <GaugeDial value={latestValue} ranges={selected.ranges} />
