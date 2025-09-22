@@ -146,18 +146,3 @@
   font-weight: 500;
 }
 .variable-button:hover { background-color: #005bb5; }
-
-/* ──────────────────────────
-   QR code 
-   ────────────────────────── */
-.qr-code {
-  position: absolute;
-  top: px;        /* start at the top edge of .card-body */
-  right: 6px;    /* adjust as needed */
-  width: 60px;
-  height: auto;
-  z-index: 11;
-}
-.recent-values-card {
-  position: relative; /* allows absolute positioning inside */
-}

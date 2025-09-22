@@ -10,7 +10,6 @@
   gap: 8px;
   height: 100%;     /* <-- key: fill the 320px card */
   min-height: 0;    /* <-- allow inner scroller to shrink */
-  padding: 0.5rem;
   position: relative;
 }
 

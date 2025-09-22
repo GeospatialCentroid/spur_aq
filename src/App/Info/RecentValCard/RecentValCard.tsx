@@ -125,13 +125,6 @@ useEffect(() => {
       </div>
 
     <div className="card recent-values-card">
-      {/* QR Code in top right */}
-      <img
-        src="/Photos/ordorReportQR.png"
-        alt="QR Code"
-        className="qr-code"
-      />
-
       <div className="card-body">
         {selected && (
 

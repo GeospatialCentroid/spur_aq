@@ -1,3 +1,39 @@
 .card{
   background-color: #f1f1f1;
 }
+.card-body--with-qr { position: relative; }
+
+.card-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between; /* title left, QR right */
+  margin-bottom: .25rem;
+}
+.card-header-row .card-title {
+  font-size: clamp(0.9rem, 1.6vw, 1rem); 
+  line-height: 1.15;                      
+  margin: 0;                              
+}
+.qr-code-title {
+  width: 56px;   /* tweak size */
+  height: auto;
+}
+@media (max-width: 576px) {
+  .qr-code-title { width: 40px; }
+}
+ :root{
+  --section-title-size: 1.25rem;
+ }
+ .section-title{
+  font-size: var(--section-title-size);
+  line-height: 1.2;
+  margin: 0;
+  font-weight: 600;
+ }
+.top-row .card > .card-body {
+  padding: 0.5rem;  
+}
+.section-title__break {
+  display: block;       
+}
+.section-title { line-height: 1.1; }

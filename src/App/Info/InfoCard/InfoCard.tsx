@@ -43,40 +43,29 @@ const InfoCard: React.FC = () => {
   }, []);
 
   return (
-    <div className="col-md-4">
-    <div className="card info-card">
-          <div className="card-body info-card__body">
-            <div className="info-scroll" role="region" aria-label="Information">
-              {info.text && (
-                <>
-                  <h5 className="card-title info-card__title">About</h5>
-                  <p className="card-text info-card__text">{info.text}</p>
-                </>
-              )}
+    <div className="info-scroll" role="region" aria-label="Information">
+      {info.text && (
+        <>
+          <p className="card-text info-card__text">{info.text}</p>
+        </>
+      )}
 
-              {info.image && (
-                <img
-                  src={info.image}
-                  alt="Info"
-                  className="info-card__media info-card__media--bottom"
-                  loading="lazy"
-                />
-              )}
+      {info.image && (
+        <img
+          src={info.image}
+          alt="Info"
+          className="info-card__media info-card__media--bottom"
+          loading="lazy"
+        />
+      )}
 
-              {!info.image && info.video && (
-                <video className="info-card__media info-card__media--bottom" controls preload="metadata">
-                  <source src={info.video} type="video/mp4" />
-                  Your browser does not support the video tag.
-                </video>
-              )}
-
-              {!info.text && (info.image || info.video) && (
-                <h5 className="card-title info-card__title info-card__title--floating">About</h5>
-              )}
-            </div>
-          </div>
-        </div>
-        </div>
+      {!info.image && info.video && (
+        <video className="info-card__media info-card__media--bottom" controls preload="metadata">
+          <source src={info.video} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      )}
+    </div>   
   );
 };
 
