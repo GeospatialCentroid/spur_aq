@@ -7,7 +7,7 @@
   --headerPadX: clamp(20px, 2vw, 20px);
   --titleSize:  clamp(1.2rem, 2vw, 1.6rem);
   --logoH:      clamp(20px, 7vh, 40px);
-  --headerExtra: 0px; /* small buffer for .app-body padding */
+  --headerExtra: 0px;
 
   /* Graphs: render vs reserve (reserve kept for future; render is used) */
   --graphHRender: clamp(220px, 24vh, 300px);
@@ -17,17 +17,11 @@
   --extra: 0px;
   --bottomReserve: calc(var(--graphHReserve) * 2 + var(--graphGap) + var(--extra));
 
-  /* Top-row/card scaling */
+  /* Top row/card scaling cap */
   --topRowMax: clamp(240px, 13.5vh, 280px);
-
-  /* Gauge controls (single source of truth) */
-  --gaugeTopPad: 8px;
-  /* ↓ Adjust this to resize the dial so two graphs fit */
-  --gaugeMaxHTop: clamp(1px, 1vh, 1px);
 
   /* Map sizing */
   --mapMaxHTop: clamp(160px, 22vh, 200px);
-
   --legendScaleTop: 0.85;
 }
 
@@ -50,14 +44,11 @@
   padding-block: var(--headerPadY);
   padding-inline: var(--headerPadX);
   position: sticky;
-  z-index: 5000;  /* higher than Leaflet controls (~1000) */
-  top:0;
+  z-index: 5000;
+  top: 0;
 }
 
-.App-info {
-  position: relative;
-  z-index: 1;         /* stays beneath the header */
-}
+.App-info { position: relative; z-index: 1; }
 
 .app-header h1,
 .app-header .title {
@@ -68,30 +59,16 @@
 }
 
 .app-header img,
-.app-header svg {
-  height: var(--logoH);
-  width: auto;
-}
+.app-header svg { height: var(--logoH); width: auto; }
 
-/* Offset the fixed header automatically */
+/* Offset the fixed header */
 .app-body {
   padding-top: calc(var(--headerPadY) * 2 + var(--logoH) + var(--headerExtra));
   flex: 1;
 }
 
-.body-section {
-  width: 100%;
-  align-self: center;
-  box-shadow: #282c34;
-  margin: 0;
-  padding: 0;
-}
-
-.stack {
-  flex: 1;
-  min-height: fit-content;
-  box-shadow: #282c34;
-}
+.body-section { width: 100%; margin: 0; padding: 0; }
+.stack { flex: 1; min-height: fit-content; }
 
 .app-footer {
   background-color: #282c34;
@@ -102,45 +79,15 @@
   width: 100%;
 }
 
-.app-loading {
-  padding: 4rem;
-  font-size: 1.5rem;
-}
+.app-loading { padding: 4rem; font-size: 1.5rem; }
 
 /* ---------- Graphs ---------- */
-/* Force graph cards to use the responsive render height */
 .graph-wrapper { height: var(--graphHRender) !important; }
 
-/* Optional: cap card height so the row doesn’t explode */
-.App-info .recent-values-card,
-.App-info .recent-values-card .card-body {
+/* Optional: cap card height; low-specificity so components can override overflow */
+:where(.App-info .recent-values-card),
+:where(.App-info .recent-values-card .card-body) {
   max-height: var(--topRowMax);
-  overflow: hidden;
-}
-
-/* ---------- Gauge (RecentValCard) ---------- */
-.recent-values-card .gauge-section {
-  padding-top: var(--gaugeTopPad);
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-/* Wrap your <GaugeDial/> with <div class="gauge-box"> in JSX */
-.recent-values-card .gauge-box {
-  width: 100%;
-  aspect-ratio: 2 / 1;  /* roomy semicircle area */
-  flex: 0 0 auto;
-  min-height: 100px;                  /* lowered so cap can take effect */
-  max-height: var(--gaugeMaxHTop);    /* cap from the variables above */
-}
-
-/* Make the SVG fill the box and keep labels visible */
-.recent-values-card .gauge-box svg,
-.recent-values-card .gauge-box .gauge-svg {
-  width: 100% !important;
-  height: 100% !important;
-  overflow: visible;
-  display: block;
 }
 
 /* ---------- Map (MapCard) ---------- */
