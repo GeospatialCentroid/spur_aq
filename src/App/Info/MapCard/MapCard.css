@@ -28,7 +28,6 @@
   height: auto !important;
 }
 
-
 /* The map wrapper now truly fills available height */
 .map-container {
   flex: 1 1 auto;     /* <-- key: fills the card-body vertically */
@@ -44,14 +43,20 @@
 }
 
 /* Standard Leaflet control margins  */
-.leaflet-right .leaflet-control { margin-right: 10px; }
-.leaflet-bottom .leaflet-control { margin-bottom: 10px; }
-/* Keep Leaflet controls below the header */
-.leaflet-top, .leaflet-bottom, .leaflet-control-container {
-  z-index: 1000;      /* lower than header’s 5000 */
+.leaflet-right .leaflet-control {
+   margin-right: 10px; 
 }
 
+.leaflet-bottom .leaflet-control { 
+  margin-bottom: 10px; 
+}
 
+/* Keep Leaflet controls below the header */
+.leaflet-top, 
+.leaflet-bottom, 
+.leaflet-control-container {
+  z-index: 1000;      /* lower than header’s 5000 */
+}
 
 /* =========================
    Fullscreen behavior 
@@ -71,42 +76,179 @@
   width: 100vw !important;
   height: 100vh !important;
 }
-.map-fullscreen .leaflet-container { animation: fadeIn 0.3s ease-in; }
-@keyframes fadeIn { from {opacity:0; transform:scale(1.01);} to {opacity:1; transform:scale(1);} }
-body.map-fullscreen-active { overflow: hidden; }
-.map-expand-button { background:#fff; padding:6px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.map-fullscreen .leaflet-container { 
+  animation: fadeIn 0.3s ease-in; 
+}
+
+@keyframes fadeIn { 
+  from {opacity:0; transform:scale(1.01);} to {opacity:1; transform:scale(1);} 
+}
+
+body.map-fullscreen-active { 
+  overflow: hidden;
+ }
+
+.map-expand-button { 
+  background:#fff;
+  padding:6px; display:flex; 
+  align-items:center; 
+  justify-content:center; cursor:pointer; 
+}
 
 /* =========================
    Legend styling
    ========================= */
-.legend { background:#fff; display:flex; flex-direction:column; color:#333; font-size:12px;
-  box-shadow:0 1px 4px rgba(0,0,0,0.2); border:1px solid #ccc; border-radius:4px;
-  width:220px; max-width:220px; height:120px; min-height:60px; max-height:300px; overflow:hidden; }
-.legend-header { position:relative; display:flex; align-items:center; justify-content:center;
-  padding:4px 52px 4px 8px; font-weight:600; background:#f9f9f9; border-bottom:1px solid #eee; cursor:move; }
-.legend-body { flex:1 1 auto; overflow-y:auto; padding:4px 8px; }
-.legend-close { all:unset; position:absolute; right:6px; top:4px; width:18px; height:18px; display:inline-flex;
-  align-items:center; justify-content:center; border:1px solid #ccc; border-radius:3px; font-size:11px; line-height:1; cursor:pointer; }
-.legend-reset { all:unset; position:absolute; right:28px; top:4px; width:18px; height:18px; display:inline-flex;
-  align-items:center; justify-content:center; border:1px solid #ccc; border-radius:3px; font-size:11px; line-height:1; cursor:pointer; }
-.legend .legend-item { display:flex; align-items:center; gap:8px; padding:3px 2px; cursor:pointer; }
-.legend .legend-item i { width:12px; height:12px; display:inline-block; border:1px solid rgba(0,0,0,0.15); }
-.legend .selected-legend { font-weight:600; outline:2px solid rgba(0,0,0,0.08); border-radius:3px; background:rgba(0,0,0,0.03); }
+.legend { 
+  background:#fff; 
+  display:flex; 
+  flex-direction:column; 
+  color:#333; 
+  font-size:12px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.2); 
+  border:1px solid #ccc; 
+  border-radius:4px;
+  width:220px;
+  max-width:220px;
+  height:120px; 
+  min-height:60px; 
+  max-height:300px; 
+  overflow:hidden; 
+  position: relative;
+  padding: 0;
+  box-sizing: border-box;
+  --footer-h: 16px;
+}
 
-.legend-resizer { position:absolute; right:6px; bottom:6px; width:12px; height:12px; cursor:nwse-resize;
-  border:1px solid #bbb; border-radius:3px; background:linear-gradient(135deg, rgba(0,0,0,0.08) 0 50%, transparent 50% 100%); }
-.toggle-legend-btn { font-size:12px; background:#fff; border:1px solid #ccc; border-radius:3px; padding:6px 8px; cursor:pointer; }
+.legend-header { 
+  position:relative; 
+  display:flex; 
+  align-items:center; 
+  justify-content:center;
+  padding:4px 52px 4px 8px; 
+  font-weight:600; 
+  background:#f9f9f9; 
+  border-bottom:1px solid #eee; 
+  cursor:move; 
+}
+
+.legend-body { 
+  flex:1 1 auto; 
+  min-height: 0;
+  overflow-y:auto; 
+  padding: 4px 14px calc(var(--footer-h) + 8px) 8px;
+  margin-bottom: var(--footer-h);
+  box-sizing: border-box;
+}
+
+.legend-close { 
+  all:unset; 
+  position:absolute; 
+  right:6px; 
+  top:4px; 
+  width:18px; 
+  height:18px; 
+  display:inline-flex;
+  align-items:center; 
+  justify-content:center; 
+  border:1px solid #ccc; 
+  border-radius:3px; 
+  font-size:11px; 
+  line-height:1; 
+  cursor:pointer; 
+}
+
+.legend-reset { 
+  all:unset; 
+  position:absolute; 
+  right:28px; 
+  top:4px; 
+  width:18px; 
+  height:18px; 
+  display:inline-flex;
+  align-items:center; 
+  justify-content:center; 
+  border:1px solid #ccc; 
+  border-radius:3px; 
+  font-size:11px; 
+  line-height:1; 
+  cursor:pointer; 
+}
+
+.legend .legend-item { 
+  display:flex; 
+  align-items:center; 
+  gap:8px; 
+  padding:3px 2px; 
+  cursor:pointer; 
+}
+
+.legend .legend-item i { 
+  width:12px; height:12px; 
+  display:inline-block; 
+  border:1px solid rgba(0,0,0,0.15); 
+}
+
+.legend .selected-legend { 
+  font-weight:600; 
+  outline:2px solid rgba(0,0,0,0.08); 
+  border-radius:3px; 
+  background:rgba(0,0,0,0.03); 
+}
+
+.toggle-legend-btn { font-size:12px; 
+  background:#fff; 
+  border:1px solid #ccc; 
+  border-radius:3px; 
+  padding:6px 8px; 
+  cursor:pointer; 
+}
+
+.legend-footer {
+  position: absolute;
+  right: 2px;  
+  bottom: 2px;  
+  height: var(--footer-h);
+  display: flex;
+  align-items: center;
+  pointer-events: none; 
+  background: transparent;
+}
+
+.legend-footer .legend-resizer {
+  position: static;           
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+  border: 1px solid #bbb; 
+  border-radius: 3px; 
+  background: linear-gradient(135deg, rgba(0,0,0,0.08) 0 50%, transparent 50% 100%);
+  pointer-events: auto;      
+  z-index: 2;
+}
+
 /* legacy .legend-container left as-is */
 /* Move Leaflet controls ONLY in fullscreen */
 .map-container.map-fullscreen .leaflet-top {
   top: 56px;        /* nudge down so they don't sit under the sticky header */
 }
 /* Legend scrolls with the page by default */
-.legend-floating { position: absolute; z-index: 1000;}
+.legend-floating { 
+  position: absolute; 
+  z-index: 1000;
+}
+
 /* When the map is fullscreen, pin the legend to the viewport */
-.legend-floating.fixed {position: fixed;}
-.map-container.map-fullscreen .leaflet-left  { left: 12px; }
-.map-container.map-fullscreen .leaflet-right { right: 12px; }
+.legend-floating.fixed {
+  position: fixed;
+}
+
+.map-container.map-fullscreen .leaflet-left  { 
+  left: 12px; 
+}
+
+.map-container.map-fullscreen .leaflet-right { 
+  right: 12px; 
+}
 
 /* Optional: small extra spacing for the zoom control stack itself */
 .map-container.map-fullscreen .leaflet-control-zoom {

@@ -95,7 +95,7 @@ function App() {
         style={{ objectFit: 'contain' }}
       />
       <h1 className="title">
-        Spur <b>R</b>egional <b>A</b>ir <b>M</b>onitoring <b>S</b>ite (<b>RAMS</b>)
+        <b>Spur</b> <b>R</b>egional <b>A</b>ir <b>M</b>onitoring <b>S</b>ite (<b>RAMS</b>)
       </h1>
     </header>
 

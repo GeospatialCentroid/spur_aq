@@ -50,8 +50,10 @@ export function useEmitGraphState({
     const state: EncodedGraphState = {
       id: id.toString(36),
       stationId: variables[0].stationId,
-      instrumentId: variables[0].instrumentId,
-      variableNames: variables.map(v => v.name),
+      measurements: variables.map(v => ({
+        instrumentId: v.instrumentId,
+        variableName: v.name,
+      })),
       fromDate,
       toDate,
       interval,

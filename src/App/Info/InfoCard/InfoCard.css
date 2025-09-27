@@ -1,22 +1,21 @@
 /* Fixed overall card height */
 .info-card {
-  height: 260px; /* adjust as needed */
+  height: 320px; /* adjust as needed */
   overflow: hidden;
 }
 
-/* Body: flex column to support split */
 .info-card__body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  height: 100%;
-  padding: 0.5rem;
+  height: 100%;     /* <-- key: fill the 320px card */
+  min-height: 0;    /* <-- allow inner scroller to shrink */
   position: relative;
 }
 
 /* Title */
 .info-card__title {
-  margin: 0 0 4px 0;
+  margin: 0 0 0;
   font-size: clamp(0.9rem, 1.6vw, 1rem);
   line-height: 1.15;
 }
@@ -28,76 +27,63 @@
   left: 12px;
 }
 
-/* ---- 50/50 Split ---- */
-.info-card--split .info-card__textWrap,
-.info-card--split .info-card__mediaWrap {
-  flex: 1 1 50%;
-  min-height: 0;
-}
-
-/* If only one block, let it fill the body */
-.info-card:not(.info-card--split) .info-card__textWrap,
-.info-card:not(.info-card--split) .info-card__mediaWrap {
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-/* Text wrap: flex column so paragraph can stretch */
-.info-card__textWrap {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
-
+/* Text itself */
 /* Text itself */
 .info-card__text {
   margin: 0;
   font-size: clamp(0.82rem, 1.2vw, 1rem);
-  line-height: 1.25;
-
-  flex: 1 1 auto;
-  min-height: 0;
-
-  /* Clamp lines */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 8;
+  line-height: 1.35;
+  white-space: normal;
   overflow-wrap: anywhere;
 }
 
-/* On wide screens, allow more lines to fill space */
-@media (min-width: 992px) {
-  .info-card--split .info-card__text {
-    -webkit-line-clamp: 12;
-  }
+.info-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;             /* show only if needed */
+  -webkit-overflow-scrolling: touch;
+  box-sizing: content-box;
+
+  /* scrollbar styling */
+  scrollbar-width: thin;           /* firefox */
+  scrollbar-color: auto transparent;
+  scrollbar-gutter: stable;        /* reserve space only when bar appears */
 }
 
-/* Media half */
-.info-card__mediaWrap {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 0;
-  height: 100%;
-}
 
 .info-card__media {
   width: 100%;
-  height: 100%;
+  height: auto;        /* let the content define height */
   max-width: 100%;
-  max-height: 100%;
   object-fit: contain;
   display: block;
 }
 
-/* Small screens: give text a touch more space if needed */
-@media (max-width: 480px) {
-  .info-card--split .info-card__textWrap {
-    flex: 0 0 55%;
-  }
-  .info-card--split .info-card__mediaWrap {
-    flex: 0 0 45%;
-  }
+
+.info-card__media--bottom {
+  margin-top: auto;          /* push media to bottom of scroll column */
+  width: 100%;
+  height: auto;
+  max-height: 40vh;          /* tweak to taste */
+  object-fit: contain;
+  border-radius: 12px;       /* optional */
 }
+
+/* Safety: ensure wrappers don’t block scrolling */
+.info-card,
+.info-card__content,
+.info-card__inner { min-height: 0; }
+
+/* Optional: nicer internal scrollbar */
+.info-scroll::-webkit-scrollbar { width: 10px; }
+.info-scroll::-webkit-scrollbar-thumb { border-radius: 10px; }
+.info-scroll::-webkit-scrollbar-track { background: transparent; }
+.info-scroll {
+  scrollbar-width: thin;           /* slim bar on overflow */
+  scrollbar-color: auto transparent;
+}
+.col-md-4 { min-height: 0; }
+
