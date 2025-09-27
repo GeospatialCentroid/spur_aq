@@ -1,6 +1,3 @@
-import type { Calibration } from "../../../Types/calibration";
-
-
 // Represents a color-coded category with a numeric range and label
 type RangeEntry = {
   color: string;                 // Hex or named color string for the gauge segment
@@ -10,15 +7,12 @@ type RangeEntry = {
 
 // Represents a parsed measurement including its source station and instrument metadata
 type ParsedMeasurement = {
-  stationName: string;          
-  instrumentName: string;        
-  instrumentId: number;          
-  measurementId: number;
-  measurementName: string;      
-  alias?: string;                 
-  units: string | null;          
-  ranges: RangeEntry[];     
-  calibrations?: Calibration[];      
+  stationName: string;           // Name of the station the instrument belongs to
+  instrumentName: string;        // Name of the instrument reporting the measurement
+  instrumentId: number;          // Unique identifier for the instrument
+  measurementName: string;       // Variable name (e.g., "ozone", "no2")
+  units: string | null;          // Units of the measurement (e.g., "ppb"), or null if not available
+  ranges: RangeEntry[];          // Array of color-coded ranges associated with this variable
 };
 
 /**
@@ -33,15 +27,11 @@ type ParsedMeasurement = {
 export const extractMeasurementsWithRanges = (stations: any[]): ParsedMeasurement[] => {
   return stations.flatMap((station: any) =>
     (station.children || []).flatMap((child: any) =>
-      (child.measurements || [])
-        .filter((measurement: any) => measurement?.feature_measure === true)
-        .map((measurement: any) => ({
+      (child.measurements || []).map((measurement: any) => ({
         stationName: station.name,
         instrumentName: child.name,
         instrumentId: child.id,
-        measurementId: measurement.id,
         measurementName: measurement.name,
-        alias: measurement.alias ?? undefined, 
         units: measurement.units || null,
         ranges: Array.isArray(measurement.ranges)
           ? measurement.ranges.map((r: any) => ({
@@ -50,7 +40,6 @@ export const extractMeasurementsWithRanges = (stations: any[]): ParsedMeasuremen
               category: r.category || '',
             }))
           : [], // If no valid ranges, return an empty array
-          calibrations: Array.isArray(measurement.calibrations) ? measurement.calibrations : [], 
       }))
     )
   );
@@ -58,7 +47,3 @@ export const extractMeasurementsWithRanges = (stations: any[]): ParsedMeasuremen
 
 // Export the types for use in other modules
 export type { ParsedMeasurement, RangeEntry };
-// ADD: shared filter for feature-measure items
-export const onlyFeatureMeasures = <T extends { feature_measure?: boolean | null }>(list: T[] = []) =>
-  list.filter(m => m?.feature_measure === true);
-

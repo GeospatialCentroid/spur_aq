@@ -33,5 +33,4 @@ export interface Measurement {
   feature_measure: boolean;
   ranges: Range[] | null;
   instrument_id?: number; // add this if you're injecting it when parsing
-  formula?: string | null;
 }

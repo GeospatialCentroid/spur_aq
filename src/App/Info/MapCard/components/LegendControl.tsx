@@ -132,10 +132,7 @@ const LegendControl: React.FC = () => {
         </span>
       </div>
       <div class="legend-body"></div>
-      <!-- Footer holds the visual resizer inline with the scrollbar arrows -->
-      <div class="legend-footer">
-        <div class="legend-resizer" title="Resize"></div>
-      </div>
+      <div class="legend-resizer"></div>
     `;
 
     document.body.appendChild(container);

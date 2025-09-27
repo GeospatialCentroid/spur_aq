@@ -1,14 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, TileLayer, LayersControl } from "react-leaflet";
+import { MapContainer, TileLayer } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/leaflet.markercluster";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import "./components/cluster.css";
-import './icons/stationIcons.css';
-
-
 
 import { useConfig } from "../../../context/ConfigContext";
 import "./MapCard.css";
@@ -59,45 +55,18 @@ const MapCard: React.FC = () => {
           style={{ width: "100%", height: "100%" }}
               >
             <RegisterMapRef mapRef={mapRef} />
- {/* Layout controls */}
-<ResizeMapOnExpand trigger={expanded} />
-<ExpandControl expanded={expanded} setExpanded={setExpanded} />
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-<LayersControl position="topright">
-  {/* --- Base layers (only one active) --- */}
-  <LayersControl.BaseLayer checked name="OpenStreetMap">
-    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-  </LayersControl.BaseLayer>
+            {/* Layout controls */}
+            <ResizeMapOnExpand trigger={expanded} />
+            <ExpandControl expanded={expanded} setExpanded={setExpanded} />
 
-  <LayersControl.BaseLayer name="Esri Satellite">
-    <TileLayer
-      url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-      attribution="Tiles © Esri"
-    />
-  </LayersControl.BaseLayer>
+            {/* Data layers */}
+            <MarkerCluster stations={config} />
+            <LandUseLayer />
 
-  <LayersControl.BaseLayer name="USGS Topo">
-  <TileLayer
-    url="https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}"
-    attribution="Map courtesy USGS"
-    maxZoom={20}
-  />
-</LayersControl.BaseLayer>
-
-  {/* --- Overlays (multi-select) --- */}
-  <LayersControl.Overlay checked name="Stations">
-    {/* MarkerCluster should render a LayerGroup/FeatureGroup under the hood; if not, it still works here */}
-    <MarkerCluster stations={config} />
-  </LayersControl.Overlay>
-
-  <LayersControl.Overlay name="Land Use">
-    <LandUseLayer />
-  </LayersControl.Overlay>
-</LayersControl>
-
-              {/* UI */}
-              <LegendControl />
-
+            {/* UI */}
+            <LegendControl />
           </MapContainer>
         </div>
       </div>

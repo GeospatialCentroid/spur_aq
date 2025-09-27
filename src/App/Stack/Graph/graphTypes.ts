@@ -29,7 +29,6 @@ export function createBlankMeasurement(): SelectedMeasurement {
     ranges: null,
     stationId: -1,
     instrumentId: -1,
-    formula: null,
   };
 }
 

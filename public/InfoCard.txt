@@ -5,6 +5,8 @@
    and we can find what works for the display. 
   
 
+# TEXT HOW TO: Try to keep it under 300 characters. Otherwise we loose visiblity of both graphs. This shows in a small info card.
+
 TEXT:
 The Spur Regional Air Monitoring Site (RAMS) is a long-term air quality monitoring station at the CSU Spur campus in Denver, Colorado. We aim to bring awareness to pollutant concentrations in the region and communicate air quality observations to the Spur community.
 

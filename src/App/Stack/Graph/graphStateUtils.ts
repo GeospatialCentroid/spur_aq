@@ -2,85 +2,58 @@
 /**
  * Encodes and decodes graph state for use in shareable, human-editable URLs.
  *
- * v2 Format (preferred):
- * - Each field is a key.value pair (e.g., `graph.1a`)
+ * Format:
+ * - Each field is a key.value pair (e.g., `station.1`)
  * - Fields are separated by `_`
- * - Multiple measurements are separated by `~`
- * - Each measurement is encoded as `<instrumentId>-<variableName>` (variableName URI-encoded)
+ * - Multiple variables are separated by `~`
  * - Selection domain is represented as `start~end` in seconds
  * - Multiple graph configurations are separated by `__`
  *
- * Example (single graph, v2):
- *   graph.1a_station.1_variables.12-ozone~34-pm25_start.2025-07-01T00:00_end.2025-07-08T00:00_interval.60_domain.1620000000~1620600000
+ * Example (single graph):
+ *   graph.1a_station.1_instrument.2_variables.ozone~pm25_start.2025-07-01T00:00_end.2025-07-08T00:00_interval.60_domain.1620000000~1620600000
  *
- * Legacy v1 (still decodable):
- *   graph.1a_station.1_instrument.12_variables.ozone~pm25_start...._end...._interval...._domain.s~e
+ * Example (multiple graphs):
+ *   graph.1a_...__graph.2b_...
  */
 
-export type EncodedMeasurement = {
-  instrumentId: number;
-  variableName: string;
-};
-
-/** A compact serializable representation of a graph's UI state (v2 shape) */
+/** A compact serializable representation of a graph's UI state */
 export type EncodedGraphState = {
   id: string;
   stationId: number;
-  /** v2: variables carry their own instrumentId */
-  measurements: EncodedMeasurement[];
+  instrumentId: number;
+  variableNames: string[];
   fromDate: string;
-  toDate: string;           // '' means "live / open-ended"
+  toDate: string;
   interval: string;
   selection: [number, number]; // [start, end] timestamps in ms
 };
 
-/** ---- helpers ---- */
-
+/**
+ * Encodes a selection time range into a "start~end" string (in seconds)
+ */
 function encodeSelection([start, end]: [number, number]): string {
   return `${Math.floor(start / 1000)}~${Math.floor(end / 1000)}`;
 }
 
-function decodeSelection(secPair: string): [number, number] {
-  const [s, e] = secPair.split('~').map(Number);
-  return [s * 1000, e * 1000];
-}
-
-function clampSelectionToRange(
-  raw: [number, number],
-  rangeStartMs: number,
-  rangeEndMs: number
-): [number, number] {
-  const clampedStart = Math.max(rangeStartMs, Math.min(rangeEndMs, raw[0]));
-  const clampedEnd = Math.max(rangeStartMs, Math.min(rangeEndMs, raw[1]));
-  return (clampedEnd - clampedStart < 60_000)
-    ? [rangeStartMs, rangeEndMs]
-    : [clampedStart, clampedEnd];
-}
-
-/** Encode a single measurement token as `<instrumentId>-<variable>` with URI-safe variable */
-function encodeMeasurementToken(m: EncodedMeasurement): string {
-  return `${m.instrumentId}-${encodeURIComponent(m.variableName)}`;
-}
-
-/** Try to parse `<instrumentId>-<variable>`; returns null on failure */
-function decodeMeasurementToken(token: string): EncodedMeasurement | null {
-  const dash = token.indexOf('-');
-  if (dash <= 0) return null;
-  const instStr = token.slice(0, dash);
-  const varStr = token.slice(dash + 1);
-  const instrumentId = Number(instStr);
-  if (!Number.isFinite(instrumentId)) return null;
-  return { instrumentId, variableName: decodeURIComponent(varStr) };
-}
-
-/** ---- v2 encoder ---- */
+/**
+ * Encodes a single graph's state to a readable URL-safe string.
+ *
+ * Keys:
+ *   - graph: ID
+ *   - station: Station ID
+ *   - instrument: Instrument ID
+ *   - variables: comma-free variable list (joined by `~`)
+ *   - start/end: ISO 8601 strings
+ *   - interval: numeric interval
+ *   - domain: start~end in seconds
+ */
 export function encodeGraphState(g: EncodedGraphState): string {
-  const vars = g.measurements.map(encodeMeasurementToken).join('~');
+  const vars = g.variableNames.join('~');
   const sel = encodeSelection(g.selection);
   return [
     `graph.${g.id}`,
     `station.${g.stationId}`,
-    // v2 intentionally omits `instrument.` to avoid the single-instrument trap
+    `instrument.${g.instrumentId}`,
     `variables.${vars}`,
     `start.${g.fromDate}`,
     `end.${g.toDate}`,
@@ -90,98 +63,39 @@ export function encodeGraphState(g: EncodedGraphState): string {
 }
 
 /**
- * Legacy encoder shim (optional):
- * If you still have old call sites that supply { instrumentId, variableNames },
- * you can keep a small adapter around them to build `measurements` and then call encodeGraphState().
+ * Decodes a single encoded graph string into an `EncodedGraphState` object.
+ * Returns null if decoding fails.
  */
-// export function encodeGraphStateLegacyShim(args: {
-//   id: string;
-//   stationId: number;
-//   instrumentId: number;
-//   variableNames: string[];
-//   fromDate: string;
-//   toDate: string;
-//   interval: string;
-//   selection: [number, number];
-// }): string {
-//   const measurements: EncodedMeasurement[] = args.variableNames.map(v => ({
-//     instrumentId: args.instrumentId,
-//     variableName: v,
-//   }));
-//   return encodeGraphState({
-//     id: args.id,
-//     stationId: args.stationId,
-//     measurements,
-//     fromDate: args.fromDate,
-//     toDate: args.toDate,
-//     interval: args.interval,
-//     selection: args.selection,
-//   });
-// }
-
-/** ---- decoder that supports both v2 (preferred) and legacy v1 ---- */
 export function decodeGraphState(encoded: string): EncodedGraphState | null {
   try {
     const parts = encoded.split('_');
+    const id = parts[0].split('.')[1];
+    const stationId = parseInt(parts[1].split('.')[1]);
+    const instrumentId = parseInt(parts[2].split('.')[1]);
+    const variableNames = parts[3].split('.')[1].split('~');
+    const fromDate = parts[4].split('.')[1];
+    const toDatePart = parts[5].split('.')[1];
+    const interval = parts[6].split('.')[1];
 
-    // Build a map of key -> value for robustness
-    const kv = new Map<string, string>();
-    for (const p of parts) {
-      const dot = p.indexOf('.');
-      if (dot <= 0) continue;
-      const k = p.slice(0, dot);
-      const v = p.slice(dot + 1);
-      kv.set(k, v);
-    }
+    const toDate = toDatePart === 'null' || toDatePart === 'undefined' || toDatePart === '' ? '' : toDatePart;
 
-    const id = kv.get('graph') ?? '';
-    const stationId = Number(kv.get('station') ?? NaN);
-    const fromDate = kv.get('start') ?? '';
-    const toDateRaw = kv.get('end') ?? '';
-    const interval = kv.get('interval') ?? '';
-    const domainRaw = kv.get('domain') ?? '';
-
-    if (!id || !Number.isFinite(stationId) || !fromDate || !interval || !domainRaw) {
-      console.warn('decodeGraphState: missing required fields', { id, stationId, fromDate, interval, domainRaw });
-      return null;
-    }
-
-    // Determine if this is legacy (v1) or new (v2) by presence of "instrument."
-    const legacyInstrument = kv.get('instrument'); // if present => v1
-    const variablesRaw = kv.get('variables') ?? '';
-
-    let measurements: EncodedMeasurement[] = [];
-    if (legacyInstrument) {
-      // v1: all variables belong to the single instrument id
-      const instId = Number(legacyInstrument);
-      if (!Number.isFinite(instId)) return null;
-      const vNames = variablesRaw ? variablesRaw.split('~') : [];
-      measurements = vNames.map(v => ({
-        instrumentId: instId,
-        variableName: decodeURIComponent(v),
-      }));
-    } else {
-      // v2: variables encoded as `<instId>-<var>` tokens
-      const tokens = variablesRaw ? variablesRaw.split('~') : [];
-      measurements = tokens
-        .map(decodeMeasurementToken)
-        .filter((m): m is EncodedMeasurement => !!m);
-    }
-
-    // handle toDate: '', 'null', 'undefined' -> ''
-    const toDate = (toDateRaw === 'null' || toDateRaw === 'undefined') ? '' : toDateRaw;
-
-    // clamp selection
-    const [selStartMs, selEndMs] = decodeSelection(domainRaw);
-    const startMs = new Date(fromDate).getTime();
+    const [selStartSec, selEndSec] = parts[7].split('.')[1].split('~').map(Number);
+    const start = new Date(fromDate).getTime();
     const now = Date.now();
-    const endMs = toDate ? new Date(toDate).getTime() : now;
-    const selection = clampSelectionToRange([selStartMs, selEndMs], startMs, endMs);
+    const end = toDate ? new Date(toDate).getTime() : now;
+
+    const rawSelection: [number, number] = [selStartSec * 1000, selEndSec * 1000];
+    const clampedStart = Math.max(start, Math.min(end, rawSelection[0]));
+    const clampedEnd = Math.max(start, Math.min(end, rawSelection[1]));
+
+    const selection: [number, number] =
+      clampedEnd - clampedStart < 60 * 1000 ? [start, end] : [clampedStart, clampedEnd];
 
     return {
       id,
       stationId,
-      measurements,
+      instrumentId,
+      variableNames,
       fromDate,
       toDate,
       interval,
@@ -193,12 +107,20 @@ export function decodeGraphState(encoded: string): EncodedGraphState | null {
   }
 }
 
-/** ---- multiple graphs ---- */
 
+
+/**
+ * Encodes a list of graph states into a single URL-safe string.
+ * Graphs are separated by `__`.
+ */
 export function encodeGraphList(graphs: EncodedGraphState[]): string {
   return graphs.map(encodeGraphState).join('__');
 }
 
+/**
+ * Decodes a list of graph states from a combined string.
+ * Invalid entries are filtered out.
+ */
 export function decodeGraphList(param: string): EncodedGraphState[] {
   return param
     .split('__')

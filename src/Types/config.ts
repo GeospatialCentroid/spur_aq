@@ -20,7 +20,6 @@ export interface Measurement {
   }[];
   feature_measure?: boolean;
   instrument_id?: number;
-  formula?: string | null;
 }
 
 /**
@@ -42,7 +41,6 @@ export interface Station {
   description: string;
   lat: string;
   lng: string;
-  icon_svg?: string;
   children: Instrument[];
 }
 
