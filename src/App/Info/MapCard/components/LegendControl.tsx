@@ -27,6 +27,7 @@ const LegendControl: React.FC = () => {
    * v2 schema: reuse saved position only if the user moved the legend,
    * and the current window size is close to when it was saved.
    */
+  const PERSIST_LEGEND = false; // ← flip to true if you ever want to remember position again
   const POS_KEY = "legendPos_v2";
   const VIEW_TOL = 120; // px tolerance for "same" viewport
 
@@ -42,38 +43,40 @@ const LegendControl: React.FC = () => {
     userMoved?: boolean;
   };
 
-  const getSavedPos = (): SavedPos | null => {
-    try {
-      const raw = localStorage.getItem(POS_KEY);
-      if (!raw) return null;
-      const p = JSON.parse(raw) as Partial<SavedPos>;
-      if (!p || !p.userMoved) return null;
-      if (
-        typeof p.left === "number" &&
-        typeof p.top === "number" &&
-        typeof p.winW === "number" &&
-        typeof p.winH === "number"
-      ) {
-        const dw = Math.abs(window.innerWidth - p.winW);
-        const dh = Math.abs(window.innerHeight - p.winH);
-        if (dw <= VIEW_TOL && dh <= VIEW_TOL) return p as SavedPos;
-      }
-    } catch {}
-    return null;
-  };
+const getSavedPos = (): SavedPos | null => {
+  if (!PERSIST_LEGEND) return null; // disable reads when persistence is off
+  try {
+    const raw = localStorage.getItem(POS_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw) as Partial<SavedPos>;
+    if (!p || !p.userMoved) return null;
+    if (
+      typeof p.left === "number" &&
+      typeof p.top === "number" &&
+      typeof p.winW === "number" &&
+      typeof p.winH === "number"
+    ) {
+      const dw = Math.abs(window.innerWidth - p.winW);
+      const dh = Math.abs(window.innerHeight - p.winH);
+      if (dw <= VIEW_TOL && dh <= VIEW_TOL) return p as SavedPos;
+    }
+  } catch {}
+  return null;
+};
 
-  const savePos = (left: number, top: number) => {
-    try {
-      const payload: SavedPos = {
-        left,
-        top,
-        winW: window.innerWidth,
-        winH: window.innerHeight,
-        userMoved: true,
-      };
-      localStorage.setItem(POS_KEY, JSON.stringify(payload));
-    } catch {}
-  };
+const savePos = (left: number, top: number) => {
+  if (!PERSIST_LEGEND) return; // disable writes when persistence is off
+  try {
+    const payload: SavedPos = {
+      left,
+      top,
+      winW: window.innerWidth,
+      winH: window.innerHeight,
+      userMoved: true,
+    };
+    localStorage.setItem(POS_KEY, JSON.stringify(payload));
+  } catch {}
+};
 
   const clearSavedPos = () => {
     try {
@@ -83,6 +86,8 @@ const LegendControl: React.FC = () => {
 
   useEffect(() => {
     if (!map) return;
+    if (!PERSIST_LEGEND) { clearSavedPos(); } // wipe any old saved coords
+
 
     // ------------------------------------------------------------------------
     // 1) Toggle control in the map
@@ -218,7 +223,8 @@ const LegendControl: React.FC = () => {
     // ------------------------------------------------------------------------
     // 3) Initial placement
     // ------------------------------------------------------------------------
-    const saved = getSavedPos();
+    // 3) Initial placement
+    const saved = PERSIST_LEGEND ? getSavedPos() : null;
     const legendRect0 = container.getBoundingClientRect();
     const mapRect = map.getContainer().getBoundingClientRect();
     const initialLeft = mapRect.right - legendRect0.width - MARGIN;
@@ -376,23 +382,23 @@ const LegendControl: React.FC = () => {
     }, 0);
 
     // Window resize: keep placement or re-anchor
-    const onResize = () => {
-      capSize();
-      applyLayering(); // re-evaluate header z-index on layout changes
-      if (!container) return;
-      const savedPos = getSavedPos();
-      if (savedPos) {
-        const r = container.getBoundingClientRect();
-        const { w, h } = viewport();
-        let l = Math.min(Math.max(MARGIN, r.left), w - r.width - MARGIN);
-        let t = Math.min(Math.max(isFs() ? MARGIN : headerSafeTop(), r.top), h - r.height - MARGIN);
-        container.style.left = `${l}px`;
-        container.style.top = `${t}px`;
-        savePos(l, t);
-      } else {
-        anchorToMap();
-      }
-    };
+const onResize = () => {
+  capSize();
+  applyLayering();
+  if (!container) return;
+
+  if (PERSIST_LEGEND && getSavedPos()) {
+    const r = container.getBoundingClientRect();
+    const { w, h } = viewport();
+    let l = Math.min(Math.max(MARGIN, r.left), w - r.width - MARGIN);
+    let t = Math.min(Math.max(isFs() ? MARGIN : headerSafeTop(), r.top), h - r.height - MARGIN);
+    container.style.left = `${l}px`;
+    container.style.top = `${t}px`;
+    savePos(l, t);
+  } else {
+    anchorToMap();
+  }
+};
     window.addEventListener("resize", onResize);
 
     // Fullscreen transitions
