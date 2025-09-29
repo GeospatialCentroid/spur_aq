@@ -139,3 +139,35 @@
 
 /* Let the header show any small offset (scoped to this card) */
 .card-body--with-qr .card-header-row { overflow: visible; }
+/* =========================
+   Narrow-card gauge fixes
+   - remove the dial's left nudge
+   - keep the label block perfectly centered
+   - trim font sizes a touch
+   ========================= */
+@container recentqr (max-width: 640px){
+  /* center the dial */
+  .recent-values-wrapper{ --gauge-x-nudge: 0; }
+
+  .gauge-box{
+    left: 0;                  /* cancel any offset */
+    width: min(100%, 440px);  /* keep it from overshooting */
+    margin: 0 auto;
+  }
+
+  .gauge-meta{
+    /* match the dial width and leave breathing room for the nav arrows */
+    --meta-side-pad: 22px;            /* tweak this if arrows overlap */
+    width: min(100%, 440px);
+    margin: 8px auto 0;
+    padding-inline: var(--meta-side-pad);
+    text-align: center;
+  }
+
+  /* gentle downscale so long names center nicely between arrows */
+  .gauge-category{ font-size: clamp(0.95rem, 2.6cqi, 1.15rem); }
+  .gauge-name{     font-size: clamp(0.95rem, 2.5cqi, 1.10rem); }
+  .latest-timestamp{ font-size: clamp(0.62rem, 2.0cqi, 0.75rem); }
+}
+
+/* If you prefer a tighter trigger, lower 640px (e.g., 600px or 560px). */
