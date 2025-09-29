@@ -1,13 +1,7 @@
 /* File: src/App/Info/RecentValues/RecentValCard.css */
 
 /* ── Design knobs ── */
-/* add to RecentValCard.css (top with other card rules) */
-.card-body--with-qr{
-  container-type: inline-size;
-  container-name: rv;   /* same name your queries already use */
-}
-
-.recent-values-wrapper{
+.recent-values-wrapper {
   /* arrow tokens */
   --arrow-y-nudge: 95px;
   --arrow-size: 35px;
@@ -15,6 +9,7 @@
   --arrow-opacity: 0.6;
   --arrow-opacity-hover: 1;
 
+  /* desktop horizontal nudge for dial + labels */
   --gauge-x-nudge: -20px;
 
   position: relative;
@@ -23,28 +18,19 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: visible;
-
-  /* container query anchor (so rules depend on THIS card’s width) */
-  container-type: inline-size;
-  container-name: rv;
-}
-
-.card-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;   /* keeps baseline tidy on wide screens */
-  gap: 8px;
+  container-type: normal; /* explicitly NOT a container */
+  container-name: none;
 }
 
 /* Card shell (visual reset only) */
-.card.recent-values-card{
+.card.recent-values-card {
   border: none !important;
   box-shadow: none !important;
   background: transparent !important;
   overflow: visible;
 }
 
-.recent-values-card .card-body{
+.recent-values-card .card-body {
   position: relative;
   overflow: visible;
   width: 100%;
@@ -56,9 +42,9 @@
 }
 
 /* ── Dial ── */
-.gauge-box{
+.gauge-box {
   width: clamp(280px, 70%, 700px);
-  max-width: 100%;                 /* guard: never exceed the card */
+  max-width: 100%;
   aspect-ratio: 2.05 / 1;
   margin: 0 auto;
   height: auto;
@@ -67,7 +53,7 @@
 }
 
 .gauge-box svg,
-.gauge-box .gauge-svg{
+.gauge-box .gauge-svg {
   width: 100% !important;
   height: 100% !important;
   display: block;
@@ -76,32 +62,33 @@
 }
 
 /* ── Text below the dial ── */
-.gauge-meta{
+.gauge-meta {
   width: clamp(280px, 88%, 700px);
-  max-width: 100%;                 /* match the dial */
+  max-width: 100%;
   text-align: center;
   margin-top: clamp(6px, 1vw, 14px);
-  left: 0;
+  left: var(--gauge-x-nudge);
   margin-left: auto;
   margin-right: auto;
+  position: relative;
 }
 
-.gauge-category{ font-weight: 700; color: #000; margin: .2rem 0 0; }
-.gauge-name{ text-align: center; margin: .2rem 0 0; }
+.gauge-category { font-weight: 700; color: #000; margin: .2rem 0 0; }
+.gauge-name     { text-align: center; margin: .2rem 0 0; }
 
-.latest-timestamp{
+.latest-timestamp {
   text-align: center;
   font-size: 0.65rem;
   line-height: 0.95;
   color: #6b7280;
   margin-top: 2px;
 }
-@media (prefers-color-scheme: dark){
-  .latest-timestamp{ color: #9ca3af; }
+@media (prefers-color-scheme: dark) {
+  .latest-timestamp { color: #9ca3af; }
 }
 
 /* ── Arrows ── */
-.arrow-button{
+.arrow-button {
   position: absolute;
   top: calc(50% + var(--arrow-y-nudge));
   transform: translateY(-50%);
@@ -115,34 +102,34 @@
   z-index: 10;
 }
 .arrow-button:hover,
-.arrow-button:focus-visible{ opacity: var(--arrow-opacity-hover); }
-.arrow-button.left{  left:  var(--arrow-offset-x); }
-.arrow-button.right{ right: var(--arrow-offset-x); }
-.arrow-button svg{ width: var(--arrow-size); height: var(--arrow-size); }
+.arrow-button:focus-visible { opacity: var(--arrow-opacity-hover); }
+.arrow-button.left  { left:  var(--arrow-offset-x); }
+.arrow-button.right { right: var(--arrow-offset-x); }
+.arrow-button svg   { width: var(--arrow-size); height: var(--arrow-size); }
 
 /* ── Stack layout ── */
-.rv-content{
+.rv-content {
   margin-top: auto;
   padding-bottom: 16px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-inline: 10px;            /* small inner gutter */
+  padding-inline: 10px;
   box-sizing: border-box;
 }
 
-/* ── Phone breakpoint ── */
-@media (max-width: 576px){
-  .recent-values-wrapper{ --gauge-x-nudge: 0; }
+/* Phones: remove nudge & tighten width a touch */
+@media (max-width: 576px) {
+  .recent-values-wrapper { --gauge-x-nudge: 0; }
 
-  .gauge-box{
+  .gauge-box {
     width: min(100%, 520px);
     aspect-ratio: 2.05 / 1;
     left: 0;
     margin: 0 auto;
   }
 
-  .gauge-meta{
+  .gauge-meta {
     width: min(100%, 520px);
     left: 0;
     margin: 8px auto 0;
@@ -150,53 +137,5 @@
   }
 }
 
-/* ── Collapsed card (narrow column on desktop) ── */
-@container rv (max-width: 460px){
-  .recent-values-wrapper{ --gauge-x-nudge: 0; }
-  .rv-content{ padding-inline: 10px; }
-
-  .gauge-box{
-    width: min(100%, 380px);
-    aspect-ratio: 2.05 / 1;
-    left: 0;
-    margin: 0 auto;
-  }
-
-  .gauge-meta{
-    width: min(100%, 380px);
-    left: 0;
-    margin: 8px auto 0;
-    text-wrap: balance;
-  }
-}
-/* Nudge the smell banner down slightly only in the collapsed width range.
-   No wrapping; just a small vertical shift so the full title stays visible. */
-@container rv (max-width: 620px){
-  .odor-report{
-    transform: translateY(12px);
-  }
-  .odor-text{ white-space: nowrap; }
-}
-
-
-/* Optional: use container units for smoother scaling if supported */
-@supports (margin-top: 1cqi){
-  @container rv (max-width: 620px){
-    .odor-report{ margin-top: clamp(8px, 2.5cqi, 16px); }
-  }
-}
-/* Make sure the header can show the offset */
-.card-header-row { overflow: visible; }
-
-/* When the card is narrow: lower the overlay and KEEP the lead line visible */
-@container rv (max-width: 620px){
-  /* Lower the absolute overlay from Info.css (top: 8px) */
-  .card-body--with-qr .qr-cta.odor-report{
-    top: -7px !important;     /* was 8px in Info.css */
-  }
-
-  /* Undo the Info.css media rule that hides the lead at <=640px */
-  .card-body--with-qr .qr-cta__lead{
-    display: inline !important;
-  }
-}
+/* Let the header show any small offset (scoped to this card) */
+.card-body--with-qr .card-header-row { overflow: visible; }

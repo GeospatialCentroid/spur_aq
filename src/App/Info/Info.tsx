@@ -47,7 +47,15 @@ const Info: React.FC = () => {
                 <div className="qr-cta odor-report">
                   <div className="qr-cta__text odor-text">
                     <div className="qr-cta__lead">What’s&nbsp;that&nbsp;smell?</div>
-                    <span className="qr-cta__action">Report it here!</span>
+                    <a
+                      className="qr-cta__action"
+                      href="https://docs.google.com/forms/d/e/1FAIpQLSco4B_ZMGY-7RVMePDOx7fg8ExX97nKQmC4we0pxqArWDV34A/viewform"   // <- put your real report URL here
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Report it here!
+                    </a>
+
                   </div>
 
                   <div className="qr-cta__right">
