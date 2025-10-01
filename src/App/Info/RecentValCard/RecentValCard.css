@@ -170,4 +170,5 @@
   .latest-timestamp{ font-size: clamp(0.62rem, 2.0cqi, 0.75rem); }
 }
 
+
 /* If you prefer a tighter trigger, lower 640px (e.g., 600px or 560px). */
