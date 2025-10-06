@@ -1,3 +1,157 @@
-.card{
-  background-color: #f1f1f1;
+/* ============= Card basics / shared ============= */
+.card { background-color: #f1f1f1; }
+
+.card-header-row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  margin-bottom:.25rem;
 }
+.card-header-row .card-title{ line-height:1.15; margin:0; }
+
+:root { --section-title-size: 1.25rem; }
+.section-title{ font-size:var(--section-title-size); line-height:1.2; margin:0; font-weight:600; }
+.section-title__break{ display:block; }
+.section-title{ line-height:1.1; }
+
+.top-row .card > .card-body { padding:.5rem; }
+
+/* ============= Recent card with QR (container-queried) ============= */
+
+/* The card-body is the container we query */
+.card-body--with-qr{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  /* keep title from running under the overlay */
+  /* keep title from running under the overlay */
+--qr-gap:8px; --cta-pad:10px;
+
+/* QR min scan size (≈2 cm on screens) */
+--qr-min-phys: 2cm;        /* for print */
+--qr-min-px:   76px;       /* ~2 cm at 96dpi */
+
+/* actual on-screen size: never smaller than 76px; can grow a bit */
+--qr-size: clamp(var(--qr-min-px), 7.2vw, 96px);
+
+/* header padding uses the real QR size */
+--qr-w: var(--qr-size);
+
+
+  /* container query root */
+  container-type: inline-size;
+  container-name: recentqr;    /* we query this by name */
+
+  /* DEFAULT = side-by-side (desktop) */
+  --qr-layout: row;            /* .qr-cta flex-direction */
+  --qr-right-dir: row;         /* arrow+QR group direction */
+  --qr-wrap: nowrap;           /* text wrapping */
+  --qr-text-align: right;      /* text alignment */
+  --qr-max: 52%;               /* overlay max-width */
+  --qr-arrow: inline-block;    /* show arrow */
+  --arrow-to-text-top: 2px;
+}
+
+/* keep title clear of overlay */
+.card-header-row{
+  padding-right: calc(var(--qr-w) + var(--qr-gap) + var(--cta-pad));
+}
+
+/* overlay uses the variables above */
+.card-body--with-qr .qr-cta{
+  position: absolute;
+  top: 8px; right: 8px;
+  display: flex; gap: 10px; align-items: flex-start;
+  flex-direction: var(--qr-layout) !important;
+  max-width: var(--qr-max) !important;
+  z-index: 11;
+}
+.card-body--with-qr .qr-cta__right{
+  display: flex; gap: 8px; align-items: center;
+  flex-direction: var(--qr-right-dir) !important;
+}
+.card-body--with-qr .qr-cta__text{
+  display: flex; flex-direction: column;
+  white-space: var(--qr-wrap) !important;
+  text-align: var(--qr-text-align) !important;
+  line-height: 1.15;
+  font-size: clamp(0.70rem, 0.9vw, 0.92rem);
+}
+.card-body--with-qr .qr-cta__arrow{
+  width: 16px; height: 16px; margin-top: 2px; color: #1B5E20;
+  display: var(--qr-arrow) !important;
+}
+.card-body--with-qr .qr-code-title{ width: var(--qr-size); height: auto; }
+
+/* keep the green formatting always */
+.card-body--with-qr .qr-cta__lead{
+  font-style: italic; font-weight: 600; color: #1B5E20; margin-bottom: 2px;
+}
+.card-body--with-qr .qr-cta__action,
+.card-body--with-qr .qr-cta__action:link,
+.card-body--with-qr .qr-cta__action:visited{
+  font-weight: 800; color: #1B5E20;
+  text-decoration: underline; text-underline-offset: 2px; text-decoration-thickness: 0.08em;
+}
+
+/* allow wrapping earlier but keep side-by-side */
+@container recentqr (min-width: 465px){  /* same lower bound as your stack band ends */
+  .card-body--with-qr .qr-cta{
+    align-items: flex-start;          /* top-align text vs (arrow+QR) group */
+  }
+  .card-body--with-qr .qr-cta__right{
+    align-items: flex-start;          /* top-align arrow with QR group */
+  }
+  .card-body--with-qr .qr-cta__arrow{
+    margin-top: var(--arrow-to-text-top);  /* micro-adjust to match text baseline */
+  }
+}
+
+/* -------- STACK BAND (edit these two numbers) --------
+   In this card-width range the text goes UNDER the QR and the arrow hides. */
+@container recentqr (min-width: 99px) and (max-width: 465px){
+  .card-body--with-qr .qr-cta{
+    --qr-layout: column;  /* QR on top, text below */
+    --qr-right-dir: column;
+    --qr-wrap: normal;
+    --qr-text-align: center;
+    --qr-max: 44%;
+    --qr-arrow: none;             /* hide arrow when stacked */
+    gap: 4px;  
+    /* NEW: keep the whole stack hugged to the right edge */
+    align-items: flex-end !important;
+    right: 8px;                   /* ensure it's anchored to the right */
+  }
+
+  /* NEW: make sure the QR group itself sits on the right edge too */
+  .card-body--with-qr .qr-cta__right{
+    align-self: flex-end;
+    align-items: center;          /* keep QR centered in its mini-column */
+    gap: 6px;
+  }
+
+  /* keep text tidy under the QR (formatting preserved) */
+  .card-body--with-qr .qr-cta__text{
+    max-width: 12rem;
+    text-align: center !important;
+    white-space: normal !important;
+  }
+}
+
+/* Print: guarantee a physical 2 cm x 2 cm */
+@media print{
+  .card-body--with-qr .qr-code-title{
+    width:  var(--qr-min-phys);
+    height: var(--qr-min-phys);
+  }
+}
+
+
+
+/* (Optional) debug outline to see when the stack band is active */
+/*
+@container recentqr (min-width: 600px) and (max-width: 980px){
+  .card-body--with-qr .qr-cta{ outline: 2px dashed #1B5E20; }
+}
+*/
