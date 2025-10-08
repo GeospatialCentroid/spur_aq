@@ -1,14 +1,40 @@
 import L from "leaflet";
 import { getGroupByCode, groupLabelByGroup, zoningGroups } from "./zoning";
 
+/** --- State shared with the Legend & layer component --- */
 let featureLayer: L.GeoJSON<any> | null = null;
 let clickedLayer: L.Path | null = null;
 let currentHighlightGroup: string | null = null;
 
-export function setFeatureLayer(layer: L.GeoJSON<any> | null) {
-  featureLayer = layer;
+/** Presence listeners so other components (Legend) can react to add/remove */
+type PresenceCb = (present: boolean) => void;
+const landUseListeners = new Set<PresenceCb>();
+
+function notifyPresence() {
+  const present = !!featureLayer;
+  landUseListeners.forEach((cb) => {
+    try { cb(present); } catch {}
+  });
 }
 
+/** Called by LandUseLayer when it mounts/unmounts */
+export function setFeatureLayer(layer: L.GeoJSON<any> | null) {
+  featureLayer = layer;
+  notifyPresence();
+}
+
+/** Query presence (used to initialize UI state) */
+export function isLandUsePresent(): boolean {
+  return !!featureLayer;
+}
+
+/** Subscribe to presence changes; returns a VOID cleanup (for React) */
+export function onLandUsePresent(cb: PresenceCb): () => void {
+  landUseListeners.add(cb);
+  return () => { landUseListeners.delete(cb); }; // return void, not boolean
+}
+
+/** Popup + click highlight per feature */
 export function onEachFeature(feature: any, layer: L.Layer) {
   const code = feature?.properties?.ZONE_DISTRICT || "Unknown";
   const group = getGroupByCode(code);
@@ -33,10 +59,11 @@ export function onEachFeature(feature: any, layer: L.Layer) {
   });
 }
 
+/** Legend highlight */
 export function highlightFeaturesByGroup(groupKey: string | null) {
   currentHighlightGroup = groupKey === currentHighlightGroup ? null : groupKey;
   const selectedCodes =
-    currentHighlightGroup && zoningGroups[currentHighlightGroup]?.codes || [];
+    (currentHighlightGroup && zoningGroups[currentHighlightGroup]?.codes) || [];
 
   if (!featureLayer) return;
 
@@ -59,6 +86,7 @@ export function highlightFeaturesByGroup(groupKey: string | null) {
   });
 }
 
+/** Default polygon style */
 export function defaultStyle(feature?: any): L.PathOptions {
   const fullCode = feature?.properties?.ZONE_DISTRICT as string | undefined;
   const group = getGroupByCode(fullCode || "");
