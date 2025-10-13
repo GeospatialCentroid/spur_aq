@@ -65,6 +65,15 @@ const clearSavedPos = () => {
   } catch {}
 };
 
+const getAttributionHeight = (): number => {
+  const attr = document.querySelector(".leaflet-control-attribution") as HTMLElement | null;
+  if (!attr) return 0;
+  const r = attr.getBoundingClientRect();
+  // +4px breathing room
+  return Math.max(0, Math.round(r.height)) + 4;
+};
+
+
 const LegendControl: React.FC = () => {
   const map = useMap();
   const [visible, setVisible] = useState(false);
@@ -88,35 +97,77 @@ const LegendControl: React.FC = () => {
     // If Land Use isn't available, mount nothing (no button, no legend)
     if (!landUseAvailable) return;
 
+  // Attribution height scoped to THIS map instance
+  const getAttrHeight = (): number => {
+    const attr = map.getContainer().querySelector(".leaflet-control-attribution") as HTMLElement | null;
+    if (!attr) return 0;
+    const r = attr.getBoundingClientRect();
+    return Math.max(0, Math.round(r.height)) + 4; // +4 breathing room
+};
+
+
     // --- Leaflet toggle control (appears only when Land Use is available) ---
-    const ToggleLegend = L.Control.extend({
-      options: { position: "bottomleft" as L.ControlPosition },
-      onAdd: () => {
-        const btn = L.DomUtil.create("button", "toggle-legend-btn") as HTMLButtonElement;
-        btn.textContent = visible ? "Hide Legend" : "Show Legend";
-        btn.style.background = "white";
-        btn.style.padding = "6px 8px";
-        btn.style.cursor = "pointer";
-        btn.style.border = "1px solid #ccc";
-        btn.style.borderRadius = "3px";
-        L.DomEvent.disableClickPropagation(btn);
-        L.DomEvent.on(btn, "click", (ev: any) => {
-          L.DomEvent.stop(ev);
-          setVisible((v) => !v);
-        });
-        return btn;
-      },
+   const ToggleLegend = L.Control.extend({
+  options: { position: "bottomright" as L.ControlPosition },
+
+  onAdd: () => {
+    const btn = L.DomUtil.create("button", "toggle-legend-btn") as HTMLButtonElement;
+    btn.textContent = "Show Legend";
+    btn.style.background = "white";
+    btn.style.padding = "6px 8px";
+    btn.style.cursor = "pointer";
+    btn.style.border = "1px solid #ccc";
+    btn.style.borderRadius = "3px";
+
+    // Reset default control margins and set our own
+    btn.style.margin = "0";
+    btn.style.marginRight = "10px";
+    btn.style.display = "block"; 
+
+
+    // Fixed gap from the bottom-right corner (does not follow attribution now)
+    const GAP_PX = 6;
+    const bump = () => {
+      btn.style.marginBottom = `${GAP_PX}px`;
+    };
+
+    bump();
+    requestAnimationFrame(bump);
+    setTimeout(bump, 150);
+
+    const onR = () => bump();
+    window.addEventListener("resize", onR);
+
+    L.DomEvent.disableClickPropagation(btn);
+    L.DomEvent.on(btn, "click", (ev: any) => {
+      L.DomEvent.stop(ev);
+      setVisible(true);
     });
 
-    const toggleCtrl = new (ToggleLegend as any)() as L.Control;
-    map.addControl(toggleCtrl);
+    // Keep a handle for cleanup
+    (btn as any).__onResize = onR;
+    return btn;
+  },
+  onRemove: function (_mapInstance: L.Map) {
+    const el = (this as any)._container as HTMLButtonElement | undefined;
+    if (!el) return;
+    const fn = (el as any).__onResize as (() => void) | undefined;
+    if (fn) window.removeEventListener("resize", fn);
+  },
 
-    // If legend isn't visible, just show the button and bail
+});
+
+
+    // Only mount the toggle when legend is hidden
+    let toggleCtrl: L.Control | null = null;
     if (!visible) {
-      return () => {
-        map.removeControl(toggleCtrl);
-      };
+      toggleCtrl = new (ToggleLegend as any)() as L.Control;
+      map.addControl(toggleCtrl);
+    return () => {
+      if (toggleCtrl) map.removeControl(toggleCtrl);
+    };
     }
+
 
     // --- Floating legend in <body> (only when visible) ---
     let container: HTMLDivElement | null = document.createElement("div");
@@ -170,7 +221,9 @@ const LegendControl: React.FC = () => {
       const rect = container.getBoundingClientRect();
       const minTop = isFs() ? MARGIN : headerSafeTop();
       const left = Math.min(Math.max(MARGIN, parseFloat(container.style.left || "0")), w - rect.width - MARGIN);
-      const top = Math.min(Math.max(minTop, parseFloat(container.style.top || "0")), h - rect.height - MARGIN);
+      const bottomSafe = h - rect.height - MARGIN - getAttrHeight() - 18;
+      const top = Math.min(Math.max(minTop, parseFloat(container.style.top || "0")), bottomSafe);
+
       container.style.left = `${left}px`;
       container.style.top = `${top}px`;
     };
@@ -191,7 +244,8 @@ const LegendControl: React.FC = () => {
       const { w, h } = viewport();
       const minTop = isFs() ? MARGIN : headerSafeTop();
       let l = mapRect.right - r0.width - MARGIN;
-      let t = mapRect.bottom - r0.height - MARGIN;
+      let t = mapRect.bottom - r0.height - MARGIN - getAttrHeight() - 18;
+
       l = Math.min(Math.max(MARGIN, l), w - r0.width - MARGIN);
       t = Math.min(Math.max(minTop, t), h - r0.height - MARGIN);
       container.style.left = `${l}px`;
@@ -211,7 +265,9 @@ const LegendControl: React.FC = () => {
     const legendRect0 = container.getBoundingClientRect();
     const mapRect = map.getContainer().getBoundingClientRect();
     const initialLeft = mapRect.right - legendRect0.width - MARGIN;
-    const initialTop = mapRect.bottom - legendRect0.height - MARGIN;
+    const initialTop  = mapRect.bottom - legendRect0.height - MARGIN - getAttrHeight() - 18;
+
+
     let left = saved ? saved.left : initialLeft;
     let top = saved ? saved.top : initialTop;
     const { w: vw, h: vh } = viewport();
@@ -407,7 +463,7 @@ const LegendControl: React.FC = () => {
       document.removeEventListener("mousemove", onRMove);
       document.removeEventListener("mouseup", onRUp);
       if (container && container.parentElement) container.parentElement.removeChild(container);
-      map.removeControl(toggleCtrl);
+      if (toggleCtrl) map.removeControl(toggleCtrl);
     };
   }, [map, visible, landUseAvailable]);
 
