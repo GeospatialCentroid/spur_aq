@@ -478,6 +478,7 @@ selectedMeasurements.forEach((variable, i) => {
     .attr('text-anchor', 'start')
     .attr('fill', 'black')
     .style('font-size', '12px')
+     .style('cursor', 'default')
     .text(variable.alias || variable.name);
 
      legendItem.append('title').text("Download data");
