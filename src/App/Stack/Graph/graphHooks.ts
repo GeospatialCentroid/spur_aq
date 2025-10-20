@@ -161,7 +161,10 @@ export function useFetchChartData({
           toDate,
           interval
         );
-
+        // store the doanload url
+        group.variables?.forEach((v: any) => {
+          v.download_url = url;
+        });
         try {
           const res = await fetch(url);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
