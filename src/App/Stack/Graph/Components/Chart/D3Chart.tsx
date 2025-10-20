@@ -5,6 +5,28 @@ import { getColorForVariable } from '../../ColorUtils';
 import { SelectedMeasurement } from '../../graphTypes';
 import { formatAxisLabel, formatTick } from '../../Utils/LabelFormat';
 
+// Utility function for download
+async function downloadFile(url: string, filename: string) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const blob = await response.blob(); // raw file content
+    const objectUrl = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = filename; // <- THIS now works reliably
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(objectUrl); // cleanup
+  } catch (err) {
+    console.error('Download failed', err);
+  }
+}
+
 interface D3ChartProps {
   id: number;
   fromDate: string;
@@ -46,8 +68,11 @@ const D3Chart: React.FC<D3ChartProps> = ({
 
 
   useEffect(() => {
+
+
+
   var variables= selectedMeasurements
-  //console.log(variables,"variables")
+//   console.log(variables,"variables")
   
   //drop milliseconds
    const normalizedData: typeof data = {};
@@ -407,32 +432,63 @@ const D3Chart: React.FC<D3ChartProps> = ({
       });
 
     // Legend with colored circles and last value of each variable
-    const legend = svg.append('g').attr('class', 'legend').attr('transform', `translate(${margin.left}, 10)`);
+    // Legend with colored circles and last value of each variable
+const legend = svg.append('g').attr('class', 'legend').attr('transform', `translate(${margin.left}, 10)`);
 
-    selectedMeasurements.forEach((variable, i) => {
-      const x = i * 120+40;
+selectedMeasurements.forEach((variable, i) => {
+  const x = i * 120 + 40;
 
-      // Circle for color
-      legend
-        .append('circle')
-        .attr('cx', x)
-        .attr('cy', 0)
-        .attr('r', 6)
-        .attr('fill', getColorForVariable(variable.name));
+  // Create a group for each legend item
+  const legendItem = legend
+    .append('g')
+    .attr('class', 'legend-item')
+    .attr('transform', `translate(${x}, 0)`);
 
-      // Last value text
-      const series = data[variable.name] || [];
-      const lastValue = series.length > 0 ? series[series.length - 1].value : 0;
-
-      legend
-        .append('text')
-        .attr('x', x + 10)
-        .attr('y', 0)
-        .attr('dy', '0.35em')
-        .style('font-size', '12px')
-        .text(`${variable.alias}`);
-        //.text(`${variable.name}: Last value ${lastValue.toFixed(2)}`);
+  // Append the colored circle
+  legendItem
+    .append('circle')
+    .attr('cx', 0)
+    .attr('cy', 0)
+    .attr('r', 6)
+    .attr('fill', getColorForVariable(variable.name))
+    .style('cursor', 'pointer')
+    .on('click', () => {
+      if (variable.download_url) {
+        downloadFile(variable.download_url + '&fmt=csv', `${variable.alias || variable.name}.csv`);
+      }
     });
+
+  // Append the "↓" text centered inside the circle
+  legendItem
+    .append('text')
+    .attr('x', 0)
+    .attr('y', 0)
+    .attr('dy', '0.35em')
+    .attr('text-anchor', 'middle')
+    .attr('fill', 'white')
+    .style('pointer-events', 'none') // let clicks pass through to circle
+    .style('font-size', '10px')
+    .text('↓');
+
+    legendItem
+    .append('text')
+    .attr('x', 12) // offset right from the circle
+    .attr('y', 0)
+    .attr('dy', '0.35em')
+    .attr('text-anchor', 'start')
+    .attr('fill', 'black')
+    .style('font-size', '12px')
+    .text(variable.alias || variable.name);
+
+     legendItem.append('title').text("Download data");
+
+});
+//       // Last value text
+//       const series = data[variable.name] || [];
+//       const lastValue = series.length > 0 ? series[series.length - 1].value : 0;
+
+
+
   }, [id, fromDate, toDate, interval, yDomain, data, selectedMeasurements, sizeTick]);
 
 

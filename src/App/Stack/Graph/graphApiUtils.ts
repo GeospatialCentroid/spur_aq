@@ -38,20 +38,22 @@ function formatDateForUrl(dateString: string): string {
     const ss = String(d.getSeconds()).padStart(2, '0');
     return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
 }
+//Modified to allow inclusion of download url
+export function groupVariablesByInstrument(variables: any[]) {
+  const groups = [];
+  const byInstrument = new Map();
 
-/** Utility: Group selected variables by station/instrument pair */
-export function groupVariablesByInstrument(vars: SelectedMeasurement[]): VariableGroup[] {
-    const map = new Map<string, VariableGroup>();
-    vars.forEach((v) => {
-        const key = `${v.stationId}:${v.instrumentId}`;
-        if (!map.has(key)) {
-            map.set(key, {
-                stationId: v.stationId,
-                instrumentId: v.instrumentId,
-                variableNames: [],
-            });
-        }
-        map.get(key)!.variableNames.push(v.name);
-    });
-    return Array.from(map.values());
+  for (const v of variables) {
+    const key = `${v.instrumentId}_${v.stationId}`;
+    if (!byInstrument.has(key)) byInstrument.set(key, []);
+    byInstrument.get(key).push(v);
+  }
+
+  for (const [key, vars] of byInstrument.entries()) {
+    const { instrumentId, stationId } = vars[0];
+    const variableNames = vars.map((v: any) => v.name);
+    groups.push({ instrumentId, stationId, variableNames, variables: vars }); // <-- include the array
+  }
+
+  return groups;
 }

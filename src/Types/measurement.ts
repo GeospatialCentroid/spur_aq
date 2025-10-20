@@ -34,4 +34,5 @@ export interface Measurement {
   ranges: Range[] | null;
   instrument_id?: number; // add this if you're injecting it when parsing
   formula?: string | null;
+  download_url?: string;
 }
