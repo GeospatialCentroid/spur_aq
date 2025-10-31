@@ -1,5 +1,6 @@
 import L from "leaflet";
 import { getGroupByCode, groupLabelByGroup, zoningGroups } from "./zoning";
+import i18n from "i18next";
 
 /** --- State shared with the Legend & layer component --- */
 let featureLayer: L.GeoJSON<any> | null = null;
@@ -13,7 +14,9 @@ const landUseListeners = new Set<PresenceCb>();
 function notifyPresence() {
   const present = !!featureLayer;
   landUseListeners.forEach((cb) => {
-    try { cb(present); } catch {}
+    try {
+      cb(present);
+    } catch {}
   });
 }
 
@@ -31,7 +34,9 @@ export function isLandUsePresent(): boolean {
 /** Subscribe to presence changes; returns a VOID cleanup (for React) */
 export function onLandUsePresent(cb: PresenceCb): () => void {
   landUseListeners.add(cb);
-  return () => { landUseListeners.delete(cb); }; // return void, not boolean
+  return () => {
+    landUseListeners.delete(cb);
+  }; // return void, not boolean
 }
 
 /** Popup + click highlight per feature */
@@ -40,7 +45,9 @@ export function onEachFeature(feature: any, layer: L.Layer) {
   const group = getGroupByCode(code);
   const label = groupLabelByGroup(group);
 
-  (layer as any).bindPopup(`<strong>${label}</strong><br>Zone Code: ${code}`);
+  (layer as any).bindPopup(
+    `<strong>${label}</strong><br>${i18n.t("MAP.POPUP.ZONE_CODE")}: ${code}`
+  );
 
   (layer as any).on("click", () => {
     if (clickedLayer && featureLayer) {

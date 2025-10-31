@@ -1,0 +1,63 @@
+{
+  "MAP": {
+    "ACTIONS": {
+      "EXPAND_MAP": "Expand map",
+      "COLLAPSE_MAP": "Collapse map",
+      "RESET_VIEW": "Reset view",
+      "SHOW_LEGEND": "Show legend",
+      "HIDE_LEGEND": "Hide legend"
+    },
+    "LEGEND": {
+      "HEADER": "Zones — Click to highlight",
+      "DRAG_HINT": "Drag to move",
+      "RESIZE": "Resize",
+      "TITLE": "Legend",
+      "NO_DATA": "No data available"
+    },
+    "ZONES": {
+      "Airport (DIA)": "Airport (DIA)",
+      "Campus (EI, EI2, ENT, H, H2, NWC)": "Campus (EI, EI2, ENT, H, H2, NWC)",
+      "Cherry Creek North (C-CCN)": "Cherry Creek North (C-CCN)",
+      "Commercial Corridor (CC)": "Commercial Corridor (CC)",
+      "Downtown (AS, C, CPV, GT, LD, TD)": "Downtown (AS, C, CPV, GT, LD, TD)",
+      "Downtown - Civic (D-CV)": "Downtown - Civic (D-CV)",
+      "Former Chapter 59 Zone": "Former Chapter 59 Zone",
+      "Industrial - General (I-B)": "Industrial - General (I-B)",
+      "Industrial - Light (I-A)": "Industrial - Light (I-A)",
+      "Industrial - Mixed Use (I-MX, M-IMX)": "Industrial - Mixed Use (I-MX, M-IMX)",
+      "Main Street (MS)": "Main Street (MS)",
+      "Mixed Use (MX, M-GMX)": "Mixed Use (MX, M-GMX)",
+      "Multi Unit (MU, RH, RO)": "Multi Unit (MU, RH, RO)",
+      "Manufactured Home Community (MHC)": "Manufactured Home Community (MHC)",
+      "Open Space - Conservation (OS-C)": "Open Space - Conservation (OS-C)",
+      "Open Space - Public Parks (OS-A)": "Open Space - Public Parks (OS-A)",
+      "Open Space - Recreation (OS-B)": "Open Space - Recreation (OS-B)",
+      "Planned Unit Development (PUD-D, PUD-G)": "Planned Unit Development (PUD-D, PUD-G)",
+      "Residential Mixed Use (RX)": "Residential Mixed Use (RX)",
+      "Single Unit (SU)": "Single Unit (SU)",
+      "Special (O-1)": "Special (O-1)",
+      "Two Unit (TU)": "Two Unit (TU)",
+      "Other": "Other"
+    },
+    "BASEMAPS": {
+      "OSM": "OpenStreetMap",
+      "ESRI_IMAGERY": "Esri Satellite (World Imagery)",
+      "USGS_TOPO": "USGS Topo",
+      "ESRI_TOPO": "Esri Topographic",
+      "ESRI_STREETS": "Esri Streets",
+      "ESRI_NATGEO": "Esri National Geographic",
+      "ESRI_LIGHT_GRAY": "Esri Light Gray",
+      "ESRI_DARK_GRAY": "Esri Dark Gray"
+    },
+    "POPUP": {
+      "ZONE_CODE": "Zone Code"
+    },
+    "UI": {
+      "LOADING": "Loading map data…"
+    },
+    "OVERLAYS": {
+      "STATIONS": "Stations",
+      "LAND_USE": "Land Use"
+    }
+  }
+}

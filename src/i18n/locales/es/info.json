@@ -1,0 +1,22 @@
+{
+  "SECTIONS": {
+    "ABOUT": "Acerca de",
+    "RECENT": "Recientes",
+    "MEASUREMENTS": "Mediciones",
+    "RECENT_MEASUREMENTS": "Mediciones <1>recientes</1>"
+  },
+  "CTA": {
+    "ODOR": "¿Qué es ese olor?"
+  },
+  "ALT": {
+    "QR_ODOR": "Código QR para reportar olores",
+    "INFO_IMAGE": "Imagen informativa"
+  },
+  "UI": {
+    "LOADING_DATA": "Cargando datos...",
+    "NO_VIDEO_SUPPORT": "Tu navegador no soporta el elemento de video."
+  },
+  "ARIA": {
+    "SCROLL_REGION": "Región de desplazamiento de información"
+  }
+}

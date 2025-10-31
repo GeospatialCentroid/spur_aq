@@ -3,6 +3,7 @@
  ~ The card can contain text up to 160 characters, an image, OR a video. If you want to combine two 
    of these options you it will take some adjusting to make sure it all fits correctly so just let us know if that is the case
    and we can find what works for the display. 
+  ~ make sure to also update the InfoCard.es.txt with spanish translation. 
   
 
 TEXT:

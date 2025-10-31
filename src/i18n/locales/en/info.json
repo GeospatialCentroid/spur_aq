@@ -1,0 +1,22 @@
+{
+  "SECTIONS": {
+    "ABOUT": "About",
+    "RECENT": "Recent",
+    "MEASUREMENTS": "Measurements",
+    "RECENT_MEASUREMENTS": "Recent <1>Measurements</1>"
+  },
+  "CTA": {
+    "ODOR": "What’s\u00A0that\u00A0smell?"
+  },
+  "ALT": {
+    "QR_ODOR": "QR code to report odors",
+    "INFO_IMAGE": "Informational image"
+  },
+  "UI": {
+    "LOADING_DATA": "Loading data...",
+    "NO_VIDEO_SUPPORT": "Your browser does not support the video tag."
+  },
+  "ARIA": {
+    "SCROLL_REGION": "Information scroll region"
+  }
+}

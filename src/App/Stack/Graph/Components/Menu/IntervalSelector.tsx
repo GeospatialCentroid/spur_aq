@@ -10,6 +10,7 @@
 import React from 'react';
 import './IntervalSelector.css'
 import { useMode } from '../../../../../context/ModeContext'; // adjust the path
+import { useTranslation } from 'react-i18next';
 
 
 interface IntervalSelectorProps {
@@ -19,17 +20,19 @@ interface IntervalSelectorProps {
 
 const IntervalSelector: React.FC<IntervalSelectorProps> = ({ value, onChange }) => {
  const { mode } = useMode();
+ const { t } = useTranslation('graph');
   return (
     <select
       className="interval-select"
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      aria-label={String(t('INTERVAL.LABEL'))}
     >
-      {mode === 'researcher' && <option value="0">Raw Data</option>}
-      <option value="1">1 min</option>
-      <option value="5">5 mins</option>
-      <option value="10">10 mins</option>
-      <option value="60">60 mins</option>
+      {mode === 'researcher' && <option value="0">{t('INTERVAL.RAW_DATA')}</option>}
+      <option value="1">{t('INTERVAL.ONE_MIN')}</option>
+      <option value="5">{t('INTERVAL.FIVE_MINS')}</option>
+      <option value="10">{t('INTERVAL.TEN_MINS')}</option>
+      <option value="60">{t('INTERVAL.SIXTY_MINS')}</option>
     </select>
   );
 };

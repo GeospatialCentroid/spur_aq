@@ -1,0 +1,15 @@
+{
+  "APP": {
+    "TITLE_FORMATTED": "<b>Spur</b> <b>R</b>egional <b>A</b>ir <b>M</b>onitoring <b>S</b>ite (<b>RAMS</b>)",
+    "LOGO_ALT": "CSU Spur Logo"
+  },
+  "GENERIC": {
+    "LOADING_CONFIG": "Loading configuration…"
+  },
+  "FOOTER": {
+    "COPYRIGHT": "© {{year}} SPUR. All rights reserved."
+  },
+  "A11Y": {
+    "REMOVE_GRAPH": "Remove graph"
+  }
+}

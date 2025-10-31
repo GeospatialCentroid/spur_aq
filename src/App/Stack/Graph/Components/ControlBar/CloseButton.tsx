@@ -1,32 +1,25 @@
 // File: src/App/Stack/Graph/Components/ControlBar/CloseButton.tsx
 
-/**
- * CloseButton component
- *
- * - Renders a button with an "X" icon to remove a graph from the stack.
- * - Triggers the `onClick` callback when pressed.
- */
-
 import React from 'react';
 import { XLg } from 'react-bootstrap-icons';
 import './CloseButton.css';
+import { useTranslation } from 'react-i18next';
 
-/**
- * Props for the CloseButton component.
- *
- * @property onClick - Callback function triggered when the button is clicked.
- */
 interface CloseButtonProps {
   onClick: () => void;
 }
 
-/**
- * A simple button for deleting/removing a graph panel from the UI.
- */
-const CloseButton: React.FC<CloseButtonProps> = ({ onClick }) => (
-  <button className="delete-btn" onClick={onClick} aria-label="Remove graph">
-    <XLg size={16} style={{ stroke: 'currentColor', strokeWidth: 1 }} />
-  </button>
-);
+const CloseButton: React.FC<CloseButtonProps> = ({ onClick }) => {
+  const { t } = useTranslation('common'); 
+  return (
+    <button
+      className="delete-btn"
+      onClick={onClick}
+      aria-label={t('A11Y.REMOVE_GRAPH') as string}
+    >
+      <XLg size={16} style={{ stroke: 'currentColor', strokeWidth: 1 }} />
+    </button>
+  );
+};
 
 export default CloseButton;

@@ -1,6 +1,8 @@
 // File: src/App.tsx
 
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Trans } from "react-i18next";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { apiUrl } from './config/api'; // TEAM: central API base + helper
@@ -18,6 +20,7 @@ let stationsCache: Config | null = null;
 
 function App() {
   const [config, setConfig] = useState<Config | null>(null);
+  const { t } = useTranslation('common');
   const [timeSeriesData, setTimeSeriesData] = useState<Record<string, { timestamp: string; value: number }[]>>({});
 
   useEffect(() => {
@@ -68,7 +71,7 @@ function App() {
   if (!config) {
     return (
       <div className="app-loading">
-        <h2>Loading configuration...</h2>
+        <h2>{t('GENERIC.LOADING_CONFIG')}</h2>
       </div>
     );
   }
@@ -90,13 +93,14 @@ function App() {
     >
       <img
         src="/Photos/InfoCardPhotos/CSUSpur_horiz_campus_rev_rgb.webp"
-        alt="CSU Spur Logo"
+        alt={t('APP.LOGO_ALT') || 'CSU Spur Logo'}
         className="header-logo"
         style={{ objectFit: 'contain' }}
       />
-      <h1 className="title">
-        <b>Spur</b> <b>R</b>egional <b>A</b>ir <b>M</b>onitoring <b>S</b>ite (<b>RAMS</b>)
-      </h1>
+        <h1 className="title">
+          <Trans i18nKey="APP.TITLE_FORMATTED" ns="common" components={{ b: <b /> }} />
+        </h1>
+
     </header>
 
 
@@ -112,7 +116,7 @@ function App() {
         </main>
 
         <footer className="app-footer">
-          <p>© {new Date().getFullYear()} SPUR. All rights reserved.</p>
+         <p>{t('FOOTER.COPYRIGHT', { year: new Date().getFullYear() })}</p>
         </footer>
       </div>
     </ConfigProvider>

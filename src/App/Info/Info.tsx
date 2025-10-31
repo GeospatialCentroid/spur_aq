@@ -4,9 +4,11 @@ import InfoCard from './InfoCard/InfoCard';
 import RecentValCard from './RecentValCard/RecentValCard';
 import { useConfig } from '../../context/ConfigContext';
 import MapCard from './MapCard/MapCard';
+import { useTranslation, Trans } from "react-i18next";
 
 const Info: React.FC = () => {
   const { config } = useConfig();
+  const { t } = useTranslation('info');
 
   return (
     <div className="App-info container-fluid my-4">
@@ -16,7 +18,7 @@ const Info: React.FC = () => {
           <div className="card info-card h-100">
             <div className="card-body info-card__body">
               <div className="card-header-row">
-                <h5 className="card-title section-title">About</h5>
+                <h5 className="card-title section-title">{t("SECTIONS.ABOUT")}</h5>
               </div>
               {/* InfoCard now renders only the scrollable content/media */}
               <InfoCard />
@@ -40,7 +42,7 @@ const Info: React.FC = () => {
             <div className="card-body card-body--with-qr">
               <div className="card-header-row">
                 <h5 className="card-title section-title">
-                  Recent <span className="section-title__break">Measurements</span>
+                  {t("SECTIONS.RECENT")} <span className="section-title__break">{t("SECTIONS.MEASUREMENTS")}</span>
                 </h5>
 
                 {/* Text + (arrow + QR) pinned to the top right */}
@@ -53,7 +55,9 @@ const Info: React.FC = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      What’s&nbsp;that&nbsp;smell?
+                        <Trans i18nKey="CTA.ODOR" ns="info">
+                          What’s&nbsp;that&nbsp;smell?
+                        </Trans>
                     </a>
 
                   </div>
@@ -72,7 +76,7 @@ const Info: React.FC = () => {
 
                     <img
                       src="/Photos/ordorReportQR.png"
-                      alt="QR code to report odors"
+                      alt={String(t("ALT.QR_ODOR"))}
                       className="qr-code-title odor-qr"
                       loading="lazy"
                     />
@@ -83,7 +87,7 @@ const Info: React.FC = () => {
               {config ? (
                 <RecentValCard stationData={config} />
               ) : (
-                <p>Loading data...</p>
+                <p>{t("UI.LOADING_DATA")}</p>
               )}
             </div>{/* end .card-body */}
           </div>

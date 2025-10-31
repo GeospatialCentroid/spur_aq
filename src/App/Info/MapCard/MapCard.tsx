@@ -18,10 +18,16 @@ import LegendControl from "./components/LegendControl";
 import ResizeMapOnExpand from "./components/ResizeMapOnExpand";
 import ExpandControl from "./components/ExpandControl";
 import RegisterMapRef from "./components/RegisterMapRef";
+import { useTranslation } from "react-i18next";
 
 /** Minimal error boundary so MarkerCluster issues don't crash the whole map. */
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: React.ReactNode }) {
+type ErrorBoundaryProps = {
+  children: React.ReactNode;
+  fallbackText?: string;
+};
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, { hasError: boolean }> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
   }
@@ -36,7 +42,7 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
     if (this.state.hasError) {
       return (
         <div style={{ padding: 8, background: "#fff3cd", border: "1px solid #ffeeba" }}>
-          Marker layer failed to render. Check console for details.
+          {this.props.fallbackText ?? "Marker layer failed to render. Check console for details."}
         </div>
       );
     }
@@ -44,8 +50,10 @@ class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { has
   }
 }
 
+
 const MapCard: React.FC = () => {
   const { config } = useConfig();
+  const { t } = useTranslation("map");
 
   const [expanded, setExpanded] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -79,7 +87,7 @@ const MapCard: React.FC = () => {
 
   
 
-  if (!config) return <div>Loading map data...</div>;
+  if (!config) return <div>{String(t("MAP.UI.LOADING", "Loading map data…"))}</div>;
 
   return (
     <div className="map-wrapper">
@@ -102,8 +110,8 @@ const MapCard: React.FC = () => {
 
             <LayersControl position="topright">
               {/* --- Base layers (only one active) --- */}
-              {baseLayers.map(({ id, name, url, attribution, checked, maxZoom }) => (
-                <LayersControl.BaseLayer key={id} name={name} checked={!!checked}>
+              {baseLayers.map(({ id, url, attribution, checked, maxZoom }) => (
+                <LayersControl.BaseLayer key={id} name={t(`MAP.BASEMAPS.${id.toUpperCase().replace(/-/g, "_")}`)} checked={!!checked}>
                   {url ? (
                     <TileLayer
                       url={url}
@@ -116,14 +124,14 @@ const MapCard: React.FC = () => {
               ))}
 
               {/* --- Overlays (multi-select) --- */}
-              <LayersControl.Overlay checked name="Stations">
-                <ErrorBoundary>
+              <LayersControl.Overlay checked name={String(t("MAP.OVERLAYS.STATIONS"))}>
+                <ErrorBoundary fallbackText={String(t("MAP.ERRORS.MARKER_LAYER_FAILED"))}>
                   <MarkerCluster stations={config} />
                 </ErrorBoundary>
               </LayersControl.Overlay>
 
               {/* Start with Land Use visible by default */}
-              <LayersControl.Overlay checked name="Land Use">
+              <LayersControl.Overlay checked name={String(t("MAP.OVERLAYS.LAND_USE"))}>
                 <LandUseLayer />
               </LayersControl.Overlay>
             </LayersControl>

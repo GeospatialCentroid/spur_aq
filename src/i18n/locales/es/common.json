@@ -1,0 +1,15 @@
+{
+  "APP": {
+    "TITLE_FORMATTED": "<b>Spur</b> <b>R</b>egional de <b>A</b>ire <b>M</b>onitoreo <b>S</b>itio (<b>RAMS</b>)",
+    "LOGO_ALT": "Logotipo de CSU Spur"
+  },
+  "GENERIC": {
+    "LOADING_CONFIG": "Cargando configuración..."
+  },
+  "FOOTER": {
+    "COPYRIGHT": "© {{year}} SPUR. Todos los derechos reservados."
+  },
+  "A11Y": {
+    "REMOVE_GRAPH": "Eliminar gráfico"
+  }
+}

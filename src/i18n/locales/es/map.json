@@ -1,0 +1,63 @@
+{
+  "MAP": {
+    "ACTIONS": {
+      "EXPAND_MAP": "Expandir mapa",
+      "COLLAPSE_MAP": "Contraer mapa",
+      "RESET_VIEW": "Restablecer vista",
+      "SHOW_LEGEND": "Mostrar leyenda",
+      "HIDE_LEGEND": "Ocultar leyenda"
+    },
+    "LEGEND": {
+      "HEADER": "Zonas — Haz clic para resaltar",
+      "DRAG_HINT": "Arrastra para mover",
+      "RESIZE": "Redimensionar",
+      "TITLE": "Leyenda",
+      "NO_DATA": "Sin datos disponibles"
+    },
+    "ZONES": {
+      "Airport (DIA)": "Aeropuerto (DIA)",
+      "Campus (EI, EI2, ENT, H, H2, NWC)": "Campus (EI, EI2, ENT, H, H2, NWC)",
+      "Cherry Creek North (C-CCN)": "Cherry Creek North (C-CCN)",
+      "Commercial Corridor (CC)": "Corredor Comercial (CC)",
+      "Downtown (AS, C, CPV, GT, LD, TD)": "Centro (AS, C, CPV, GT, LD, TD)",
+      "Downtown - Civic (D-CV)": "Centro - Cívico (D-CV)",
+      "Former Chapter 59 Zone": "Zona del Capítulo 59 (anterior)",
+      "Industrial - General (I-B)": "Industrial - General (I-B)",
+      "Industrial - Light (I-A)": "Industrial - Ligero (I-A)",
+      "Industrial - Mixed Use (I-MX, M-IMX)": "Industrial - Uso Mixto (I-MX, M-IMX)",
+      "Main Street (MS)": "Calle Principal (MS)",
+      "Mixed Use (MX, M-GMX)": "Uso Mixto (MX, M-GMX)",
+      "Multi Unit (MU, RH, RO)": "Multiunidad (MU, RH, RO)",
+      "Manufactured Home Community (MHC)": "Comunidad de Casas Prefabricadas (MHC)",
+      "Open Space - Conservation (OS-C)": "Espacio Abierto - Conservación (OS-C)",
+      "Open Space - Public Parks (OS-A)": "Espacio Abierto - Parques Públicos (OS-A)",
+      "Open Space - Recreation (OS-B)": "Espacio Abierto - Recreación (OS-B)",
+      "Planned Unit Development (PUD-D, PUD-G)": "Desarrollo de Unidad Planificada (PUD-D, PUD-G)",
+      "Residential Mixed Use (RX)": "Residencial de Uso Mixto (RX)",
+      "Single Unit (SU)": "Unidad Única (SU)",
+      "Special (O-1)": "Especial (O-1)",
+      "Two Unit (TU)": "Doble Unidad (TU)",
+      "Other": "Otro"
+    },
+    "BASEMAPS": {
+      "OSM": "OpenStreetMap",
+      "ESRI_IMAGERY": "Esri Satélite (Imágenes del Mundo)",
+      "USGS_TOPO": "USGS Topográfico",
+      "ESRI_TOPO": "Esri Topográfico",
+      "ESRI_STREETS": "Esri Calles",
+      "ESRI_NATGEO": "Esri National Geographic",
+      "ESRI_LIGHT_GRAY": "Esri Gris Claro",
+      "ESRI_DARK_GRAY": "Esri Gris Oscuro"
+    },
+    "POPUP": {
+      "ZONE_CODE": "Código de zona"
+    },
+        "UI": {
+      "LOADING": "Cargando datos del mapa…"
+    },
+    "OVERLAYS": {
+      "STATIONS": "Estaciones",
+      "LAND_USE": "Uso de suelo"
+    }
+  }
+}

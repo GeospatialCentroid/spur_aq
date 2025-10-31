@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import L from "leaflet";
 import { useMap } from "react-leaflet";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   expanded: boolean;
@@ -9,6 +10,7 @@ type Props = {
 
 const ExpandControl: React.FC<Props> = ({ expanded, setExpanded }) => {
   const map = useMap();
+  const { t, i18n } = useTranslation("map");
 
   useEffect(() => {
     const Expand = L.Control.extend({
@@ -17,7 +19,10 @@ const ExpandControl: React.FC<Props> = ({ expanded, setExpanded }) => {
         const c = L.DomUtil.create("div", "leaflet-bar leaflet-control map-expand-button");
         L.DomEvent.disableClickPropagation(c);
         c.style.cursor = "pointer";
-        c.title = expanded ? "Collapse Map" : "Expand Map";
+        c.title = expanded
+          ? (t("MAP.ACTIONS.COLLAPSE_MAP") as string)
+          : (t("MAP.ACTIONS.EXPAND_MAP") as string);
+
         c.innerHTML = `
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             ${
@@ -37,7 +42,8 @@ const ExpandControl: React.FC<Props> = ({ expanded, setExpanded }) => {
     return () => {
       map.removeControl(ctrl);
     };
-  }, [map, expanded, setExpanded]);
+  }, [map, expanded, setExpanded, i18n.language]);
+
 
   return null;
 };

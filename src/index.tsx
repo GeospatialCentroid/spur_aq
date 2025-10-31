@@ -14,6 +14,8 @@ import './index.css'; // Global styles
 import App from './App'; // Main App component
 import reportWebVitals from './reportWebVitals'; // Performance measuring tool
 import { BrowserRouter } from 'react-router-dom'; // Router wrapper for navigation support
+import "./i18n/i18n-setup";
+
 
 // Create a root container for the React application
 const root = ReactDOM.createRoot(

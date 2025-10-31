@@ -1,0 +1,35 @@
+{
+  "LEGEND": {
+    "DOWNLOAD": "Download data"
+  },
+  "BUTTONS": {
+    "CONFIRM": "Confirm",
+    "CANCEL": "Cancel",
+    "SELECT_VARIABLE": "Select Variable"
+  },
+  "A11Y": {
+    "RANGE": "Time range slider",
+    "HANDLE": "Handle {{index}}",
+    "CLOSE_MODAL": "Close variable selection modal",
+    "DRAG_GRAPH": "Drag graph to reorder",
+    "REMOVE_GRAPH": "Remove graph",
+    "REMOVE_VARIABLE": "Remove variable"
+  },
+  "MODAL": {
+    "TITLE_SELECT_VARIABLE": "Select a Variable",
+    "INSTRUCTION_SELECT_ITEM": "Select a station, instrument, or measurement to view its description."
+  },
+    "MENU": {
+    "EXPAND": "Expand Menu",
+    "COLLAPSE": "Collapse Menu",
+    "PLACEHOLDER_DATETIME": "Select date and time"
+  },
+   "INTERVAL": {
+    "LABEL": "Select interval",
+    "RAW_DATA": "Raw Data",
+    "ONE_MIN": "1 min",
+    "FIVE_MINS": "5 mins",
+    "TEN_MINS": "10 mins",
+    "SIXTY_MINS": "60 mins"
+  }
+}

@@ -7,12 +7,14 @@ import FadingRightArrow from './FadingRightArrow';
 import './RecentValCard.css';
 import { apiUrl } from '../../../config/api';
 import { calibrateValueForMeasurement } from '../../../utils/calibration';
+import { useTranslation } from "react-i18next";
 
 interface RecentValuesCardProps {
   stationData: any[];
 }
 
 const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
+  const { t, i18n } = useTranslation("recent");
   const parsedMeasurements = extractMeasurementsWithRanges(stationData).filter(p => p.ranges.length > 0);
 
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -92,7 +94,7 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
         onClick={() =>
           setCurrentIndex((currentIndex - 1 + parsedMeasurements.length) % parsedMeasurements.length)
         }
-        aria-label="Previous measurement"
+        aria-label={String(t("A11Y.PREV"))}
       >
         <FadingLeftArrow />
       </button>
@@ -103,7 +105,7 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
         onClick={() =>
           setCurrentIndex((currentIndex + 1) % parsedMeasurements.length)
         }
-        aria-label="Next measurement"
+        aria-label={String(t("A11Y.NEXT"))}
       >
         <FadingRightArrow />
       </button>
@@ -115,7 +117,7 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
           </div>
 
           <div className="gauge-meta" aria-live="polite">
-            <p className="gauge-category">{match?.category || 'Unknown'}</p>
+            <p className="gauge-category">{match?.category || t("LABELS.UNKNOWN")}</p>
 
             <h6 className="gauge-name">
               {displayLabel} ({latestValue.toFixed(1)} {selected.units || ''})
@@ -123,7 +125,7 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
 
             {formattedTimestamp && (
               <div className="latest-timestamp">
-                Last updated {formattedTimestamp}
+                {t("LABELS.LAST_UPDATED", { date: formattedTimestamp })}
               </div>
             )}
           </div>
