@@ -5,7 +5,9 @@
   "BUTTONS": {
     "CONFIRM": "Confirmar",
     "CANCEL": "Cancelar",
-    "SELECT_VARIABLE": "Seleccionar variable"
+    "SELECT_VARIABLE": "Seleccionar variable",
+    "ADD_VARIABLE": "+ Añadir variable",
+    "ADD_GRAPH": "Añadir gráfico"
   },
   "A11Y": {
     "RANGE": "Control deslizante del intervalo de tiempo",
@@ -19,10 +21,13 @@
     "TITLE_SELECT_VARIABLE": "Selecciona una variable",
     "INSTRUCTION_SELECT_ITEM": "Selecciona una estación, instrumento o medición para ver su descripción."
   },
-    "MENU": {
+  "MENU": {
     "EXPAND": "Expandir menú",
     "COLLAPSE": "Contraer menú",
-    "PLACEHOLDER_DATETIME": "Selecciona fecha y hora"
+    "PLACEHOLDER_DATETIME": "Selecciona fecha y hora",
+    "FROM": "Desde",
+    "TO": "Hasta",
+    "AVG": "Prom."
   },
   "INTERVAL": {
     "LABEL": "Seleccionar intervalo",
@@ -31,5 +36,9 @@
     "FIVE_MINS": "5 min",
     "TEN_MINS": "10 min",
     "SIXTY_MINS": "60 min"
+  },
+  "GRAPH": {
+    "SLIDER_LABEL": "{{start}} → {{end}}",
+    "LOADING": "Cargando..."
   }
 }

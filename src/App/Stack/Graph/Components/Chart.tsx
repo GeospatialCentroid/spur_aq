@@ -44,7 +44,8 @@ const Chart: React.FC<ChartProps> = ({
   className = '',
   selectedMeasurements
 }) => {
-   const { t } = useTranslation();
+  const { t } = useTranslation("graph");
+
   /**
    * Transform row-wise chartData into column-wise structure:
    * {

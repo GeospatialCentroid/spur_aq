@@ -64,7 +64,7 @@ const Menu: React.FC<MenuProps> = ({
   interval,
   onIntervalChange,
 }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation("graph");
   // Tracks the index of the variable selector to auto-open on mount
   const [openOnMountIndex, setOpenOnMountIndex] = useState<number | null>(null);
 

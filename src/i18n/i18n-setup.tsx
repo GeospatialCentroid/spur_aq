@@ -18,7 +18,7 @@ import esGraph from "./locales/es/graph.json";
 void i18n
   .use(initReactI18next)
   .init({
-    lng: "es",                  // default language
+    lng: "en",                  // default language
     fallbackLng: "en",
     ns: ["common", "info", "map", "recent", "graph"],
     defaultNS: "common",

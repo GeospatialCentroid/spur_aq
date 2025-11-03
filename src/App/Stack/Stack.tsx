@@ -34,7 +34,7 @@ interface GraphItem {
 }
 
 const Stack: React.FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation("graph");
   const navigate = useNavigate();
   const location = useLocation();
   const nextIdRef = useRef(1); // Counter to ensure unique graph IDs
@@ -162,12 +162,13 @@ const Stack: React.FC = () => {
         ))}
       </ReactSortable>
 
+
       <button
         type="button"
         className="btn btn-outline-primary align-self-center mt-1"
         onClick={addGraph}
-        title={t('BUTTONS.ADD_GRAPH')}
-        aria-label={t('BUTTONS.ADD_GRAPH')}
+        title={t('BUTTONS.ADD_GRAPH') as string}
+        aria-label={t('BUTTONS.ADD_GRAPH') as string}
       >
         <Plus /> {t('BUTTONS.ADD_GRAPH')}
       </button>

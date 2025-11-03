@@ -5,7 +5,9 @@
   "BUTTONS": {
     "CONFIRM": "Confirm",
     "CANCEL": "Cancel",
-    "SELECT_VARIABLE": "Select Variable"
+    "SELECT_VARIABLE": "Select Variable",
+    "ADD_VARIABLE": "+ Add Variable",
+    "ADD_GRAPH": "Add Graph"
   },
   "A11Y": {
     "RANGE": "Time range slider",
@@ -19,17 +21,24 @@
     "TITLE_SELECT_VARIABLE": "Select a Variable",
     "INSTRUCTION_SELECT_ITEM": "Select a station, instrument, or measurement to view its description."
   },
-    "MENU": {
+  "MENU": {
     "EXPAND": "Expand Menu",
     "COLLAPSE": "Collapse Menu",
-    "PLACEHOLDER_DATETIME": "Select date and time"
+    "PLACEHOLDER_DATETIME": "Select date and time",
+    "FROM": "From",
+    "TO": "To",
+    "AVG": "Avg"
   },
-   "INTERVAL": {
+  "INTERVAL": {
     "LABEL": "Select interval",
     "RAW_DATA": "Raw Data",
     "ONE_MIN": "1 min",
     "FIVE_MINS": "5 mins",
     "TEN_MINS": "10 mins",
     "SIXTY_MINS": "60 mins"
+  },
+  "GRAPH": {
+    "SLIDER_LABEL": "{{start}} → {{end}}",
+    "LOADING": "Loading..."
   }
 }

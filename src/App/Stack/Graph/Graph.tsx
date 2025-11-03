@@ -40,7 +40,7 @@ interface GraphProps {
 
 /** Main component representing one full graph unit */
 const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation("graph");
   const [menuExpanded, setMenuExpanded] = useState(true);
   const [loading, setLoading] = useState(true);
   const { config } = useConfig();
