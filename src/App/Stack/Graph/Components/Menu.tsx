@@ -11,6 +11,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './Menu.css';
 import DateSelector from './Menu/DateSelector';
 import VariableSelector from './Menu/VariableSelector';
@@ -63,6 +64,7 @@ const Menu: React.FC<MenuProps> = ({
   interval,
   onIntervalChange,
 }) => {
+  const { t } = useTranslation();
   // Tracks the index of the variable selector to auto-open on mount
   const [openOnMountIndex, setOpenOnMountIndex] = useState<number | null>(null);
 
@@ -78,13 +80,13 @@ const Menu: React.FC<MenuProps> = ({
 
         {/* Time and interval controls */}
         <div className="dt-button-group">
-            From:
+            {t('MENU.FROM')}:
             <DateSelector
               value={fromDate}
               onChange={onFromDateChange}
               maxDate={toDate}
             />
-            To:
+            {t('MENU.TO')}:
             <DateSelector
               value={toDate}
               onChange={onToDateChange}
@@ -94,7 +96,7 @@ const Menu: React.FC<MenuProps> = ({
             />
 
           <div className="interval-group">
-            Avg:
+            {t('MENU.AVG')}:
             <IntervalSelector
               value={interval}
               onChange={onIntervalChange}
@@ -121,7 +123,7 @@ const Menu: React.FC<MenuProps> = ({
 
           {variables.length < 2 && (
             <button className="add-variable-button" onClick={handleAddVariable}>
-              + Add Variable
+              {t('BUTTONS.ADD_VARIABLE')}
             </button>
           )}
         </div>

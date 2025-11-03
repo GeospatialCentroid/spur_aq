@@ -11,6 +11,7 @@
  */
 
 import React, { useRef, useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import './Graph.css';
 import Menu from './Components/Menu';
 import ControlBar from './Components/ControlBar';
@@ -39,6 +40,7 @@ interface GraphProps {
 
 /** Main component representing one full graph unit */
 const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange }) => {
+  const { t } = useTranslation();
   const [menuExpanded, setMenuExpanded] = useState(true);
   const [loading, setLoading] = useState(true);
   const { config } = useConfig();
@@ -322,7 +324,7 @@ useEffect(() => {
         {loading && (
           <div className="position-absolute top-50 start-50 translate-middle" style={{ zIndex: 9999 }}>
             <div className="spinner-border text-dark" role="status">
-              <span className="visually-hidden">Loading...</span>
+              <span className="visually-hidden">{t('GRAPH.LOADING')}</span>
             </div>
           </div>
         )}
