@@ -1,6 +1,7 @@
 // src/App/Info/MapCard/components/LegendControl.tsx
 import React, { useEffect, useState } from "react";
 import L from "leaflet";
+import { useTranslation } from "react-i18next";
 import { useMap } from "react-leaflet";
 import { zoningGroups } from "../zoning";
 import {
@@ -76,6 +77,7 @@ const getAttributionHeight = (): number => {
 
 const LegendControl: React.FC = () => {
   const map = useMap();
+  const { t, i18n } = useTranslation("map");
   const [visible, setVisible] = useState(false);
   const [landUseAvailable, setLandUseAvailable] = useState<boolean>(false);
 
@@ -112,7 +114,7 @@ const LegendControl: React.FC = () => {
 
   onAdd: () => {
     const btn = L.DomUtil.create("button", "toggle-legend-btn") as HTMLButtonElement;
-    btn.textContent = "Show Legend";
+    btn.textContent = String(t("MAP.ACTIONS.SHOW_LEGEND"));
     btn.style.background = "white";
     btn.style.padding = "6px 8px";
     btn.style.cursor = "pointer";
@@ -176,15 +178,22 @@ const LegendControl: React.FC = () => {
     container.style.visibility = "hidden";
 
     container.innerHTML = `
-      <div class="legend-header" title="Drag to move" style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
-        <strong>Zones — Click to Highlight</strong>
+      <div class="legend-header" title="${String(t("MAP.LEGEND.DRAG_HINT"))}"
+          style="display:flex;align-items:center;gap:8px;justify-content:space-between;">
+        <strong>${String(t("MAP.LEGEND.HEADER"))}</strong>
         <span style="display:flex;gap:6px;align-items:center;">
-          <button class="legend-close" aria-label="Hide legend" title="Hide legend" style="cursor:pointer;border:none;background:transparent;font-size:18px;line-height:1">×</button>
+          <button class="legend-close"
+                  aria-label="${String(t("MAP.ACTIONS.HIDE_LEGEND"))}"
+                  title="${String(t("MAP.ACTIONS.HIDE_LEGEND"))}"
+                  style="cursor:pointer;border:none;background:transparent;font-size:18px;line-height:1">×</button>
         </span>
       </div>
       <div class="legend-body"></div>
-      <div class="legend-footer"><div class="legend-resizer" title="Resize"></div></div>
+      <div class="legend-footer">
+        <div class="legend-resizer" title="${String(t("MAP.LEGEND.RESIZE"))}"></div>
+      </div>
     `;
+
     document.body.appendChild(container);
 
     const viewport = () => ({ w: window.innerWidth, h: window.innerHeight });
@@ -294,14 +303,20 @@ const LegendControl: React.FC = () => {
     L.DomEvent.disableScrollPropagation(container);
 
     const body = container.querySelector(".legend-body") as HTMLDivElement;
+
     Object.keys(zoningGroups).forEach((label) => {
       const group = zoningGroups[label];
       const item = document.createElement("div");
       item.className = "legend-item";
       item.dataset.group = label;
-      item.innerHTML = `<i style="background:${group.color}"></i> ${label}`;
+
+      // Force a string + provide a fallback if the key is missing
+      const translated = String(t(`MAP.ZONES.${label}`, { defaultValue: label }));
+
+      item.innerHTML = `<i style="background:${group.color}"></i> ${translated}`;
       body.appendChild(item);
     });
+
 
     container.addEventListener("click", (e) => {
       const closeBtn = (e.target as HTMLElement).closest(".legend-close");
@@ -465,7 +480,7 @@ const LegendControl: React.FC = () => {
       if (container && container.parentElement) container.parentElement.removeChild(container);
       if (toggleCtrl) map.removeControl(toggleCtrl);
     };
-  }, [map, visible, landUseAvailable]);
+  }, [map, visible, landUseAvailable, i18n.language]);
 
   return null;
 };

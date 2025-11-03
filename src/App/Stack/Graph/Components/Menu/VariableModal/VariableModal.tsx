@@ -17,6 +17,7 @@ import { useConfig } from '../../../../../../context/ConfigContext';
 import { getColorForVariable } from '../../../ColorUtils';
 import { SelectedMeasurement, createBlankMeasurement } from '../../../graphTypes';
 import { Calibration } from '../../../../../../Types/calibration';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Metadata representing a selected item in the hierarchy.
@@ -57,6 +58,7 @@ const VariableModal: React.FC<VariableModalProps> = ({
   onConfirmSelection,
   stationsOverride, // Add this
 }) => {
+  const { t } = useTranslation('graph');
   const { config } = useConfig(); // Station/instrument/measurement data
   const [selected, setSelected] = useState<SelectedItem | null>(null); // Currently highlighted item
   const [selectedKey, setSelectedKey] = useState<string | null>(null); // Key in format "stationId:instrumentId:measurementName"
@@ -135,7 +137,7 @@ const VariableModal: React.FC<VariableModalProps> = ({
         {/* Modal Header */}
         <div className="modal-header">
           <div className="modal-header-section left">
-            <h2>Select a Variable</h2>
+            <h2>{t('MODAL.TITLE_SELECT_VARIABLE')}</h2>
           </div>
 
           <div className="modal-header-section center">
@@ -145,9 +147,13 @@ const VariableModal: React.FC<VariableModalProps> = ({
           </div>
 
           <div className="modal-header-section right">
-            <button className="close-button" onClick={onClose}>
-              &times;
-            </button>
+              <button
+                className="close-button"
+                onClick={onClose}
+                aria-label={String(t('A11Y.CLOSE_MODAL'))}
+              >
+                &times;
+              </button>
           </div>
         </div>
 
@@ -179,7 +185,7 @@ const VariableModal: React.FC<VariableModalProps> = ({
 
           ) : (
             <div className="variableDescription">
-              <p>Select a station, instrument, or measurement to view its description.</p>
+              <p>{t('MODAL.INSTRUCTION_SELECT_ITEM')}</p>
             </div>
           )}
         </div>

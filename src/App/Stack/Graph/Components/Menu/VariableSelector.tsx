@@ -15,6 +15,7 @@ import './VariableSelector.css';
 import { getColorForVariable } from '../../ColorUtils';
 import { XLg } from 'react-bootstrap-icons';
 import { SelectedMeasurement } from '../../graphTypes';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Props for the VariableSelector component.
@@ -40,6 +41,7 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
   onRemove,
   openOnMount,
 }) => {
+  const { t } = useTranslation('graph');
   const [isOpen, setIsOpen] = useState(false); // Tracks if the modal is open
 
   // Open the modal immediately on first mount if instructed
@@ -78,7 +80,7 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
               : undefined
           }
         >
-          {value?.alias ?? value?.name ?? 'Select Variable'}
+          {value?.alias ?? value?.name ?? t('BUTTONS.SELECT_VARIABLE')}
         </button>
 
         {/* Optional remove button */}
@@ -86,7 +88,7 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
           <button
             className="remove-variable-button"
             onClick={onRemove}
-            aria-label="Remove variable"
+            aria-label={String(t('A11Y.REMOVE_VARIABLE'))}
           >
             <XLg size={16} style={{ stroke: 'currentColor', strokeWidth: 1 }} />
           </button>

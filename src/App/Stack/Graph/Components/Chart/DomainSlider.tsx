@@ -1,6 +1,7 @@
 import React from 'react';
 import { Range, getTrackBackground } from 'react-range';
 import './DomainSlider.css';
+import { useTranslation } from 'react-i18next';
 
 interface DomainSliderProps {
   domain: [number, number];
@@ -15,12 +16,13 @@ export default function DomainSlider({
   selection,
   onChange,
 }: DomainSliderProps) {
+  const { t } = useTranslation('graph');
   return (
-    <div className="domain-slider-wrapper">
+    <div className="domain-slider-wrapper" aria-label={String(t('A11Y.RANGE'))}>
       <div className="domain-slider">
         <Range
           values={selection}
-          step={STEP}
+          step={STEP} 
           min={domain[0]}
           max={domain[1]}
           draggableTrack
@@ -55,7 +57,7 @@ export default function DomainSlider({
                 {...rest}
                 className="slider-handle"
                 role="slider"
-                aria-label={`Handle ${index + 1}`}
+                aria-label={String(t('A11Y.HANDLE', { index: index + 1 }))}
                 aria-valuemin={domain[0]}
                 aria-valuemax={domain[1]}
                 aria-valuenow={selection[index]}

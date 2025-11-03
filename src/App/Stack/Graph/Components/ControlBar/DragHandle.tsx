@@ -11,14 +11,19 @@
 import React from 'react';
 import { GripVertical } from 'react-bootstrap-icons';
 import './DragHandle.css';
+import { useTranslation } from 'react-i18next';
 
 /**
  * A visual handle element that allows the graph to be dragged to reorder.
  */
-const DragHandle: React.FC = () => (
-  <div className="drag-handle" aria-label="Drag graph">
-    <GripVertical />
-  </div>
-);
+const DragHandle: React.FC = () => {
+  const { t } = useTranslation('common'); // ✅ Hook inside component, and probably "common" ns
+
+  return (
+    <div className="drag-handle" aria-label={String(t('A11Y.DRAG_GRAPH'))}>
+      <GripVertical />
+    </div>
+  );
+};
 
 export default DragHandle;

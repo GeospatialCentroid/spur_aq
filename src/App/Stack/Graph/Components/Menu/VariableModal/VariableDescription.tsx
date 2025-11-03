@@ -9,6 +9,7 @@
 
 import React from 'react';
 import './VariableDescription.css';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Props for the VariableDescription component.
@@ -38,6 +39,7 @@ const VariableDescription: React.FC<VariableDescriptionProps> = ({
   onCancel,
   highlightColor,
 }) => {
+  const { t } = useTranslation('graph');
   return (
     <div className="variableDescription">
       {/* Show multi-line description with preserved line breaks */}
@@ -48,6 +50,7 @@ const VariableDescription: React.FC<VariableDescriptionProps> = ({
           <button
             className="confirm-button btn btn-primary"
             onClick={onConfirm}
+            aria-label={String(t('BUTTONS.CONFIRM'))}
             style={
               highlightColor
                 ? {
@@ -58,11 +61,15 @@ const VariableDescription: React.FC<VariableDescriptionProps> = ({
                 : undefined
             }
           >
-            Confirm
+            {t('BUTTONS.CONFIRM')}
           </button>
-          <button onClick={onCancel} className="btn btn-secondary ml-2">
-            Cancel
-          </button>
+            <button
+              onClick={onCancel}
+              className="btn btn-secondary ml-2"
+              aria-label={String(t('BUTTONS.CANCEL'))}
+            >
+              {t('BUTTONS.CANCEL')}
+            </button>
         </div>
       )}
     </div>

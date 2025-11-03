@@ -3,6 +3,7 @@
 import React from 'react';
 import './ExpandToggle.css';
 import { ArrowBarLeft, ArrowBarRight } from 'react-bootstrap-icons';
+import { useTranslation } from 'react-i18next';
 
 
 /**
@@ -22,11 +23,12 @@ interface ExpandToggleProps {
  * A small toggle button for showing or hiding the graph configuration menu.
  */
 export default function ExpandToggle({ expanded, onToggle, className }: ExpandToggleProps) {
+  const { t } = useTranslation('graph');
   return (
     <button
       className={`expand-toggle ${className || ''}`}
       onClick={onToggle}
-      title={expanded ? 'Collapse Menu' : 'Expand Menu'}
+      title={expanded ? String(t('MENU.COLLAPSE')) : String(t('MENU.EXPAND'))}
     >
       {expanded ? <ArrowBarLeft size={30} /> : <ArrowBarRight size={30} />}
     </button>

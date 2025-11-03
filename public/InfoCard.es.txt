@@ -1,0 +1,13 @@
+# INSTRUCTIONS
+~ This is the SPANISH translation file. 
+~ Please copy the structure of InfoCard.txt and add the Spanish translation of the same content. 
+~ Keep both files in sync — if you update the English file, update this file as well.
+
+TEXT:
+El Sitio Regional de Monitoreo de Aire (RAMS) es una estación de monitoreo de calidad del aire a largo plazo en el campus CSU Spur en Denver, Colorado. Buscamos crear conciencia sobre las concentraciones de contaminantes en la región y comunicar observaciones de calidad del aire a la comunidad Spur.
+
+# IMAGE: relative path to image is already given public/Photos/InfoCardPhotos/(example: overview.mp4 or airQuality.jpg)
+IMAGE: /Photos/InfoCardPhotos/SpurRAMS.jpg
+
+# VIDEO: Relative path to a public/ video
+VIDEO:

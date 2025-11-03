@@ -4,6 +4,7 @@ import './D3Chart.css';
 import { getColorForVariable } from '../../ColorUtils';
 import { SelectedMeasurement } from '../../graphTypes';
 import { formatAxisLabel, formatTick } from '../../Utils/LabelFormat';
+import { useTranslation } from 'react-i18next';
 
 // Utility function for download
 async function downloadFile(url: string, filename: string) {
@@ -48,6 +49,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
 }) => {
   const ref = useRef<SVGSVGElement | null>(null);
   const [sizeTick, setSizeTick] = useState(0);
+  const { t } = useTranslation('graph');
 
   useEffect(() => {
   if (!ref.current) return;
@@ -481,7 +483,7 @@ selectedMeasurements.forEach((variable, i) => {
      .style('cursor', 'default')
     .text(variable.alias || variable.name);
 
-     legendItem.append('title').text("Download data");
+     legendItem.append('title').text(t('LEGEND.DOWNLOAD'));
 
 });
 //       // Last value text

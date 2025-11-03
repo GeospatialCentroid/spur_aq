@@ -12,6 +12,7 @@ import React from 'react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './DateSelector.css';
+import { useTranslation } from 'react-i18next';
 
 
 /**
@@ -40,6 +41,7 @@ export default function DateSelector({
   maxDate,
   isClearable,
 }: DateSelectorProps) {
+  const { t } = useTranslation('graph');
   const selectedDate = value ? new Date(value) : null;
 
   const handleChange = (date: Date | null) => {
@@ -61,7 +63,7 @@ export default function DateSelector({
         dateFormat="yyyy-MM-dd h:mm aa"
         minDate={minDate ? new Date(minDate) : undefined}
         maxDate={maxDate ? new Date(maxDate) : undefined}
-        placeholderText="Select date and time"
+        placeholderText={String(t('MENU.PLACEHOLDER_DATETIME'))}
         className="custom-dtpicker"
         popperPlacement="top-end"
         popperClassName="dtpicker-popper"

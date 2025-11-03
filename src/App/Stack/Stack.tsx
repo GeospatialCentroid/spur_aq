@@ -10,6 +10,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ReactSortable } from 'react-sortablejs';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Stack.css';
@@ -33,6 +34,7 @@ interface GraphItem {
 }
 
 const Stack: React.FC = () => {
+  const { t } = useTranslation("graph");
   const navigate = useNavigate();
   const location = useLocation();
   const nextIdRef = useRef(1); // Counter to ensure unique graph IDs
@@ -160,12 +162,15 @@ const Stack: React.FC = () => {
         ))}
       </ReactSortable>
 
+
       <button
         type="button"
         className="btn btn-outline-primary align-self-center mt-1"
         onClick={addGraph}
+        title={t('BUTTONS.ADD_GRAPH') as string}
+        aria-label={t('BUTTONS.ADD_GRAPH') as string}
       >
-        <Plus /> Add Graph
+        <Plus /> {t('BUTTONS.ADD_GRAPH')}
       </button>
     </div>
   );

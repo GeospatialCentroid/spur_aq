@@ -1,0 +1,10 @@
+{
+  "A11Y": {
+    "PREV": "Previous measurement",
+    "NEXT": "Next measurement"
+  },
+  "LABELS": {
+    "UNKNOWN": "Unknown",
+    "LAST_UPDATED": "Last updated {{date}}"
+  }
+}

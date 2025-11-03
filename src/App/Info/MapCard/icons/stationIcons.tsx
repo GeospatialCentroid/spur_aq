@@ -65,10 +65,6 @@ export function makeStationDivIcon({
     </div>
     `;
 
-
-
-
-
   // Optional debug:
   // console.log('DivIcon <svg>?', html.includes('<svg'));
   // console.log('DivIcon <img>?', html.includes('<img'));

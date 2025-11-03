@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './InfoCard.css';
+import { useTranslation } from 'react-i18next';
 
 type InfoData = {
   text?: string;
@@ -34,16 +35,49 @@ const parseInfoCardText = (raw: string): InfoData => {
 
 const InfoCard: React.FC = () => {
   const [info, setInfo] = useState<InfoData>({});
+  const { t, i18n } = useTranslation('info');
 
-  useEffect(() => {
-    fetch('/InfoCard.txt')
-      .then((res) => res.text())
-      .then((text) => setInfo(parseInfoCardText(text)))
-      .catch((err) => console.error('Failed to load InfoCard.txt', err));
-  }, []);
+useEffect(() => {
+  const lang = i18n.resolvedLanguage || i18n.language || "en";
+  const path = lang.startsWith("es") ? "/InfoCard.es.txt" : "/InfoCard.txt";
+
+  let cancelled = false;
+
+  const load = async () => {
+    try {
+      const res = await fetch(path);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const txt = await res.text();
+      const parsed = parseInfoCardText(txt);
+
+      // If the ES file exists but has no usable keys, fall back to EN.
+      if (!parsed.text && !parsed.image && !parsed.video && !cancelled && !path.endsWith("/InfoCard.txt")) {
+        const resEn = await fetch("/InfoCard.txt");
+        const txtEn = await resEn.text();
+        setInfo(parseInfoCardText(txtEn));
+        return;
+      }
+
+      if (!cancelled) setInfo(parsed);
+    } catch {
+      // Hard fallback to EN
+      try {
+        const resEn = await fetch("/InfoCard.txt");
+        const txtEn = await resEn.text();
+        if (!cancelled) setInfo(parseInfoCardText(txtEn));
+      } catch (e2) {
+        console.error("Failed to load InfoCard files", e2);
+      }
+    }
+  };
+
+  load();
+  return () => { cancelled = true; };
+}, [i18n.resolvedLanguage]);
+
 
   return (
-    <div className="info-scroll" role="region" aria-label="Information">
+    <div className="info-scroll" role="region" aria-label={String(t("ARIA.SCROLL_REGION"))}>
       {info.text && (
         <>
           <p className="card-text info-card__text">{info.text}</p>
@@ -53,7 +87,7 @@ const InfoCard: React.FC = () => {
       {info.image && (
         <img
           src={info.image}
-          alt="Info"
+          alt={String(t("ALT.INFO_IMAGE"))}
           className="info-card__media info-card__media--bottom"
           loading="lazy"
         />
@@ -62,7 +96,7 @@ const InfoCard: React.FC = () => {
       {!info.image && info.video && (
         <video className="info-card__media info-card__media--bottom" controls preload="metadata">
           <source src={info.video} type="video/mp4" />
-          Your browser does not support the video tag.
+          {t("UI.NO_VIDEO_SUPPORT")}
         </video>
       )}
     </div>   
