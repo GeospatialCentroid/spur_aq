@@ -6,7 +6,7 @@ import { Trans } from "react-i18next";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { apiUrl } from './config/api'; // TEAM: central API base + helper
-
+import LanguageDropup from './components/LanguageDropup'
 
 
 import Info from './App/Info/Info';
@@ -117,6 +117,7 @@ function App() {
 
         <footer className="app-footer">
          <p>{t('FOOTER.COPYRIGHT', { year: new Date().getFullYear() })}</p>
+         <LanguageDropup />
         </footer>
       </div>
     </ConfigProvider>
