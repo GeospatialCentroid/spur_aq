@@ -71,12 +71,18 @@
 .stack { flex: 1; min-height: fit-content; }
 
 .app-footer {
+  position: relative;
   background-color: #282c34;
   color: #ffffff;
   padding: 1rem;
   text-align: center;
   font-size: 0.9rem;
   width: 100%;
+}
+.app-footer .lang-dropup {
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
 }
 
 .app-loading { padding: 4rem; font-size: 1.5rem; }
@@ -105,3 +111,36 @@
   transform: scale(var(--legendScaleTop));
   transform-origin: top left;
 }
+/* ---------- Language Dropup ---------- */
+.lang-dropup-menu {
+  position: absolute;
+  bottom: 38px;
+  right: 0;
+  min-width: 180px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: .5rem;
+  padding: .25rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  z-index: 1080;
+}
+
+.lang-dropup-item {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: .5rem .75rem;
+  border-radius: .375rem;
+  cursor: pointer;
+}
+
+.lang-dropup-item:hover {
+  background: rgba(255,255,255,.08);
+}
+
+.lang-dropup-item.active {
+  font-weight: 600;
+  background: rgba(0,123,255,.12);
+}
+

@@ -11,5 +11,12 @@
   },
   "A11Y": {
     "REMOVE_GRAPH": "Remove graph"
+  },
+  "LANG": {
+  "EN": "English",
+  "ES": "Spanish",
+  "LABEL": "Language"
   }
+  
+
 }
