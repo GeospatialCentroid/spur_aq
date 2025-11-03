@@ -10,6 +10,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import D3Chart from './Chart/D3Chart';
 import DomainSlider from './Chart/DomainSlider';
 import './Chart.css';
@@ -43,6 +44,7 @@ const Chart: React.FC<ChartProps> = ({
   className = '',
   selectedMeasurements
 }) => {
+   const { t } = useTranslation();
   /**
    * Transform row-wise chartData into column-wise structure:
    * {
@@ -150,10 +152,12 @@ const Chart: React.FC<ChartProps> = ({
           selection={selection}
           onChange={onSliderChange}
         />
-        <div className="slider-label">
-          {new Date(selection[0]).toLocaleString()} →{' '}
-          {new Date(selection[1]).toLocaleString()}
-        </div>
+      <div className="slider-label">
+        {t('GRAPH.SLIDER_LABEL', {
+          start: new Date(selection[0]).toLocaleString(),
+          end: new Date(selection[1]).toLocaleString(),
+        })}
+      </div>
       </div>
     </div>
   );
