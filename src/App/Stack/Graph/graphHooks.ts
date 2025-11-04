@@ -139,6 +139,10 @@ export function useFetchChartData({
   setLoading?: (loading: boolean) => void;
 }) {
   useEffect(() => {
+    if (!variables.length || variables.every(v => !v.name || !v.instrumentId)) {
+     setLoading?.(true);
+    }
+
     if (variables.length === 0) return;
 
     const key = JSON.stringify({ variables, fromDate, toDate, interval });
