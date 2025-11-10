@@ -1,5 +1,5 @@
 import React from 'react';
-import i18n from 'i18next';
+import i18n from '../i18n/i18n-setup';
 import { useTranslation } from 'react-i18next';
 
 type Lang = { code: string; labelKey: string };

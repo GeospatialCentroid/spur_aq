@@ -4,11 +4,13 @@ import React, {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
   ReactNode,
 } from 'react';
-import axios from 'axios';
 import { Config } from '../Types/config';
+import i18n from '../i18n/i18n-setup';
+import { localizeWithI18n } from '../i18n/langSpans';
 
 interface TimeSeriesEntry {
   timestamp: string;
@@ -36,9 +38,28 @@ interface ConfigProviderProps {
   children: ReactNode;
 }
 
-export const ConfigProvider: React.FC<ConfigProviderProps> = ({ config, timeSeriesData, children }) => {
+export const ConfigProvider: React.FC<ConfigProviderProps> = ({
+  config: rawConfig,
+  timeSeriesData,
+  children,
+}) => {
+  // bump when language changes to recompute the localized view
+  const [langTick, setLangTick] = useState(0);
+
+  useEffect(() => {
+    const onLang = () => setLangTick((t) => t + 1);
+    i18n.on('languageChanged', onLang);
+    return () => i18n.off('languageChanged', onLang);
+  }, []);
+
+  // keep HTML only for 'description'; all other <span lang> fields -> plain text
+  const localizedConfig = useMemo(() => {
+    if (!rawConfig) return null;
+    return localizeWithI18n(rawConfig, i18n, ['description']);
+  }, [rawConfig, langTick]);
+
   return (
-    <ConfigContext.Provider value={{ config, timeSeriesData }}>
+    <ConfigContext.Provider value={{ config: localizedConfig, timeSeriesData }}>
       {children}
     </ConfigContext.Provider>
   );
