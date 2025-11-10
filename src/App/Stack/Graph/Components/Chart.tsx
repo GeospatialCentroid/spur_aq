@@ -15,6 +15,8 @@ import D3Chart from './Chart/D3Chart';
 import DomainSlider from './Chart/DomainSlider';
 import './Chart.css';
 import {SelectedMeasurement} from '../graphTypes';
+import { formatSmartShort } from '../../../../utils/time';
+
 
 /** Props for Chart component */
 interface ChartProps {
@@ -153,12 +155,13 @@ const Chart: React.FC<ChartProps> = ({
           selection={selection}
           onChange={onSliderChange}
         />
-      <div className="slider-label">
-        {t('GRAPH.SLIDER_LABEL', {
-          start: new Date(selection[0]).toLocaleString(),
-          end: new Date(selection[1]).toLocaleString(),
-        })}
-      </div>
+        <div className="slider-label">
+          {t('GRAPH.SLIDER_LABEL', {
+            start: formatSmartShort(new Date(selection[0]).toISOString()),
+            end: formatSmartShort(new Date(selection[1]).toISOString()),
+          })}
+        </div>
+
       </div>
     </div>
   );

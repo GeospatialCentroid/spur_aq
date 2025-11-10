@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
+import { isUtcMode } from '../../../../../utils/time'; 
 import './D3Chart.css';
 import { getColorForVariable } from '../../ColorUtils';
 import { SelectedMeasurement } from '../../graphTypes';
 import { formatAxisLabel, formatTick } from '../../Utils/LabelFormat';
 import { useTranslation } from 'react-i18next';
+import { buildDownloadUrl, safeFilename } from '../../../../../utils/download';
 
 // Utility function for download
 async function downloadFile(url: string, filename: string) {
@@ -51,6 +53,8 @@ const D3Chart: React.FC<D3ChartProps> = ({
   const [sizeTick, setSizeTick] = useState(0);
   const { t } = useTranslation('graph');
 
+  const useUtc = isUtcMode();
+
   useEffect(() => {
   if (!ref.current) return;
   const container = ref.current.parentElement;
@@ -70,11 +74,6 @@ const D3Chart: React.FC<D3ChartProps> = ({
 
 
   useEffect(() => {
-
-
-
-  var variables= selectedMeasurements
-//   console.log(variables,"variables")
   
   //drop milliseconds
    const normalizedData: typeof data = {};
@@ -110,7 +109,9 @@ const D3Chart: React.FC<D3ChartProps> = ({
 
 
     // Create X scale (time)
-    const xScale = d3.scaleTime().domain([start, end]).range([0, innerWidth]);
+    const xScale = (useUtc ? d3.scaleUtc() : d3.scaleTime())
+      .domain([start, end])
+      .range([0, innerWidth]);
 
     // Primary Y scale domain from props (assumed for first var)
     const primaryYScale = d3
@@ -141,35 +142,49 @@ const D3Chart: React.FC<D3ChartProps> = ({
     // Calculate duration in minutes for tick logic
     const durationMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
 
+    const minute = useUtc ? d3.utcMinute : d3.timeMinute;
+    const hour   = useUtc ? d3.utcHour   : d3.timeHour;
+    const day    = useUtc ? d3.utcDay    : d3.timeDay;
+    const week   = useUtc ? d3.utcWeek   : d3.timeWeek;
+    const month  = useUtc ? d3.utcMonth  : d3.timeMonth;
+    const year   = useUtc ? d3.utcYear   : d3.timeYear;
+
+
     // Choose X-axis tick interval based on duration
     let tickInterval: d3.TimeInterval;
-    if (durationMinutes <= 60) tickInterval = d3.timeMinute.every(15)!;
-    else if (durationMinutes <= 6 * 60) tickInterval = d3.timeMinute.every(15)!;
-    else if (durationMinutes <= 24 * 60) tickInterval = d3.timeHour.every(1)!;
-    else if (durationMinutes <= 3 * 24 * 60) tickInterval = d3.timeHour.every(6)!;
-    else if (durationMinutes <= 14 * 24 * 60) tickInterval = d3.timeDay.every(1)!;
-    else if (durationMinutes <= 45 * 24 * 60) tickInterval = d3.timeWeek.every(1)!;
-    else if (durationMinutes <= 365 * 24 * 60) tickInterval = d3.timeMonth.every(1)!;
-    else tickInterval = d3.timeYear.every(1)!;
+    if (durationMinutes <= 60) tickInterval = minute.every(15)!;
+    else if (durationMinutes <= 6 * 60) tickInterval = minute.every(15)!;
+    else if (durationMinutes <= 24 * 60) tickInterval = hour.every(1)!;
+    else if (durationMinutes <= 3 * 24 * 60) tickInterval = hour.every(6)!;
+    else if (durationMinutes <= 14 * 24 * 60) tickInterval = day.every(1)!;
+    else if (durationMinutes <= 45 * 24 * 60) tickInterval = week.every(1)!;
+    else if (durationMinutes <= 365 * 24 * 60) tickInterval = month.every(1)!;
+    else tickInterval = year.every(1)!;
+
 
     // Optional sub-tick interval
     let subTickInterval: d3.TimeInterval | null = null;
-    if (durationMinutes > 365 * 24 * 60) subTickInterval = d3.timeMonth.every(1);
-    else if (durationMinutes > 14 * 24 * 60) subTickInterval = d3.timeDay.every(1);
-    else if (durationMinutes > 6 * 60) subTickInterval = d3.timeHour.every(1);
-    else if (durationMinutes > 60) subTickInterval = d3.timeMinute.every(15);
-    else subTickInterval = d3.timeMinute.every(1);
+    if (durationMinutes > 365 * 24 * 60) subTickInterval = month.every(1);
+    else if (durationMinutes > 14 * 24 * 60) subTickInterval = day.every(1);
+    else if (durationMinutes > 6 * 60) subTickInterval = hour.every(1);
+    else if (durationMinutes > 60) subTickInterval = minute.every(15);
+    else subTickInterval = minute.every(1);
+
+    const fmtYear      = useUtc ? d3.utcFormat('%Y')         : d3.timeFormat('%Y');
+    const fmtMonthYear = useUtc ? d3.utcFormat('%b %Y')      : d3.timeFormat('%b %Y');
+    const fmtShort     = useUtc ? d3.utcFormat('%m/%d %H:%M'): d3.timeFormat('%m/%d %H:%M');
 
     // Draw bottom X-axis with formatted tick labels
-    const xAxis = d3
-      .axisBottom(xScale)
-      .ticks(tickInterval)
-      .tickFormat((d: Date | d3.NumberValue) => {
-        const date = d instanceof Date ? d : new Date(+d);
-        if (durationMinutes > 365 * 24 * 60) return d3.timeFormat('%Y')(date);
-        else if (durationMinutes > 45 * 24 * 60) return d3.timeFormat('%b %Y')(date);
-        else return d3.timeFormat('%m/%d %H:%M')(date);
-      });
+   const xAxis = d3
+    .axisBottom(xScale)
+    .ticks(tickInterval)
+    .tickFormat((d: Date | d3.NumberValue) => {
+      const date = d instanceof Date ? d : new Date(+d);
+      if (durationMinutes > 365 * 24 * 60) return fmtYear(date);
+      else if (durationMinutes > 45 * 24 * 60) return fmtMonthYear(date);
+      else return fmtShort(date);
+  });
+
 
     const xAxisGroup = g.append('g').attr('transform', `translate(0,${innerHeight})`).call(xAxis);
 
@@ -187,7 +202,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
     // Format X-axis tick labels to multiline (date on one line, time on next)
     xAxisGroup.selectAll('.tick text').each(function (d) {
       const self = d3.select(this);
-      const fullLabel = d3.timeFormat('%m/%d %H:%M')(d as Date);
+      const fullLabel = (useUtc ? d3.utcFormat('%m/%d %H:%M') : d3.timeFormat('%m/%d %H:%M'))(d as Date);
       const [datePart, timePart] = fullLabel.split(' ');
       self.text(null);
       self.append('tspan').attr('x', 0).attr('dy', '0.6em').text(datePart);
@@ -357,7 +372,9 @@ const D3Chart: React.FC<D3ChartProps> = ({
       hour: 'numeric',
       minute: '2-digit',
       hour12: true,
+      timeZone: useUtc ? 'UTC' : 'America/Denver',
     });
+
 
     // Overlay rectangle to capture mouse events for tooltip
     g.append('rect')
@@ -456,7 +473,8 @@ selectedMeasurements.forEach((variable, i) => {
     .style('cursor', 'pointer')
     .on('click', () => {
       if (variable.download_url) {
-        downloadFile(variable.download_url + '&fmt=csv', `${variable.alias || variable.name}.csv`);
+ const fname = safeFilename(variable.alias || variable.name || 'data') + '.csv';
+downloadFile(buildDownloadUrl(variable.download_url), fname);
       }
     });
 

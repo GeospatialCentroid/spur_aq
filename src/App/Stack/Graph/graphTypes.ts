@@ -30,6 +30,7 @@ export function createBlankMeasurement(): SelectedMeasurement {
     stationId: -1,
     instrumentId: -1,
     formula: null,
+    download_url: undefined,
   };
 }
 

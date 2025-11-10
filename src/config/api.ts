@@ -22,5 +22,11 @@ const raw = (process.env.REACT_APP_API_BASE_URL || '').trim();
 // default is the current dev box, so the app still works if .env is empty
 export const API_BASE_URL = raw ? raw.replace(/\/+$/, '') : 'http://10.1.76.54:8001';
 
-export const apiUrl = (path: string) =>
-  `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+export const apiUrl = (path: string) => {
+  const sep = path.includes('?') ? '&' : '?';
+  const isUtcMode = new URLSearchParams(window.location.search).get('tz') === 'UTC';
+  const tzParam = isUtcMode ? `${sep}tz=UTC` : '';
+  return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}${tzParam}`;
+};
+
+

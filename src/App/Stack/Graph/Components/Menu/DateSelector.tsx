@@ -13,6 +13,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import './DateSelector.css';
 import { useTranslation } from 'react-i18next';
+import { isUtcMode, isoFromZonedWallTime } from '../../../../../utils/time';
 
 
 /**
@@ -42,14 +43,24 @@ export default function DateSelector({
   isClearable,
 }: DateSelectorProps) {
   const { t } = useTranslation('graph');
-  const selectedDate = value ? new Date(value) : null;
+  const useUtc = isUtcMode();
+  const selectedDate = value
+    ? new Date(value)
+    : null;
+
 
   const handleChange = (date: Date | null) => {
-    if (date) {
-      onChange(date.toISOString());
-    } else {
+    if (!date) {
       onChange('');
+      return;
     }
+
+    // Store as ISO-UTC. Interpret as UTC when ?tz=UTC, otherwise as America/Denver wall time.
+    const iso = useUtc
+      ? date.toISOString()
+      : isoFromZonedWallTime(date, 'America/Denver');
+
+    onChange(iso);
   };
 
   return (
@@ -57,8 +68,9 @@ export default function DateSelector({
       <DatePicker
         portalId="root"
         selected={selectedDate}
-        onChange={handleChange}
         showTimeSelect
+        timeInputLabel={useUtc ? 'UTC' : 'America/Denver'}
+        onChange={handleChange}
         timeIntervals={15}
         dateFormat="yyyy-MM-dd h:mm aa"
         minDate={minDate ? new Date(minDate) : undefined}

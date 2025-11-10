@@ -8,6 +8,7 @@ import './RecentValCard.css';
 import { apiUrl } from '../../../config/api';
 import { calibrateValueForMeasurement } from '../../../utils/calibration';
 import { useTranslation } from "react-i18next";
+import { formatSmartShort } from '../../../utils/time';
 
 interface RecentValuesCardProps {
   stationData: any[];
@@ -25,14 +26,12 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
   const match = selected?.ranges.find(r => latestValue >= r.range[0] && latestValue <= r.range[1]);
   const displayLabel = selected?.alias ?? selected?.measurementName ?? '_';
 
-  const formattedTimestamp =
-    typeof latestTimestamp === 'string' && latestTimestamp
-      ? new Date(latestTimestamp).toLocaleString('en-US', {
-          dateStyle: 'medium',
-          timeStyle: 'short',
-          timeZone: 'America/Boise',
-        })
-      : '';
+
+const formattedTimestamp =
+  typeof latestTimestamp === 'string' && latestTimestamp
+    ? formatSmartShort(latestTimestamp)
+    : '';
+
 
   const fetchLatestValue = async (measurement: ParsedMeasurement) => {
     try {
