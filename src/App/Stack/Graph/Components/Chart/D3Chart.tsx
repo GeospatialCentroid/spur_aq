@@ -233,7 +233,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
   if (primaryMeasurement) {
     const left_axis_name = primaryMeasurement.alias ?? primaryMeasurement.name ?? '';
     const fullLeftLabel =
-      `${left_axis_name}${primaryMeasurement?.units ? ` (${primaryMeasurement.units})` : ''}`;
+      `${left_axis_name}${primaryMeasurement?.units || primaryMeasurement?.formula ?  ` (${[primaryMeasurement?.formula, primaryMeasurement?.units].filter(Boolean).join(', ')})`  : ''}`;
     const formattedLeft = formatAxisLabel(fullLeftLabel);
 
     const leftTitle = g.append('text')
@@ -265,7 +265,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
   if (secondaryMeasurement) {
     const rightLabel = secondaryMeasurement.alias ?? secondaryMeasurement.name ?? '';
     const fullRightLabel =
-      `${rightLabel}${secondaryMeasurement?.units ? ` (${secondaryMeasurement.units})` : ''}`;
+      `${rightLabel}${secondaryMeasurement?.units || secondaryMeasurement?.formula ?  ` (${[secondaryMeasurement?.formula, secondaryMeasurement?.units].filter(Boolean).join(', ')})`  : ''}`;
     const formattedRight = formatAxisLabel(fullRightLabel);
 
     const rightTitle = g.append('text')

@@ -322,7 +322,7 @@ useEffect(() => {
 
       <div className="graph-chart position-relative">
         {loading && (
-          <div className="position-absolute top-50 start-50 translate-middle" style={{ zIndex: 9999 }}>
+          <div className="position-absolute top-50 start-50 translate-middle" style={{ zIndex: 100 }}>
             <div className="spinner-border text-dark" role="status">
               <span className="visually-hidden">{t('GRAPH.LOADING')}</span>
             </div>
