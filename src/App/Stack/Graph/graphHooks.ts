@@ -140,7 +140,7 @@ export function useFetchChartData({
 }) {
   useEffect(() => {
     if (!variables.length || variables.every(v => !v.name || !v.instrumentId)) {
-     setLoading?.(true);
+     setLoading?.(false);
     }
 
     if (variables.length === 0) return;
