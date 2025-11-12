@@ -84,6 +84,15 @@ const D3Chart: React.FC<D3ChartProps> = ({
       }));
     }
     data = normalizedData
+
+    // Resolve a consistent color for a series using alias if available
+    const colorFor = (seriesName: string) => {
+      const m = selectedMeasurements.find(
+        mm => mm.name === seriesName || mm.alias === seriesName
+      );
+      return getColorForVariable(m?.alias || m?.name || seriesName);
+    };
+
     // Setup SVG and clear previous contents
     const svg = d3.select<SVGSVGElement, unknown>(ref.current!);
     svg.selectAll('*').remove();
@@ -330,9 +339,10 @@ const D3Chart: React.FC<D3ChartProps> = ({
       g.append('path')
         .datum(series)
         .attr('fill', 'none')
-        .attr('stroke', getColorForVariable(measurement.name))
+        .attr('stroke', colorFor(measurement.name))
         .attr('stroke-width', 2)
         .attr('d', line);
+
     });
 
     // Create focus circles for tooltips (one circle per measurement)
@@ -341,11 +351,12 @@ const D3Chart: React.FC<D3ChartProps> = ({
       focusCircles[measurement.name] = g
         .append('circle')
         .attr('r', 5)
-        .attr('fill', getColorForVariable(measurement.name))
+        .attr('fill', colorFor(measurement.name))
         .attr('stroke', '#fff')
         .attr('stroke-width', 1.5)
         .style('opacity', 0);
     });
+
 
     // Tooltip div
     let tooltip = d3.select('body').select<HTMLDivElement>('div.tooltip');
@@ -404,7 +415,7 @@ const D3Chart: React.FC<D3ChartProps> = ({
             Object.entries(pointData).map(
               ([key, value]) => `
             <div style="display: flex; align-items: center; gap: 6px;">
-              <div style="width: 10px; height: 10px; border-radius: 50%; background: ${getColorForVariable(
+              <div style="width: 10px; height: 10px; border-radius: 50%; background: ${colorFor(
                 key
               )};"></div>
               ${key}: ${value.toFixed(2)}
@@ -469,7 +480,7 @@ selectedMeasurements.forEach((variable, i) => {
     .attr('cx', 0)
     .attr('cy', 0)
     .attr('r', 6)
-    .attr('fill', getColorForVariable(variable.name))
+    .attr('fill', colorFor(variable.name))
     .style('cursor', 'pointer')
     .on('click', () => {
       if (variable.download_url) {

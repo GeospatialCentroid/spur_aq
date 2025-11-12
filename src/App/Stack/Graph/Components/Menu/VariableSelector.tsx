@@ -74,7 +74,7 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
           style={
             value?.name
               ? {
-                  backgroundColor: getColorForVariable(value.name),
+                  backgroundColor: getColorForVariable(value.alias || value.name),
                   color: 'white',
                 }
               : undefined
