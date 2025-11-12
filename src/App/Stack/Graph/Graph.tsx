@@ -29,6 +29,8 @@ import {
 } from './graphHooks';
 import { SelectedMeasurement, createBlankMeasurement } from './graphTypes';
 import { DateTime } from 'luxon';
+import { getMaxSeries } from './graphStateUtils';
+import { isResearcherMode } from './graphStateUtils';
 
 /** Props for the Graph component */
 interface GraphProps {
@@ -44,6 +46,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const [menuExpanded, setMenuExpanded] = useState(true);
   const [loading, setLoading] = useState(true);
   const { config } = useConfig();
+  const MAX_SERIES = getMaxSeries();
 
   // Helper to find a measurement in config by name, stationId, and instrumentId
 function getMeasurementFromConfig(name: string, stationId: number, instrumentId: number) {
@@ -271,31 +274,61 @@ useEffect(() => {
     setVariables((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const addVariable = () => {
-    // You should prompt/select a valid name, stationId, instrumentId
-    // For demonstration, use the first available measurement from config
-    if (!config || config.length === 0) return;
-    const stationId = config[0].id;
-    const instrument = config[0].children[0];
-    const instrumentId = instrument.id;
-    const measurement = instrument.measurements?.[0];
-    const name = measurement?.name ?? '';
-    setVariables((prev) => [
+const addVariable = () => {
+  // You should prompt/select a valid name, stationId, instrumentId
+  // For demonstration, find the first available measurement from config
+  if (!config || config.length === 0) return;
+
+  setVariables(prev => {
+    // Enforce max-series limit (normal = 2, researcher mode = Infinity)
+    if (prev.length >= MAX_SERIES) return prev;
+
+    // Find the first station/instrument/measurement that actually exists
+    let chosen:
+      | { stationId: number; instrumentId: number; name: string; measurement: any }
+      | null = null;
+
+    for (const station of config) {
+      const instruments = station.children ?? [];
+      for (const instrument of instruments) {
+        const m = instrument.measurements?.[0];
+        if (m && m.name) {
+          chosen = {
+            stationId: station.id,
+            instrumentId: instrument.id,
+            name: m.name,
+            measurement: m,
+          };
+          break;
+        }
+      }
+      if (chosen) break;
+    }
+
+    if (!chosen) {
+      console.warn('[Graph] addVariable(): no instruments/measurements found in config');
+      return prev; // Safety guard if data missing
+    }
+
+    return [
       ...prev,
       {
         ...createBlankMeasurement(),
-        ...measurement,
-        name,
-        stationId,
-        instrumentId,
+        ...chosen.measurement,
+        name: chosen.name,
+        stationId: chosen.stationId,
+        instrumentId: chosen.instrumentId,
       },
-    ]);
-  };
+    ];
+  });
+};
+
+
 
   if (!config) return null;
 
   return (
-    <div className="graph">
+    <div className={`graph ${isResearcherMode() ? 'research-mode' : ''}`}>
       {menuExpanded && (
         <div className="graph-menu">
           <Menu

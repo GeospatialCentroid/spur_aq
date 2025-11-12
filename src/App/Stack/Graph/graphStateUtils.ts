@@ -34,6 +34,29 @@ export type EncodedGraphState = {
   selection: [number, number]; // [start, end] timestamps in ms
 };
 
+// ---------------------------------------------------------------------------
+// Research-mode helpers (URL flag)
+// Usage: add ?mode=researcher to the page URL to raise the max series cap.
+// Import getMaxSeries/isResearcherMode where you enforce the cap.
+// ---------------------------------------------------------------------------
+export function isResearcherMode(): boolean {
+  try {
+    // Guard for non-browser environments and bad URLs
+    if (typeof window === 'undefined' || !window.location) return false;
+    const params = new URLSearchParams(window.location.search);
+    return (params.get('mode') || '').toLowerCase() === 'researcher';
+  } catch {
+    return false;
+  }
+}
+
+/** Central place to control the limit */
+export function getMaxSeries(): number {
+  return isResearcherMode() ? Number.POSITIVE_INFINITY : 2;
+  // or: return 1_000_000;  // if you prefer a gigantic numeric cap
+}
+
+
 /** ---- helpers ---- */
 
 function encodeSelection([start, end]: [number, number]): string {

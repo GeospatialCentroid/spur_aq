@@ -16,26 +16,27 @@
     }
 }
 
+/* Base layout (both modes) */
 .variable-button-group {
-    margin-top: .75rem;
-    background-color: #efefef;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    padding: 0.5rem;
+  margin-top: .75rem;
+  background-color: #efefef;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.5rem;
 
-    /* Scroll behavior */
-    /* FIXED height */
-    overflow-y: auto;
-    max-height: 210px;
-    /* Set a fixed height to prevent overflow */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 
-    /* Layout */
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-
-    font-weight: 500;
+  font-weight: 500;
 }
+
+/* Scrollbar ONLY in researcher mode */
+.graph-menu.research-mode .variable-button-group {
+  overflow-y: auto;      /* or `scroll` if you like always-visible bars */
+  max-height: 150px;     /* or 250–300px if you want to see more rows */
+}
+
 
 .dt-button-group {
     display: flex;
