@@ -74,7 +74,9 @@ const D3Chart: React.FC<D3ChartProps> = ({
 
 
   useEffect(() => {
-  
+  //console.log(selectedMeasurements)
+  var _interval=Number(interval)
+
   //drop milliseconds
    const normalizedData: typeof data = {};
     for (const [key, values] of Object.entries(data)) {
@@ -330,7 +332,13 @@ const D3Chart: React.FC<D3ChartProps> = ({
       // Define line generator
       const line = d3
         .line<{ timestamp: string; value: number }>()
-        .defined((d) => d.value != null)
+       .defined((d, i, dataArray) => {
+          if (d.value == null) return false;
+          if (i === 0) return true;
+          const prev = dataArray[i - 1];
+          const gapMinutes = (new Date(d.timestamp).getTime() - new Date(prev.timestamp).getTime()) / (1000 * 60);
+          return gapMinutes <= _interval; // only connect if gap close to the interval
+        })
         .x((d) => xScale(new Date(d.timestamp)))
         .y((d) => yScale(d.value))
         .curve(d3.curveMonotoneX);
@@ -410,19 +418,28 @@ const D3Chart: React.FC<D3ChartProps> = ({
         if (isNaN(datetime.getTime())) return;
 
         // Build tooltip HTML with date/time and values
-        const tooltipHtml = [`<strong>${formatter.format(datetime)}</strong>`]
+       const tooltipHtml = [
+          `<strong>${formatter.format(datetime)}</strong>`
+        ]
           .concat(
-            Object.entries(pointData).map(
-              ([key, value]) => `
-            <div style="display: flex; align-items: center; gap: 6px;">
-              <div style="width: 10px; height: 10px; border-radius: 50%; background: ${colorFor(
-                key
-              )};"></div>
-              ${key}: ${value.toFixed(2)}
-            </div>`
-            )
+            Object.entries(pointData).map(([key, value]) => {
+              const m = selectedMeasurements.find(
+                (mm) => mm.name === key || mm.alias === key
+              );
+
+              const formulaText = m?.formula ? ` ${m.formula}` : `${key}`;
+
+              return `
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <div style="width: 10px; height: 10px; border-radius: 50%; background: ${colorFor(
+                    key
+                  )};"></div>
+                 ${formulaText}: ${value.toFixed(2)}
+                </div>
+              `;
+            })
           )
-          .join('');
+          .join(''); // removed
 
         tooltip
           .html(tooltipHtml)
