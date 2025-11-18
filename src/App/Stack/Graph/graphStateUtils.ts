@@ -20,6 +20,7 @@
 export type EncodedMeasurement = {
   instrumentId: number;
   variableName: string;
+  color?: string;
 };
 
 /** A compact serializable representation of a graph's UI state (v2 shape) */
@@ -82,18 +83,27 @@ function clampSelectionToRange(
 
 /** Encode a single measurement token as `<instrumentId>-<variable>` with URI-safe variable */
 function encodeMeasurementToken(m: EncodedMeasurement): string {
-  return `${m.instrumentId}-${encodeURIComponent(m.variableName)}`;
+  const nameEnc = encodeURIComponent(m.variableName);
+  const colorEnc = m.color ? encodeURIComponent(m.color) : '';
+  const payload = colorEnc ? `${nameEnc}|${colorEnc}` : nameEnc;
+  return `${m.instrumentId}-${payload}`;
 }
 
 /** Try to parse `<instrumentId>-<variable>`; returns null on failure */
 function decodeMeasurementToken(token: string): EncodedMeasurement | null {
   const dash = token.indexOf('-');
   if (dash <= 0) return null;
+
   const instStr = token.slice(0, dash);
-  const varStr = token.slice(dash + 1);
+  const payload = token.slice(dash + 1);
   const instrumentId = Number(instStr);
   if (!Number.isFinite(instrumentId)) return null;
-  return { instrumentId, variableName: decodeURIComponent(varStr) };
+
+  const [nameEnc, colorEnc] = payload.split('|');
+  const variableName = decodeURIComponent(nameEnc || '');
+  const color = colorEnc ? decodeURIComponent(colorEnc) : undefined;
+
+  return { instrumentId, variableName, color };
 }
 
 /** ---- v2 encoder ---- */
