@@ -14,7 +14,6 @@ import './VariableModal.css';
 import VariableList from './VariableList';
 import VariableDescription from './VariableDescription';
 import { useConfig } from '../../../../../../context/ConfigContext';
-import { getColorForVariable } from '../../../ColorUtils';
 import { SelectedMeasurement, createBlankMeasurement } from '../../../graphTypes';
 import { Calibration } from '../../../../../../Types/calibration';
 import { useTranslation } from 'react-i18next';
@@ -49,14 +48,17 @@ interface VariableModalProps {
   onClose: () => void;
   onConfirmSelection: (variable: any) => void;
   stationsOverride?: any[]; // Add this optional prop
+  slotColor?: string;
+  coloredSelections?: { key: string; color: string }[];
 }
-
 
 const VariableModal: React.FC<VariableModalProps> = ({
   isOpen,
   onClose,
   onConfirmSelection,
-  stationsOverride, // Add this
+  stationsOverride,
+  slotColor,
+  coloredSelections,
 }) => {
   const { t } = useTranslation('graph');
   const { config } = useConfig(); // Station/instrument/measurement data
@@ -123,14 +125,6 @@ const VariableModal: React.FC<VariableModalProps> = ({
     return selected.name;
   };
 
-  /**
-   * Dynamically computes highlight color for selected measurement.
-   */
-  const getSelectedColor = (): string | undefined => {
-    if (selected?.type !== 'measurement') return undefined;
-    return getColorForVariable(selected.alias || selected.name);
-  };
-
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -164,8 +158,10 @@ const VariableModal: React.FC<VariableModalProps> = ({
               stations={(stationsOverride ?? config)}
               onSelect={handleSelect}
               selectedKey={selectedKey ?? undefined}
-              selectedColor={getSelectedColor()}
+              selectedColor={slotColor}
+              coloredSelections={coloredSelections}
             />
+
 
 
           </div>
@@ -177,9 +173,7 @@ const VariableModal: React.FC<VariableModalProps> = ({
               onConfirm={selected.type === 'measurement' ? handleConfirm : undefined}
               onCancel={selected.type === 'measurement' ? handleCancel : undefined}
               highlightColor={
-                selected.type === 'measurement'
-                  ? getColorForVariable(selected.alias || selected.name)
-                  : undefined
+                selected.type === 'measurement' ? slotColor : undefined
               }
             />
 

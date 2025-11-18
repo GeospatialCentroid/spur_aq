@@ -87,13 +87,15 @@ const D3Chart: React.FC<D3ChartProps> = ({
     }
     data = normalizedData
 
-    // Resolve a consistent color for a series using alias if available
-    const colorFor = (seriesName: string) => {
-      const m = selectedMeasurements.find(
-        mm => mm.name === seriesName || mm.alias === seriesName
-      );
-      return getColorForVariable(m?.alias || m?.name || seriesName);
-    };
+ // Resolve a consistent color for a series using alias if available
+const colorFor = (seriesName: string) => {
+  const m = selectedMeasurements.find(
+    mm => mm.name === seriesName || mm.alias === seriesName
+  );
+  if (m?.color) return m.color; // ← prefer the color stored on the measurement
+  return getColorForVariable(m?.alias || m?.name || seriesName);
+};
+
 
     // Setup SVG and clear previous contents
     const svg = d3.select<SVGSVGElement, unknown>(ref.current!);

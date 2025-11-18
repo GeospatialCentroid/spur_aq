@@ -48,7 +48,10 @@ interface MenuProps {
   onRemoveVariable: (index: number) => void;
   interval: string;
   onIntervalChange: (interval: string) => void;
+  getSlotColor?: (index: number) => string | undefined;
+  coloredSelections?: { key: string; color: string }[];
 }
+
 
 /**
  * Menu component used to configure a graph query.
@@ -65,6 +68,8 @@ const Menu: React.FC<MenuProps> = ({
   onRemoveVariable,
   interval,
   onIntervalChange,
+  getSlotColor,
+  coloredSelections,
 }) => {
   const { t } = useTranslation("graph");
   const MAX_SERIES = getMaxSeries();
@@ -123,6 +128,8 @@ const Menu: React.FC<MenuProps> = ({
               }}
               onRemove={() => onRemoveVariable(i)}
               openOnMount={i === openOnMountIndex}
+              slotColor={getSlotColor ? getSlotColor(i) : undefined}
+              coloredSelections={coloredSelections}
             />
           ))}
 

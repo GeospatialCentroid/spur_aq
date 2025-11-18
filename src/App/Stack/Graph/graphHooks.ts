@@ -45,15 +45,25 @@ export function useEmitGraphState({
   lastEmitted: React.MutableRefObject<string>;
 }) {
   useEffect(() => {
-    if (!onStateChange || variables.length === 0) return;
+    if (!onStateChange) return;
+
+    // Only treat “real” variables as active (must have name + instrumentId)
+    const active = variables.filter(v => v.name && v.instrumentId);
+
+    const stationId =
+      active[0]?.stationId ??
+      variables[0]?.stationId ??
+      0;
 
     const state: EncodedGraphState = {
       id: id.toString(36),
-      stationId: variables[0].stationId,
-      measurements: variables.map(v => ({
-        instrumentId: v.instrumentId,
-        variableName: v.name,
-      })),
+      stationId,
+      // Only encode active measurements; blank slots are ignored
+    measurements: active.map(v => ({
+      instrumentId: v.instrumentId,
+      variableName: v.name,
+      color: v.color,    // ← persist color in URL
+    })),
       fromDate,
       toDate,
       interval,
@@ -140,10 +150,9 @@ export function useFetchChartData({
 }) {
   useEffect(() => {
     if (!variables.length || variables.every(v => !v.name || !v.instrumentId)) {
-     setLoading?.(false);
+      setLoading?.(false);
+      return;
     }
-
-    if (variables.length === 0) return;
 
     const key = JSON.stringify({ variables, fromDate, toDate, interval });
     if (key === lastFetchKey.current) return;

@@ -12,7 +12,6 @@
 import React, { useEffect, useState } from 'react';
 import VariableModal from './VariableModal/VariableModal';
 import './VariableSelector.css';
-import { getColorForVariable } from '../../ColorUtils';
 import { XLg } from 'react-bootstrap-icons';
 import { SelectedMeasurement } from '../../graphTypes';
 import { useTranslation } from 'react-i18next';
@@ -30,7 +29,10 @@ interface VariableSelectorProps {
   onChange: (variable: SelectedMeasurement) => void;
   onRemove?: () => void;
   openOnMount?: boolean;
+  slotColor?: string;
+  coloredSelections?: { key: string; color: string }[];
 }
+
 
 /**
  * Renders a button that opens a modal for selecting a measurement variable.
@@ -40,6 +42,8 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
   onChange,
   onRemove,
   openOnMount,
+  slotColor,
+  coloredSelections,
 }) => {
   const { t } = useTranslation('graph');
   const [isOpen, setIsOpen] = useState(false); // Tracks if the modal is open
@@ -68,18 +72,19 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
       {/* Wrapper around the selection button and optional remove button */}
       <div className="variable-selector-wrapper">
         {/* Button shows current variable or fallback text */}
-        <button
+          <button
           className="variable-select-button"
           onClick={openModal}
           style={
-            value?.name
+            value?.name && slotColor
               ? {
-                  backgroundColor: getColorForVariable(value.alias || value.name),
+                  backgroundColor: slotColor,
                   color: 'white',
                 }
               : undefined
           }
         >
+
           {value?.alias ?? value?.name ?? t('BUTTONS.SELECT_VARIABLE')}
         </button>
 
@@ -100,6 +105,8 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
         isOpen={isOpen}
         onClose={closeModal}
         onConfirmSelection={handleConfirmSelection}
+        slotColor={slotColor}
+        coloredSelections={coloredSelections}
       />
     </>
   );
