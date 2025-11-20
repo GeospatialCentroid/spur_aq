@@ -6,7 +6,6 @@
   --arrow-y-nudge: 95px;
   --arrow-size: 35px;
   --arrow-offset-x: -4px;
-  --arrow-opacity: 0.6;
   --arrow-opacity-hover: 1;
 
   /* desktop horizontal nudge for dial + labels */
@@ -87,25 +86,48 @@
   .latest-timestamp { color: #9ca3af; }
 }
 
-/* ── Arrows ── */
+/* ── Arrows (Rounded Rectangle Buttons) ── */
 .arrow-button {
   position: absolute;
   top: calc(50% + var(--arrow-y-nudge));
   transform: translateY(-50%);
-  background: transparent;
-  border: none;
+  width: 30px;
+  height: 38px;
+  border-radius: 8px;
+  background-color: #0d6efd;
+  border: 1px solid #0b5ed7;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  padding: 0.25rem;
-  display: flex; align-items: center; justify-content: center;
-  opacity: var(--arrow-opacity);
-  transition: opacity 120ms ease;
+  padding: 0;              /* <-- keep this 0 so nothing gets clipped */
+  box-sizing: border-box;
+
+  color: #fff;
+  transition: opacity 120ms ease, transform 80ms ease;
   z-index: 10;
 }
-.arrow-button:hover,
-.arrow-button:focus-visible { opacity: var(--arrow-opacity-hover); }
+
 .arrow-button.left  { left:  var(--arrow-offset-x); }
 .arrow-button.right { right: var(--arrow-offset-x); }
-.arrow-button svg   { width: var(--arrow-size); height: var(--arrow-size); }
+
+/* size of the arrow inside the button */
+.arrow-button svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* nudge arrows *toward the center* without clipping */
+.arrow-button.left svg {
+  transform: translateX(3px);   /* move right (inward) */
+}
+
+.arrow-button.right svg {
+  transform: translateX(-3px);  /* move left (inward) */
+}
+
+
 
 /* ── Stack layout ── */
 .rv-content {

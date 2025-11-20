@@ -9,7 +9,7 @@
  * - Can be instructed to open immediately on mount (used when a variable is just added).
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import VariableModal from './VariableModal/VariableModal';
 import './VariableSelector.css';
 import { XLg } from 'react-bootstrap-icons';
@@ -47,24 +47,46 @@ const VariableSelector: React.FC<VariableSelectorProps> = ({
 }) => {
   const { t } = useTranslation('graph');
   const [isOpen, setIsOpen] = useState(false); // Tracks if the modal is open
+  const hasConfirmedRef = useRef(false);
 
   // Open the modal immediately on first mount if instructed
   useEffect(() => {
     if (openOnMount) {
+      hasConfirmedRef.current = false;
       setIsOpen(true);
     }
   }, [openOnMount]);
 
   // Opens the modal manually
-  const openModal = () => setIsOpen(true);
+  // Opens the modal manually
+  const openModal = () => {
+    hasConfirmedRef.current = false;
+    setIsOpen(true);
+  };
+
 
   // Closes the modal
-  const closeModal = () => setIsOpen(false);
+    // Closes the modal
+  const closeModal = () => {
+    setIsOpen(false);
+
+    // If this slot was just added (openOnMount) and the user closed
+    // the modal without confirming a selection, remove the blank slot.
+   if (openOnMount && !hasConfirmedRef.current && !value?.name && onRemove) {
+      onRemove();
+    }
+
+    // Reset for next open
+    hasConfirmedRef.current = false;
+  };
 
   // Handles confirmation of variable selection from the modal
+  // Handles confirmation of variable selection from the modal
   const handleConfirmSelection = (variable: SelectedMeasurement) => {
+    hasConfirmedRef.current = true;
     onChange(variable);
-    closeModal();
+    // Do NOT call closeModal() here; VariableModal will call `onClose`
+    // after confirm, which in turn calls closeModal() once.
   };
 
   return (

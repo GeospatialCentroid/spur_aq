@@ -15,7 +15,7 @@ const MarkerCluster: React.FC<Props> = ({ stations }) => {
 
     const cluster = hasMC
       ? (L as any).markerClusterGroup({
-          zoomToBoundsOnClick: false,     // we’ll toggle spiderfy instead
+          zoomToBoundsOnClick: false, // we’ll toggle spiderfy instead
           spiderfyOnMaxZoom: false,
           spiderfyDistanceMultiplier: 1.15,
           spiderLegPolylineOptions: {
@@ -29,7 +29,7 @@ const MarkerCluster: React.FC<Props> = ({ stations }) => {
         })
       : L.layerGroup();
 
-    // markers
+    // ---- add station markers ----
     stations.forEach((s) => {
       const lat = parseFloat(s.lat);
       const lng = parseFloat(s.lng);
@@ -62,6 +62,38 @@ const MarkerCluster: React.FC<Props> = ({ stations }) => {
     document.addEventListener("keydown", onKey);
 
     map.addLayer(cluster);
+
+    // 🔵 Auto-spiderfy once on initial load so the first cluster starts “open”
+    if (hasMC) {
+      const anyCluster = cluster as any;
+
+      // wait a bit so MarkerCluster can build clusters, then spiderfy
+      setTimeout(() => {
+        if (anyCluster._hasAutoSpiderfied) return;
+        anyCluster._hasAutoSpiderfied = true;
+
+        const layers: any[] = anyCluster.getLayers?.() ?? [];
+        if (!layers.length) return;
+
+        // use the first layer and find its visible parent cluster
+        let target: any = layers[0];
+
+        if (anyCluster.getVisibleParent) {
+          const parent = anyCluster.getVisibleParent(target);
+          if (parent) target = parent;
+        }
+
+        if (
+          target &&
+          target.getChildCount &&
+          target.getChildCount() > 1 &&
+          !target._spiderfied
+        ) {
+          target.spiderfy(); // => state in your screenshot: two pins + legs + faded bubble
+        }
+      }, 200); // tweak delay if needed (150–300 ms is usually plenty)
+    }
+
     return () => {
       document.removeEventListener("keydown", onKey);
       map.off("click zoomstart movestart", collapseAll);
