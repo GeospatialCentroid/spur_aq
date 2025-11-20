@@ -7,7 +7,7 @@
   
 
 TEXT:
-The Spur Regional Air Monitoring Site (RAMS) is a long-term air quality monitoring station at the CSU Spur campus in Denver, Colorado. We aim to bring awareness to pollutant concentrations in the region and communicate air quality observations to the Spur community.
+The Spur Regional Air Monitoring Site (RAMS) is a long-term air quality monitoring station at the CSU Spur campus in Denver, Colorado. We aim to bring awareness to pollutant concentrations in the region, communicate air quality observations to the Spur community, and provide opportunities for students to learn about air quality.
 
 # IMAGE: relative path to image is already given public/Photos/InfoCardPhotos/(place your file name here example: overview.mp4 or airQuality.jpg)
 IMAGE: /Photos/InfoCardPhotos/SpurRAMS.jpg
