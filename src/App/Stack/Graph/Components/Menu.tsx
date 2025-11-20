@@ -18,6 +18,8 @@ import VariableSelector from './Menu/VariableSelector';
 import IntervalSelector from './Menu/IntervalSelector';
 import { getNowMountain } from '../graphDateUtils';
 import { SelectedMeasurement } from '../graphTypes';
+import { getMaxSeries, isResearcherMode } from '../graphStateUtils';
+
 
 /**
  * Props for the Menu component.
@@ -46,7 +48,10 @@ interface MenuProps {
   onRemoveVariable: (index: number) => void;
   interval: string;
   onIntervalChange: (interval: string) => void;
+  getSlotColor?: (index: number) => string | undefined;
+  coloredSelections?: { key: string; color: string }[];
 }
+
 
 /**
  * Menu component used to configure a graph query.
@@ -63,8 +68,12 @@ const Menu: React.FC<MenuProps> = ({
   onRemoveVariable,
   interval,
   onIntervalChange,
+  getSlotColor,
+  coloredSelections,
 }) => {
   const { t } = useTranslation("graph");
+  const MAX_SERIES = getMaxSeries();
+  const researcherMode = isResearcherMode();
   // Tracks the index of the variable selector to auto-open on mount
   const [openOnMountIndex, setOpenOnMountIndex] = useState<number | null>(null);
 
@@ -74,8 +83,9 @@ const Menu: React.FC<MenuProps> = ({
     setOpenOnMountIndex(variables.length); // index of the new variable
   };
 
+
   return (
-    <div className={`graph-menu ${className}`}>
+    <div className={`graph-menu ${className} ${researcherMode ? 'research-mode' : ''}`}>
       <div className="menu-content">
 
         {/* Time and interval controls */}
@@ -118,10 +128,12 @@ const Menu: React.FC<MenuProps> = ({
               }}
               onRemove={() => onRemoveVariable(i)}
               openOnMount={i === openOnMountIndex}
+              slotColor={getSlotColor ? getSlotColor(i) : undefined}
+              coloredSelections={coloredSelections}
             />
           ))}
 
-          {variables.length < 2 && (
+          {variables.length < MAX_SERIES && (
             <button className="add-variable-button" onClick={handleAddVariable}>
               {t('BUTTONS.ADD_VARIABLE')}
             </button>

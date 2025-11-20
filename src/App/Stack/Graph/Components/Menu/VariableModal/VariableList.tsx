@@ -31,12 +31,13 @@ interface VariableListProps {
       alias?: string;
       units?: string;
       calibrations?: Calibration[];
-      public_display?:boolean;
+      public_display?: boolean;
     },
     key: string
   ) => void;
   selectedKey?: string;
-  selectedColor?: string;
+  selectedColor?: string; // color for the measurement in the *current* slot
+  coloredSelections?: { key: string; color: string }[]; // colors for all existing selections
 }
 
 /**
@@ -47,6 +48,7 @@ const VariableList: React.FC<VariableListProps> = ({
   onSelect,
   selectedKey,
   selectedColor,
+  coloredSelections,
 }) => {
   const { mode } = useMode();
   return (
@@ -99,36 +101,48 @@ const VariableList: React.FC<VariableListProps> = ({
                   {instrument.measurements.map((m) => {
                     const measurementKey = `${station.id}:${instrument.id}:${m.name}`;
                     const isSelected = selectedKey === measurementKey;
+
                     if (mode === 'public' && !m.public_display) {
-                        return null;
-                      }
+                      return null;
+                    }
+
+                    // Look up an existing color for this measurement (if any)
+                    const assigned = coloredSelections?.find(
+                      (c) => c.key === measurementKey
+                    );
+                    const baseColor = assigned?.color;
+
+                    // If this is the row currently selected in the modal,
+                    // let the current slot color override the base color.
+                    const finalColor =
+                      isSelected && selectedColor ? selectedColor : baseColor;
+
                     return (
                       <li
                         key={m.id}
                         className={`selectable measurement ${isSelected ? 'selected' : ''}`}
                         onClick={() =>
                           onSelect(
-                         {
-                            type: 'measurement',
-                            name: m.name,
-                            description: m.description ?? '',
-                            alias: m.alias ?? m.name,
-                            units: m.units?.toString(),
-                          },
+                            {
+                              type: 'measurement',
+                              name: m.name,
+                              description: m.description ?? '',
+                              alias: m.alias ?? m.name,
+                              units: m.units?.toString(),
+                            },
                             measurementKey
                           )
                         }
                         style={
-                          isSelected && selectedColor
+                          finalColor
                             ? {
-                                backgroundColor: selectedColor,
+                                backgroundColor: finalColor,
                                 color: 'white',
                               }
                             : undefined
                         }
                       >
                         {m.alias || m.name}
-
                       </li>
                     );
                   })}

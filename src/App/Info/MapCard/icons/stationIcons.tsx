@@ -92,9 +92,9 @@ export function makeIconFromStation(
   return makeStationDivIcon({
     kind: opts?.kind ?? 'air-quality',
     size: opts?.size ?? 40,
-    accent: opts?.accent ?? '#1fa755',
+    accent: opts?.accent ?? '#0d6efd',
     fill: opts?.fill ?? '#fff',
-    tip: opts?.tip ?? '#1fa755',
+    tip: opts?.tip ?? '#0d6efd',
     label: opts?.label ?? station.name,
     svg: station.icon_svg || '',
   });

@@ -20,6 +20,7 @@
 export type EncodedMeasurement = {
   instrumentId: number;
   variableName: string;
+  color?: string;
 };
 
 /** A compact serializable representation of a graph's UI state (v2 shape) */
@@ -33,6 +34,29 @@ export type EncodedGraphState = {
   interval: string;
   selection: [number, number]; // [start, end] timestamps in ms
 };
+
+// ---------------------------------------------------------------------------
+// Research-mode helpers (URL flag)
+// Usage: add ?mode=researcher to the page URL to raise the max series cap.
+// Import getMaxSeries/isResearcherMode where you enforce the cap.
+// ---------------------------------------------------------------------------
+export function isResearcherMode(): boolean {
+  try {
+    // Guard for non-browser environments and bad URLs
+    if (typeof window === 'undefined' || !window.location) return false;
+    const params = new URLSearchParams(window.location.search);
+    return (params.get('mode') || '').toLowerCase() === 'researcher';
+  } catch {
+    return false;
+  }
+}
+
+/** Central place to control the limit */
+export function getMaxSeries(): number {
+  return isResearcherMode() ? Number.POSITIVE_INFINITY : 2;
+  // or: return 1_000_000;  // if you prefer a gigantic numeric cap
+}
+
 
 /** ---- helpers ---- */
 
@@ -59,18 +83,27 @@ function clampSelectionToRange(
 
 /** Encode a single measurement token as `<instrumentId>-<variable>` with URI-safe variable */
 function encodeMeasurementToken(m: EncodedMeasurement): string {
-  return `${m.instrumentId}-${encodeURIComponent(m.variableName)}`;
+  const nameEnc = encodeURIComponent(m.variableName);
+  const colorEnc = m.color ? encodeURIComponent(m.color) : '';
+  const payload = colorEnc ? `${nameEnc}|${colorEnc}` : nameEnc;
+  return `${m.instrumentId}-${payload}`;
 }
 
 /** Try to parse `<instrumentId>-<variable>`; returns null on failure */
 function decodeMeasurementToken(token: string): EncodedMeasurement | null {
   const dash = token.indexOf('-');
   if (dash <= 0) return null;
+
   const instStr = token.slice(0, dash);
-  const varStr = token.slice(dash + 1);
+  const payload = token.slice(dash + 1);
   const instrumentId = Number(instStr);
   if (!Number.isFinite(instrumentId)) return null;
-  return { instrumentId, variableName: decodeURIComponent(varStr) };
+
+  const [nameEnc, colorEnc] = payload.split('|');
+  const variableName = decodeURIComponent(nameEnc || '');
+  const color = colorEnc ? decodeURIComponent(colorEnc) : undefined;
+
+  return { instrumentId, variableName, color };
 }
 
 /** ---- v2 encoder ---- */

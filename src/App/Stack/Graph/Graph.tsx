@@ -29,6 +29,31 @@ import {
 } from './graphHooks';
 import { SelectedMeasurement, createBlankMeasurement } from './graphTypes';
 import { DateTime } from 'luxon';
+import { getMaxSeries } from './graphStateUtils';
+import { isResearcherMode } from './graphStateUtils';
+import { SERIES_COLORS } from './ColorUtils';
+
+// Pick the next available Dark2 color that isn't already used.
+// If all colors are used, wrap around.
+function pickNextColor(
+  existing: SelectedMeasurement[],
+  ignoreIndex?: number
+): string {
+  const used = new Set<string>();
+
+  existing.forEach((v, i) => {
+    if (ignoreIndex !== undefined && i === ignoreIndex) return;
+    if (v.color) used.add(v.color);
+  });
+
+  for (const c of SERIES_COLORS) {
+    if (!used.has(c)) return c;
+  }
+
+  // Fallback: wrap if more series than colors
+  return SERIES_COLORS[used.size % SERIES_COLORS.length];
+}
+
 
 /** Props for the Graph component */
 interface GraphProps {
@@ -44,6 +69,7 @@ const Graph: React.FC<GraphProps> = ({ id, onRemove, initialState, onStateChange
   const [menuExpanded, setMenuExpanded] = useState(true);
   const [loading, setLoading] = useState(true);
   const { config } = useConfig();
+  const MAX_SERIES = getMaxSeries();
 
   // Helper to find a measurement in config by name, stationId, and instrumentId
 function getMeasurementFromConfig(name: string, stationId: number, instrumentId: number) {
@@ -90,26 +116,42 @@ function findMeasurementByInstrument(
    * NOTE: with the v2 URL format, `initialState` carries `measurements` where each entry
    * embeds its own `instrumentId` alongside the `variableName`. We hydrate from that here.
    */
- const [variables, setVariables] = useState<SelectedMeasurement[]>(() => {
-    const stationIdDefault = initialState?.stationId ?? 0;
-    const ms = initialState?.measurements ?? [];
-    return ms.map(({ instrumentId, variableName }) => {
-      const within = getMeasurementFromConfig(variableName, stationIdDefault, instrumentId);
-      const across = findMeasurementByInstrument(variableName, instrumentId);
-      const m = within ?? across.measurement ?? null;
-      const resolvedStationId = within ? stationIdDefault : (across.stationId ?? stationIdDefault);
+const [variables, setVariables] = useState<SelectedMeasurement[]>(() => {
+  const stationIdDefault = initialState?.stationId ?? 0;
+  const ms = initialState?.measurements ?? [];
 
-      return {
-        ...createBlankMeasurement(),
-        ...(m ?? {}),
-        name:  m?.name  ?? variableName,  // canonical for API/data
-        alias: m?.alias ?? null,          // prefer alias for UI
-        stationId: resolvedStationId,
-        instrumentId,
-      };
-    });
+  // First build base list with whatever color came from the URL (if any)
+  const base: SelectedMeasurement[] = ms.map(({ instrumentId, variableName, color }) => {
+    const within = getMeasurementFromConfig(variableName, stationIdDefault, instrumentId);
+    const across = findMeasurementByInstrument(variableName, instrumentId);
+    const m = within ?? across.measurement ?? null;
+    const resolvedStationId = within ? stationIdDefault : (across.stationId ?? stationIdDefault);
+
+    return {
+      ...createBlankMeasurement(),
+      ...(m ?? {}),
+      name:  m?.name  ?? variableName,  // canonical for API/data
+      alias: m?.alias ?? null,          // prefer alias for UI
+      stationId: resolvedStationId,
+      instrumentId,
+      color: color ?? undefined,        // may be undefined for old URLs
+    };
   });
 
+  // Second pass: assign Dark2 colors where missing, without duplication
+  const withColors: SelectedMeasurement[] = [];
+  base.forEach((v) => {
+    if (v.color) {
+      withColors.push(v);
+    } else {
+      const nextColor = pickNextColor(withColors);
+      withColors.push({ ...v, color: nextColor });
+    }
+  });
+
+  return withColors;
+});
+;
 
     // Re-hydrate variables with full metadata once config is loaded (fixes alias after refresh)
  // Re-hydrate variables with full metadata once config is loaded (fixes alias after refresh)
@@ -240,30 +282,62 @@ useEffect(() => {
 
   const handleIntervalChange = (newInterval: string) => setInterval(newInterval);
 
-  const handleVariableChange = (index: number, value: SelectedMeasurement) => {
+  const handleVariableChange = (index: number, raw: SelectedMeasurement) => {
+    // 🔒 Never trust color coming from the modal / outside.
+    // We always manage colors here based on currently-selected variables.
+    const { color: _ignoredColor, ...value } = raw;
+
     const byName  = getMeasurementFromConfig(value.name,  value.stationId, value.instrumentId);
     const byAlias = value.alias ? getMeasurementFromConfig(value.alias, value.stationId, value.instrumentId) : undefined;
     const xName   = findMeasurementByInstrument(value.name,  value.instrumentId);
     const xAlias  = value.alias ? findMeasurementByInstrument(value.alias, value.instrumentId) : {};
 
     const measurement = byName ?? byAlias ?? xName.measurement ?? xAlias.measurement;
-    const stId = (byName || byAlias) ? value.stationId : (xName.stationId ?? xAlias.stationId ?? value.stationId);
+    const stId = (byName || byAlias)
+      ? value.stationId
+      : (xName.stationId ?? xAlias.stationId ?? value.stationId);
 
-    const mergedValue = measurement ? {
-      ...value,
-      ...measurement,
-      name:  measurement.name  ?? value.name,
-      alias: measurement.alias ?? value.alias ?? null,
-      stationId: stId, // <- ensure correct
-    } : value;
+    const mergedBase: SelectedMeasurement = measurement
+      ? {
+          ...value,
+          ...measurement,
+          name:  measurement.name  ?? value.name,
+          alias: measurement.alias ?? value.alias ?? null,
+          stationId: stId,
+        }
+      : value;
 
-    console.log('Selected Measurement:', mergedValue);
+    console.log('Selected Measurement:', mergedBase);
+
     setVariables(prev => {
       const updated = [...prev];
-      updated[index] = mergedValue;
+
+      // Build a set of colors currently in use by OTHER slots
+      const used = new Set<string>();
+      updated.forEach((v, i) => {
+        if (i === index) return;          // ignore the slot we’re editing
+        if (v.color) used.add(v.color);
+      });
+
+      // Pick the first palette color that is not used,
+      // or wrap around if all 8 are already taken.
+      let color =
+        SERIES_COLORS.find(c => !used.has(c)) ??
+        SERIES_COLORS[used.size % SERIES_COLORS.length];
+
+      // If this slot already had a color and it isn't conflicting,
+      // keep it (this matters on refresh when we hydrated from URL).
+      const existingColor = updated[index]?.color;
+      if (existingColor && !used.has(existingColor)) {
+        color = existingColor;
+      }
+
+      updated[index] = { ...mergedBase, color };
       return updated;
     });
   };
+
+
 
 
 
@@ -272,31 +346,53 @@ useEffect(() => {
   };
 
   const addVariable = () => {
-    // You should prompt/select a valid name, stationId, instrumentId
-    // For demonstration, use the first available measurement from config
     if (!config || config.length === 0) return;
-    const stationId = config[0].id;
-    const instrument = config[0].children[0];
-    const instrumentId = instrument.id;
-    const measurement = instrument.measurements?.[0];
-    const name = measurement?.name ?? '';
-    setVariables((prev) => [
-      ...prev,
-      {
-        ...createBlankMeasurement(),
-        ...measurement,
-        name,
-        stationId,
-        instrumentId,
-      },
-    ]);
+
+    setVariables((prev) => {
+      // Enforce max-series limit (normal = 2, researcher mode = Infinity)
+      if (prev.length >= MAX_SERIES) return prev;
+
+      // Just add a BLANK slot; the VariableSelector/modal will fill it in.
+      return [...prev, createBlankMeasurement()];
+    });
   };
 
-  if (!config) return null;
+  /**
+   * For a given variable slot index, return the color that slot should use.
+   * - If the slot already has a color, return that.
+   * - Otherwise, compute the next free palette color, ignoring this slot.
+   * This is what the modal should use to color the currently-selected item.
+   */
+  const getSlotColor = (index: number): string | undefined => {
+    const current = variables[index];
+    if (current?.color) return current.color;
+
+    // Build a temporary list with this slot's color cleared,
+    // then reuse the same "pickNextColor" logic.
+    const temp = variables.map((v, i) =>
+      i === index ? { ...v, color: undefined } : v
+    );
+
+    return pickNextColor(temp, index);
+  };
+
+   if (!config) return null;
+
+  // Map currently-selected variables to their measurement keys and colors,
+  // so the modal can show those colors in its list.
+  const coloredSelections = variables
+    .filter(
+      (v) => v.color && v.stationId != null && v.instrumentId != null && v.name
+    )
+    .map((v) => ({
+      key: `${v.stationId}:${v.instrumentId}:${v.name}`,
+      color: v.color as string,
+    }));
 
   return (
-    <div className="graph">
-      {menuExpanded && (
+    <div className={`graph ${isResearcherMode() ? 'research-mode' : ''}`}>
+
+       {menuExpanded && (
         <div className="graph-menu">
           <Menu
             fromDate={fromDate}
@@ -309,9 +405,14 @@ useEffect(() => {
             onAddVariable={addVariable}
             interval={interval}
             onIntervalChange={handleIntervalChange}
+            /** let Menu ask which color a slot should use */
+            getSlotColor={getSlotColor}
+            /** let the modal know which measurements already have colors */
+            coloredSelections={coloredSelections}
           />
         </div>
       )}
+
 
       <div className="graph-expand-toggle">
         <ExpandToggle
