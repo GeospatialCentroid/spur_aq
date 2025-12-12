@@ -76,12 +76,12 @@ export function highlightFeaturesByGroup(groupKey: string | null) {
 
   featureLayer.setStyle((feature: any) => {
     if (!feature) return {};
-    const fullCode = feature.properties?.ZONE_DISTRICT || "";
-    const match = fullCode.match(/^[A-Z]+-([A-Z]+)-/);
+    const fullCode = String(feature.properties?.ZONE_DISTRICT || "").toUpperCase();
+    const match = fullCode.match(/^[A-Z]+-([A-Z]+(?:-[A-Z]+)*)-/);
     const useType = match ? match[1] : fullCode;
     const isMatch = selectedCodes.includes(useType);
 
-    const group = getGroupByCode(fullCode);
+  const group = getGroupByCode(useType);
     const color = group?.color || "#cccccc";
 
     return {

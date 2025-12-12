@@ -32,10 +32,39 @@ export const zoningGroups: Record<string, ZoningGroup> = {
 
 export function getGroupByCode(fullCode: string | undefined | null) {
   if (!fullCode) return undefined;
-  const parts = fullCode.split("-").filter(Boolean);
-  const useType = parts.length >= 2 ? parts[1] : fullCode;
-  return Object.values(zoningGroups).find((g) => g.codes.includes(useType));
+
+  const codeStr = String(fullCode).trim().toUpperCase();
+
+  // Flatten all codes, longest-first so "M-IMX" wins over "M"
+  const allCodes = Object.values(zoningGroups)
+    .flatMap((g) => g.codes)
+    .filter(Boolean)
+    .map((c) => c.trim().toUpperCase())
+    .sort((a, b) => b.length - a.length);
+
+  // Match code as:
+  // - exact match: "OS-C"
+  // - prefix: "OS-C-..."
+  // - contained with dashes: "...-OS-C-..."
+  // - suffix: "...-OS-C"
+  const matched = allCodes.find((c) => {
+    return (
+      codeStr === c ||
+      codeStr.startsWith(`${c}-`) ||
+      codeStr.startsWith(`FC-${c}-`) ||
+      codeStr.includes(`-${c}-`) ||
+      codeStr.endsWith(`-${c}`)
+    );
+  });
+
+  if (!matched) return undefined;
+
+  return Object.values(zoningGroups).find((g) =>
+    g.codes.map((x) => x.toUpperCase()).includes(matched)
+  );
 }
+
+
 
 export function groupLabelByGroup(group: ZoningGroup | undefined) {
   return (Object.keys(zoningGroups) as (keyof typeof zoningGroups)[])
