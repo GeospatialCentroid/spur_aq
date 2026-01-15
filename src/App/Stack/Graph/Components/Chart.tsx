@@ -131,10 +131,10 @@ const Chart: React.FC<ChartProps> = ({
     return result;
   }, [chartData, selection]);
 
-console.log(
-  "DEBUG chartData sample:",
-  chartData.slice(0, 50) // just the first ~50 rows
-);
+// console.log(
+//   "DEBUG chartData sample:",
+//   chartData.slice(0, 50) // just the first ~50 rows
+//);
 
 
 

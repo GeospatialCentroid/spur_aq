@@ -316,6 +316,9 @@ const D3Chart: React.FC<D3ChartProps> = ({
 
   const useUtc = isUtcMode();
 
+  const searchParams = new URLSearchParams(window.location.search);
+  const hideChart = searchParams.get('hide_chart');
+
   useEffect(() => {
   if (!ref.current) return;
   const container = ref.current.parentElement;
@@ -337,7 +340,9 @@ const D3Chart: React.FC<D3ChartProps> = ({
   useEffect(() => {
   //console.log(selectedMeasurements)
   var _interval=Number(interval)
-
+    if (_interval<1){
+        _interval=1
+    }
   //drop milliseconds
    const normalizedData: typeof data = {};
     for (const [key, values] of Object.entries(data)) {
@@ -584,170 +589,173 @@ const colorFor = (seriesName: string) => {
     });
 
     // Draw lines for each measurement
-    selectedMeasurements.forEach((measurement) => {
-      const series = data[measurement.name];
-      if (!series || series.length === 0) return;
-
-      // Choose correct yScale
-      const yScale = measurement.units === primaryMeasurement?.units ? primaryYScale : secondaryYScale;
-      if (!yScale) return;
-
-      // Define line generator
-      const line = d3
-        .line<{ timestamp: string; value: number }>()
-       .defined((d, i, dataArray) => {
-          if (d.value == null) return false;
-          if (i === 0) return true;
-          const prev = dataArray[i - 1];
-          const gapMinutes = (new Date(d.timestamp).getTime() - new Date(prev.timestamp).getTime()) / (1000 * 60);
-          return gapMinutes <= _interval; // only connect if gap close to the interval
-        })
-        .x((d) => xScale(new Date(d.timestamp)))
-        .y((d) => yScale(d.value))
-        .curve(d3.curveMonotoneX);
-
-      // Append line path
-      g.append('path')
-        .datum(series)
-        .attr('fill', 'none')
-        .attr('stroke', colorFor(measurement.name))
-        .attr('stroke-width', 2)
-        .attr('d', line);
-
-    });
-
-    // Create focus circles for tooltips (one circle per measurement)
-
-    const focusMarkers: Record<string, d3.Selection<SVGGElement, unknown, any, unknown>> = {};
-    selectedMeasurements.forEach((measurement) => {
-      const shape = getMarkerShapeForName(measurement.name, selectedMeasurements);
-
-      const group = g
-        .append('g')
-        .attr('class', 'focus-marker')
-        .style('opacity', 0);
-
-      drawMarkerShape(group, shape, colorFor(measurement.name), 5);
-
-      focusMarkers[measurement.name] = group;
-    });
-
-    // Tooltip div
-    let tooltip = d3.select('body').select<HTMLDivElement>('div.tooltip');
-    if (tooltip.empty()) {
-      tooltip = d3
-        .select('body')
-        .append('div')
-        .attr('class', 'tooltip')
-        .style('position', 'absolute')
-        .style('pointer-events', 'none')
-        .style('background', '#fff')
-        .style('border', '1px solid #ccc')
-        .style('padding', '6px')
-        .style('border-radius', '4px')
-        .style('font-size', '12px')
-        .style('opacity', 0);
-    }
-
-    // Date formatter for tooltip header
-    const formatter = new Intl.DateTimeFormat('en-US', {
-      month: 'numeric',
-      day: 'numeric',
-      year: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: useUtc ? 'UTC' : 'America/Denver',
-    });
-
-
-    // Overlay rectangle to capture mouse events for tooltip
-    g.append('rect')
-      .attr('width', innerWidth)
-      .attr('height', innerHeight)
-      .style('fill', 'none')
-      .style('pointer-events', 'all')
-      .on('mousemove', function (event) {
-        const [mouseX] = d3.pointer(event);
-        const x0 = xScale.invert(mouseX);
-
-        // Find closest timestamp index
-        const bisect = d3.bisector((d: string) => new Date(d)).center;
-        const i = bisect(allTimestamps, x0);
-        const timestamp = allTimestamps[i];
-        if (!timestamp) return;
-
-        const pointData = dataByTimestamp.get(timestamp);
-        if (!pointData) return;
-
-        const datetime = new Date(timestamp);
-        if (isNaN(datetime.getTime())) return;
-
-        // Build tooltip HTML with date/time and values
-       const tooltipHtml = [
-          `<strong>${formatter.format(datetime)}</strong>`
-        ]
-          .concat(
-            Object.entries(pointData).map(([key, value]) => {
-              const m = selectedMeasurements.find(
-                (mm) => mm.name === key || mm.alias === key
-              );
-
-              const formulaText = m?.formula ? ` ${m.formula}` : `${key}`;
-              const shape = getMarkerShapeForName(key, selectedMeasurements);
-              const color = colorFor(key);
-
-              return `
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  ${markerHtml(shape, color)}
-                  <span>${formulaText}: ${value.toFixed(2)}</span>
-                </div>
-              `;
-            })
-          )
-          .join(''); // removed
-
-        tooltip
-          .html(tooltipHtml)
-          .style('left', event.pageX + 10 + 'px')
-          .style('top', event.pageY - 40 + 'px')
-          .style('opacity', 1);
-
-        // Position focus circles on hovered points
-        // Position focus markers on hovered points
+    if (hideChart != 't'){
         selectedMeasurements.forEach((measurement) => {
           const series = data[measurement.name];
-          if (!series) return;
+          if (!series || series.length === 0) return;
 
-          const marker = focusMarkers[measurement.name];
-          if (!marker) return;
+          // Choose correct yScale
+          const yScale = measurement.units === primaryMeasurement?.units ? primaryYScale : secondaryYScale;
+          if (!yScale) return;
 
-          const point = series.find((d) => d.timestamp === timestamp);
-          if (!point) {
-            marker.style('opacity', 0);
-            return;
-          }
+          // Define line generator
+          const line = d3
+            .line<{ timestamp: string; value: number }>()
+           .defined((d, i, dataArray) => {
+              if (d.value == null) return false;
+              if (i === 0) return true;
+              const prev = dataArray[i - 1];
+              const gapMinutes = (new Date(d.timestamp).getTime() - new Date(prev.timestamp).getTime()) / (1000 * 60);
+              return gapMinutes <= _interval; // only connect if gap close to the interval
+            })
+            .x((d) => xScale(new Date(d.timestamp)))
+            .y((d) => yScale(d.value))
+            .curve(d3.curveMonotoneX);
 
-          const yScale =
-            measurement.units === primaryMeasurement?.units ? primaryYScale : secondaryYScale;
-          if (!yScale) {
-            marker.style('opacity', 0);
-            return;
-          }
+          // Append line path
+          g.append('path')
+            .datum(series)
+            .attr('fill', 'none')
+            .attr('stroke', colorFor(measurement.name))
+            .attr('stroke-width', 2)
+            .attr('d', line);
 
-          const cx = xScale(new Date(point.timestamp));
-          const cy = yScale(point.value);
-
-          marker
-            .attr('transform', `translate(${cx},${cy})`)
-            .style('opacity', 1);
         });
 
-      })
-      .on('mouseout', () => {
-        tooltip.style('opacity', 0);
-        Object.values(focusMarkers).forEach((marker) => marker.style('opacity', 0));
-      });
+        // Create focus circles for tooltips (one circle per measurement)
+
+        const focusMarkers: Record<string, d3.Selection<SVGGElement, unknown, any, unknown>> = {};
+        selectedMeasurements.forEach((measurement) => {
+          const shape = getMarkerShapeForName(measurement.name, selectedMeasurements);
+
+          const group = g
+            .append('g')
+            .attr('class', 'focus-marker')
+            .style('opacity', 0);
+
+          drawMarkerShape(group, shape, colorFor(measurement.name), 5);
+
+          focusMarkers[measurement.name] = group;
+        });
+
+        // Tooltip div
+        let tooltip = d3.select('body').select<HTMLDivElement>('div.tooltip');
+        if (tooltip.empty()) {
+          tooltip = d3
+            .select('body')
+            .append('div')
+            .attr('class', 'tooltip')
+            .style('position', 'absolute')
+            .style('pointer-events', 'none')
+            .style('background', '#fff')
+            .style('border', '1px solid #ccc')
+            .style('padding', '6px')
+            .style('border-radius', '4px')
+            .style('font-size', '12px')
+            .style('opacity', 0);
+        }
+
+        // Date formatter for tooltip header
+        const formatter = new Intl.DateTimeFormat('en-US', {
+          month: 'numeric',
+          day: 'numeric',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+          timeZone: useUtc ? 'UTC' : 'America/Denver',
+        });
+
+
+        // Overlay rectangle to capture mouse events for tooltip
+        g.append('rect')
+          .attr('width', innerWidth)
+          .attr('height', innerHeight)
+          .style('fill', 'none')
+          .style('pointer-events', 'all')
+          .on('mousemove', function (event) {
+            const [mouseX] = d3.pointer(event);
+            const x0 = xScale.invert(mouseX);
+
+            // Find closest timestamp index
+            const bisect = d3.bisector((d: string) => new Date(d)).center;
+            const i = bisect(allTimestamps, x0);
+            const timestamp = allTimestamps[i];
+            if (!timestamp) return;
+
+            const pointData = dataByTimestamp.get(timestamp);
+            if (!pointData) return;
+
+            const datetime = new Date(timestamp);
+            if (isNaN(datetime.getTime())) return;
+
+            // Build tooltip HTML with date/time and values
+           const tooltipHtml = [
+              `<strong>${formatter.format(datetime)}</strong>`
+            ]
+              .concat(
+                Object.entries(pointData).map(([key, value]) => {
+                  const m = selectedMeasurements.find(
+                    (mm) => mm.name === key || mm.alias === key
+                  );
+
+                  const formulaText = m?.formula ? ` ${m.formula}` : `${key}`;
+                  const shape = getMarkerShapeForName(key, selectedMeasurements);
+                  const color = colorFor(key);
+
+                  return `
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                      ${markerHtml(shape, color)}
+                      <span>${formulaText}: ${value.toFixed(2)}</span>
+                    </div>
+                  `;
+                })
+              )
+              .join(''); // removed
+
+            tooltip
+              .html(tooltipHtml)
+              .style('left', event.pageX + 10 + 'px')
+              .style('top', event.pageY - 40 + 'px')
+              .style('opacity', 1);
+
+            // Position focus circles on hovered points
+            // Position focus markers on hovered points
+            selectedMeasurements.forEach((measurement) => {
+              const series = data[measurement.name];
+              if (!series) return;
+
+              const marker = focusMarkers[measurement.name];
+              if (!marker) return;
+
+              const point = series.find((d) => d.timestamp === timestamp);
+              if (!point) {
+                marker.style('opacity', 0);
+                return;
+              }
+
+              const yScale =
+                measurement.units === primaryMeasurement?.units ? primaryYScale : secondaryYScale;
+              if (!yScale) {
+                marker.style('opacity', 0);
+                return;
+              }
+
+              const cx = xScale(new Date(point.timestamp));
+              const cy = yScale(point.value);
+
+              marker
+                .attr('transform', `translate(${cx},${cy})`)
+                .style('opacity', 1);
+            });
+
+          })
+          .on('mouseout', () => {
+            tooltip.style('opacity', 0);
+            Object.values(focusMarkers).forEach((marker) => marker.style('opacity', 0));
+          });
+
+      }
 
 
     // Legend with colored circles and last value of each variable

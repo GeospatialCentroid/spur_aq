@@ -26,7 +26,10 @@ export const apiUrl = (path: string) => {
   const sep = path.includes('?') ? '&' : '?';
   const isUtcMode = new URLSearchParams(window.location.search).get('tz') === 'UTC';
   const tzParam = isUtcMode ? `${sep}tz=UTC` : '';
-  return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}${tzParam}`;
+  const isNoCalibrationMode = new URLSearchParams(window.location.search).get('calibration') == 'raw';
+  const NoCalibrationParam = isNoCalibrationMode ? `${sep}no_cal=t` : ``;
+  console.log(new URLSearchParams(window.location.search).get('calibration'),"NoCalibrationParam",NoCalibrationParam)
+  return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}${tzParam}${NoCalibrationParam}`;
 };
 
 

@@ -175,3 +175,13 @@ For critical logic or expressions that may be non-obvious, use `//` comments inl
 
 This structure supports both **readability** and **scalability** in collaborative, data-driven React applications.
 
+## URL Params
+| URL Parameter        | Example Value | Description                                                                 |
+|----------------------|---------------|-----------------------------------------------------------------------------|
+| `tz`                 | `utc`         | Forces all timestamps, axes, and tooltips to render in UTC instead of mountain time. |
+| `mode`               | `researcher`  | Enables researcher mode, exposing advanced UI elements. |
+| `calibration`        | `raw`         | Requests uncalibrated (raw) measurement data instead of calibrated values. |
+| `hide_chart`         | `t`           | Hides the D3 time-series chart while allowing the rest of the application UI to load. |
+
+``` e.g tz=utc&mode=researcher&calibration=raw&hide_chart=t```
+
