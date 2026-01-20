@@ -14,6 +14,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import './DateSelector.css';
 import { useTranslation } from 'react-i18next';
 import { isUtcMode, isoFromZonedWallTime } from '../../../../../utils/time';
+import {  fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 
 /**
@@ -45,7 +46,9 @@ export default function DateSelector({
   const { t } = useTranslation('graph');
   const useUtc = isUtcMode();
   const selectedDate = value
+    ? useUtc
     ? new Date(value)
+    : toZonedTime(value, 'America/Denver')
     : null;
 
 
@@ -58,7 +61,7 @@ export default function DateSelector({
     // Store as ISO-UTC. Interpret as UTC when ?tz=UTC, otherwise as America/Denver wall time.
     const iso = useUtc
       ? date.toISOString()
-      : isoFromZonedWallTime(date, 'America/Denver');
+      : fromZonedTime(date, 'America/Denver').toISOString();
 
     onChange(iso);
   };
