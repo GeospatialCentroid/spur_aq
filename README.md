@@ -183,5 +183,8 @@ This structure supports both **readability** and **scalability** in collaborativ
 | `calibration`        | `raw`         | Requests uncalibrated (raw) measurement data instead of calibrated values. |
 | `hide_chart`         | `t`           | Hides the D3 time-series chart while allowing the rest of the application UI to load. |
 
-``` e.g tz=utc&mode=researcher&calibration=raw&hide_chart=t```
+| `no_blackout`         | `t`           | Keeps the data collected while the instrument is calibrating |
+
+
+``` e.g tz=utc&mode=researcher&calibration=raw&hide_chart=t&no_blackout=t```
 

@@ -42,8 +42,7 @@ const VariableDescription: React.FC<VariableDescriptionProps> = ({
   const { t } = useTranslation('graph');
   return (
     <div className="variableDescription">
-      {/* Show multi-line description with preserved line breaks */}
-      <p style={{ whiteSpace: 'pre-wrap' }} dangerouslySetInnerHTML={{ __html: description }} />
+     
       {/* Only show Confirm/Cancel if a measurement is selected and handlers are defined */}
       {type === 'measurement' && onConfirm && onCancel && (
         <div className="description-actions">
@@ -72,6 +71,8 @@ const VariableDescription: React.FC<VariableDescriptionProps> = ({
             </button>
         </div>
       )}
+       {/* Show multi-line description with preserved line breaks */}
+      <p style={{ whiteSpace: 'pre-wrap' }} dangerouslySetInnerHTML={{ __html: description }} />
     </div>
   );
 };

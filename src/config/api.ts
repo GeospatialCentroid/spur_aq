@@ -28,8 +28,10 @@ export const apiUrl = (path: string) => {
   const tzParam = isUtcMode ? `${sep}tz=UTC` : '';
   const isNoCalibrationMode = new URLSearchParams(window.location.search).get('calibration') == 'raw';
   const NoCalibrationParam = isNoCalibrationMode ? `${sep}no_cal=t` : ``;
-  console.log(new URLSearchParams(window.location.search).get('calibration'),"NoCalibrationParam",NoCalibrationParam)
-  return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}${tzParam}${NoCalibrationParam}`;
+  const isNoBlackoutMode = new URLSearchParams(window.location.search).get('no_blackout') == 't';
+  const NoBlackoutParam = isNoBlackoutMode ? `${sep}no_blackout=t` : ``;
+  console.log(new URLSearchParams(window.location.search).get('no_blackout'),"NoBlackoutParam",NoBlackoutParam)
+  return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}${tzParam}${NoCalibrationParam}${NoBlackoutParam}`;
 };
 
 

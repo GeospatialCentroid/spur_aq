@@ -599,18 +599,23 @@ const colorFor = (seriesName: string) => {
           if (!yScale) return;
 
           // Define line generator
-          const line = d3
-            .line<{ timestamp: string; value: number }>()
-           .defined((d, i, dataArray) => {
-              if (d.value == null) return false;
-              if (i === 0) return true;
-              const prev = dataArray[i - 1];
-              const gapMinutes = (new Date(d.timestamp).getTime() - new Date(prev.timestamp).getTime()) / (1000 * 60);
-              return gapMinutes <= _interval; // only connect if gap close to the interval
-            })
-            .x((d) => xScale(new Date(d.timestamp)))
-            .y((d) => yScale(d.value))
-            .curve(d3.curveMonotoneX);
+          const line = d3.line<{ timestamp: string; value: number }>()
+          if (_interval>1){
+
+               line.defined((d, i, dataArray) => {
+                  if (d.value == null) return false;
+                  if (i === 0) return true;
+                  const prev = dataArray[i - 1];
+                  const gapMinutes = (new Date(d.timestamp).getTime() - new Date(prev.timestamp).getTime()) / (1000 * 60);
+                  return gapMinutes <= _interval; // only connect if gap close to the interval
+                })
+
+            }else{
+               line.defined(d => d.value != null)
+            }
+            line.x((d) => xScale(new Date(d.timestamp)))
+                .y((d) => yScale(d.value))
+                .curve(d3.curveMonotoneX);
 
           // Append line path
           g.append('path')

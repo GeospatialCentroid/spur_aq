@@ -1,8 +1,7 @@
 // File: src/App/Stack/Graph/graphApiUtils.
 
 import { SelectedMeasurement, VariableGroup } from './graphTypes';
-import { API_BASE_URL } from '../../../config/api'; 
-
+import { apiUrl } from '../../../config/api';
 /** Utility: Build a fully encoded API URL for measurements */
 export function buildApiUrl(
     stationId: number,
@@ -12,12 +11,10 @@ export function buildApiUrl(
     endDate: string,
     interval: string
 ): string {
-    const baseUrl = API_BASE_URL;
+    //const baseUrl = API_BASE_URL;
     const encodedStart = encodeURIComponent(formatDateForUrl(startDate));
     const variablePath = variableNames.join(',');
-
-    let url = `${baseUrl}/measurement/${instrumentId}/measurements/${variablePath}/${interval}/?start=${encodedStart}`;
-    
+    let url =apiUrl(`/measurement/${instrumentId}/measurements/${variablePath}/${interval}/?start=${encodedStart}`);
     if (endDate) {
         const encodedEnd = encodeURIComponent(formatDateForUrl(endDate));
         url += `&end=${encodedEnd}`;
