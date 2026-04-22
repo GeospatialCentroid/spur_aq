@@ -116,7 +116,7 @@ const y2 = centerY + Math.sin(needleAngle) * needleLength;
       const labelAngle = -Math.PI + i * arcSpan;
       const x = centerX + Math.cos(labelAngle) * (radius + 20);
       const y = centerY + Math.sin(labelAngle) * (radius + 20);
-
+      const isLast = i === sortedRanges.length - 1;
       svg.append('text')
         .attr('x', x)
         .attr('y', y)
@@ -124,23 +124,25 @@ const y2 = centerY + Math.sin(needleAngle) * needleLength;
         .attr('alignment-baseline', 'middle')
         .style('font-size', '12px')
         .style('font-weight', 'bold')
-        .text(r.range[0]);
+        .text(isLast ? `${r.range[0]}+` : r.range[0]);
 
       // Add the final upper bound label
-      if (i === sortedRanges.length - 1) {
-        const endLabelAngle = -Math.PI + (i + 1) * arcSpan;
-        const endX = centerX + Math.cos(endLabelAngle) * (radius + 20);
-        const endY = centerY + Math.sin(endLabelAngle) * (radius + 20);
+    //   sortedRanges.forEach((r, i) => {
+    //   const labelAngle = -Math.PI + i * arcSpan;
+    //   const x = centerX + Math.cos(labelAngle) * (radius + 20);
+    //   const y = centerY + Math.sin(labelAngle) * (radius + 20);
 
-        svg.append('text')
-          .attr('x', endX)
-          .attr('y', endY)
-          .attr('text-anchor', 'middle')
-          .attr('alignment-baseline', 'middle')
-          .style('font-size', '12px')
-          .style('font-weight', 'bold')
-          .text(r.range[1]);
-      }
+    //   const isSecondLast = i === sortedRanges.length - 2;
+
+    //   svg.append('text')
+    //     .attr('x', x)
+    //     .attr('y', y)
+    //     .attr('text-anchor', 'middle')
+    //     .attr('alignment-baseline', 'middle')
+    //     .style('font-size', '12px')
+    //     .style('font-weight', 'bold')
+    //     .text(isSecondLast ? `${r.range[0]}+` : r.range[0]);
+    // });
     });
   }, [value, sortedRanges]);
 

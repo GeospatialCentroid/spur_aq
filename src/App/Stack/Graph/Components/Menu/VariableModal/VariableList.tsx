@@ -143,6 +143,9 @@ const VariableList: React.FC<VariableListProps> = ({
                         }
                       >
                         {m.alias || m.name}
+                        {(m.formula || m.units)
+                        ? ` (${[m.formula, m.units].filter(Boolean).join(', ')})`
+                        : ''}
                       </li>
                     );
                   })}

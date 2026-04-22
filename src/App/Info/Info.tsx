@@ -46,7 +46,7 @@ const Info: React.FC = () => {
                 </h5>
 
                 {/* Text + (arrow + QR) pinned to the top right */}
-                <div className="qr-cta odor-report">
+                <div className="qr-cta odor-report" style={{ display: 'none' }}>
                   <div className="qr-cta__text odor-text">
                     <div className="qr-cta__lead"></div>
                     <a

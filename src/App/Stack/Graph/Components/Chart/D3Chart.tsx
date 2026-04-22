@@ -382,8 +382,7 @@ const colorFor = (seriesName: string) => {
 
     // Determine primary and secondary variables based on first two selectedMeasurements,
     // enforce first variable uses left axis, second uses right if units differ
-    const primaryMeasurement = selectedMeasurements[0];
-
+    const primaryMeasurement = selectedMeasurements[0] ?? null;
     const secondaryMeasurement = selectedMeasurements[1] ?? null;
 
 
@@ -399,20 +398,44 @@ const colorFor = (seriesName: string) => {
       .nice()
       .range([innerHeight, 0]);
 
-    // Secondary Y scale domain from actual data if second variable exists
-    const secondaryYScale = secondaryMeasurement
-      ? (secondaryMeasurement.units === primaryMeasurement?.units
-          ? primaryYScale // share the same scale if units match
-          : (data[secondaryMeasurement.name]
-              ? d3.scaleLinear()
-                  .domain([
-                    d3.min(data[secondaryMeasurement.name].map((d) => d.value)) ?? 0,
-                    d3.max(data[secondaryMeasurement.name].map((d) => d.value)) ?? 100,
-                  ])
-                  .nice()
-                  .range([innerHeight, 0])
-              : null))
-      : null;
+    //Secondary Y scale domain from actual data if second variable exists
+    // const secondaryYScale = secondaryMeasurement
+    //   ? (secondaryMeasurement.units === primaryMeasurement?.units
+    //       ? primaryYScale // share the same scale if units match
+    //       : (data[secondaryMeasurement.name]
+    //           ? d3.scaleLinear()
+    //               .domain([
+    //                 d3.min(data[secondaryMeasurement.name].map((d) => d.value)) ?? 0,
+    //                 d3.max(data[secondaryMeasurement.name].map((d) => d.value)) ?? 100,
+    //               ])
+    //               .nice()
+    //               .range([innerHeight, 0])
+    //           : null))
+    //   : null;
+const secondaryYScale = secondaryMeasurement
+  ? (() => {
+      const series = data[secondaryMeasurement.name];
+      if (!series || series.length === 0) return null;
+
+      const values = series
+        .map(d => d.value)
+        .filter(v => v != null && !isNaN(v));
+
+      if (values.length === 0) return null;
+
+      const min = d3.min(values)!;
+      const max = d3.max(values)!;
+
+      const range = max - min || 1;
+      const padding = range * 0.1;
+
+      return d3.scaleLinear()
+        .domain([min - padding, max + padding])
+        .nice()
+        .range([innerHeight, 0]);
+    })()
+  : null;
+
 
 
     // Main group translated by margins
@@ -595,7 +618,10 @@ const colorFor = (seriesName: string) => {
           if (!series || series.length === 0) return;
 
           // Choose correct yScale
-          const yScale = measurement.units === primaryMeasurement?.units ? primaryYScale : secondaryYScale;
+          //const yScale = measurement.units === primaryMeasurement?.units ? primaryYScale : secondaryYScale;
+         const isPrimary = measurement.name === primaryMeasurement?.name;
+         const yScale = isPrimary ? primaryYScale : secondaryYScale;
+          
           if (!yScale) return;
 
           // Define line generator
@@ -739,8 +765,9 @@ const colorFor = (seriesName: string) => {
                 return;
               }
 
-              const yScale =
-                measurement.units === primaryMeasurement?.units ? primaryYScale : secondaryYScale;
+              const isPrimary = measurement.name === primaryMeasurement?.name;
+
+              const yScale = isPrimary ? primaryYScale : secondaryYScale;
               if (!yScale) {
                 marker.style('opacity', 0);
                 return;
