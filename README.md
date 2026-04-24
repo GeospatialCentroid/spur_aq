@@ -178,7 +178,7 @@ This structure supports both **readability** and **scalability** in collaborativ
 ## URL Params
 | URL Parameter        | Example Value | Description                                                                 |
 |----------------------|---------------|-----------------------------------------------------------------------------|
-| `tz`                 | `utc`         | Forces all timestamps, axes, and tooltips to render in UTC instead of mountain time. |
+| `tz`                 | `UTC`         | Forces all timestamps, axes, and tooltips to render in UTC instead of mountain time. |
 | `mode`               | `researcher`  | Enables researcher mode, exposing advanced UI elements. |
 | `calibration`        | `raw`         | Requests uncalibrated (raw) measurement data instead of calibrated values. |
 | `hide_chart`         | `t`           | Hides the D3 time-series chart while allowing the rest of the application UI to load. |
@@ -186,5 +186,5 @@ This structure supports both **readability** and **scalability** in collaborativ
 | `no_blackout`         | `t`           | Keeps the data collected while the instrument is calibrating |
 
 
-``` e.g tz=utc&mode=researcher&calibration=raw&hide_chart=t&no_blackout=t```
+``` e.g tz=UTC&mode=researcher&calibration=raw&hide_chart=t&no_blackout=t```
 

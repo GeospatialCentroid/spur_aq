@@ -153,7 +153,7 @@ const [variables, setVariables] = useState<SelectedMeasurement[]>(() => {
 });
 ;
 
-    // Re-hydrate variables with full metadata once config is loaded (fixes alias after refresh)
+
  // Re-hydrate variables with full metadata once config is loaded (fixes alias after refresh)
 useEffect(() => {
   if (!config || variables.length === 0) return;
@@ -306,8 +306,6 @@ useEffect(() => {
           stationId: stId,
         }
       : value;
-
-    console.log('Selected Measurement:', mergedBase);
 
     setVariables(prev => {
       const updated = [...prev];

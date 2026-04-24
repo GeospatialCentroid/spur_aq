@@ -144,6 +144,8 @@ const D3Chart: React.FC<D3ChartProps> = ({ id, fromDate, toDate, interval, yDoma
   }, []);
 
   useEffect(() => {
+    
+
     const _interval = Math.max(Number(interval), 1);
     const svg = d3.select<SVGSVGElement, unknown>(ref.current!);
     svg.selectAll('*').remove();
@@ -205,11 +207,38 @@ const D3Chart: React.FC<D3ChartProps> = ({ id, fromDate, toDate, interval, yDoma
     const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
     // 3. X-AXIS
-    const xAxis = d3.axisBottom(xScale).ticks(5).tickFormat(d => {
-      const fmt = useUtc ? d3.utcFormat('%m/%d %H:%M') : d3.timeFormat('%m/%d %H:%M');
-      return fmt(d as Date);
-    });
-    g.append('g').attr('transform', `translate(0,${innerHeight})`).call(xAxis);
+  const xAxis = d3.axisBottom(xScale)
+    .ticks(5)
+    // We remove the default tickFormat here because we'll handle it manually below
+    .tickFormat(() => ""); 
+
+  const xAxisGroup = g.append('g')
+    .attr('transform', `translate(0,${innerHeight})`)
+    .call(xAxis);
+
+  // Custom multiline formatting
+  xAxisGroup.selectAll(".tick text")
+  .each(function(d) {
+    const date = d as Date;
+    const el = d3.select(this);
+    
+    // Formatters
+    const formatDay = useUtc ? d3.utcFormat('%m/%d') : d3.timeFormat('%m/%d');
+    const formatTime = useUtc ? d3.utcFormat('%H:%M') : d3.timeFormat('%I %p');
+
+    // Line 1: Month/Day
+    el.append('tspan')
+      .attr('x', 0)
+      .attr('dy', '1.2em') // Position relative to the tick
+      .text(formatDay(date));
+
+    // Line 2: Time
+    el.append('tspan')
+      .attr('x', 0)
+      .attr('dy', '1.2em') // Position relative to the first tspan
+      .style('fill', '#666') // Optional: make time slightly lighter
+      .text(formatTime(date));
+  });
 
     // 4. MULTIPLE Y-AXES
     selectedMeasurements.forEach((m, i) => {
@@ -225,9 +254,8 @@ const D3Chart: React.FC<D3ChartProps> = ({ id, fromDate, toDate, interval, yDoma
 
       axisGroup.selectAll('path, line').style('stroke', color);
       axisGroup.selectAll('text').style('fill', color).text((d: any) => formatTick(String(d)));
-      console.log(m.alias , m.name,m.formula, m.units)
-     const labelParts = [m.formula, m.units].filter(Boolean).join(', ');
-     const labelStr = `${m.alias || m.name}${labelParts ? ` (${labelParts})` : ''}`;
+      const labelParts = [m.formula, m.units].filter(Boolean).join(', ');
+      const labelStr = `${m.alias || m.name}${labelParts ? ` (${labelParts})` : ''}`;
 
       
       g.append('text')
@@ -246,13 +274,43 @@ const D3Chart: React.FC<D3ChartProps> = ({ id, fromDate, toDate, interval, yDoma
       selectedMeasurements.forEach((m) => {
         const series = data[m.name];
         if (!series) return;
+        
         const line = d3.line<{ timestamp: string; value: number }>()
-          .defined(d => d.value != null)
-          .x(d => xScale(new Date(d.timestamp)))
-          .y(d => yScales[m.name](d.value))
-          .curve(d3.curveLinear);
+      .x(d => xScale(new Date(d.timestamp)))
+      .y(d => yScales[m.name](d.value))
+      .curve(d3.curveLinear); 
 
-        g.append('path')
+      // Apply the gap-detection logic
+      line.defined((d, i, dataArray) => {
+        // 1. Basic null check
+        if (d.value === null || d.value === undefined) return false;
+        
+        // 2. If it's the first point, we can't check a gap, so just show it
+        if (i === 0) return true;
+
+        // 3. Interval-based gap check
+        if (_interval > 1) {
+          const prev = dataArray[i - 1];
+          const currentTime = new Date(d.timestamp).getTime();
+          const prevTime = new Date(prev.timestamp).getTime();
+          
+          // Calculate difference in minutes
+          const gapMinutes = (currentTime - prevTime) / (1000 * 60);
+          
+          /**
+           * LOGIC: Only return true (connect the line) if the gap is 
+           * less than or equal to our defined interval.
+           * We add a small buffer (e.g., 1.5x) to prevent gaps caused 
+           * by tiny 1-second variations in sensor reporting.
+           */
+          return gapMinutes <= (_interval * 1.5); 
+        }
+
+    return true;
+  });
+
+
+      g.append('path')
           .datum(series)
           .attr('fill', 'none')
           .attr('stroke', m.color || getColorForVariable(m.alias || m.name))
