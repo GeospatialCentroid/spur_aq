@@ -375,7 +375,26 @@ const D3Chart: React.FC<D3ChartProps> = ({ id, fromDate, toDate, interval, yDoma
             }
           });
 
-          tooltip.html(html).style('left', `${event.pageX + 15}px`).style('top', `${event.pageY - 20}px`).style('opacity', 1);
+          tooltip.html(html)
+          .style('opacity', 1);
+          // Position tooltip intelligently
+          // 1. Get tooltip dimensions
+          const tooltipNode = tooltip.node();
+          const tooltipWidth = tooltipNode?.offsetWidth || 0;
+          const pageWidth = window.innerWidth;
+
+          // 2. Determine horizontal position
+          // If (Mouse X + Tooltip Width + offset) > Screen Width, flip it to the left
+          let leftPos = event.pageX + 15;
+          if (leftPos + tooltipWidth > pageWidth) {
+            leftPos = event.pageX - tooltipWidth - 15;
+          }
+
+          // 3. Apply positions
+          tooltip
+            .style('left', `${leftPos}px`)
+            .style('top', `${event.pageY - 20}px`);
+
         })
         .on('mouseout', () => {
           tooltip.style('opacity', 0);
