@@ -62,3 +62,23 @@ export type { ParsedMeasurement, RangeEntry };
 export const onlyFeatureMeasures = <T extends { feature_measure?: boolean | null }>(list: T[] = []) =>
   list.filter(m => m?.feature_measure === true);
 
+export function getCategoryText(value: number, ranges: RangeEntry[]): string {
+  // Ensure ranges are sorted lowest to highest
+  const sortedRanges = [...ranges].sort((a, b) => a.range[0] - b.range[0]);
+
+  for (let i = 0; i < sortedRanges.length; i++) {
+    const minVal = sortedRanges[i].range[0];
+    
+    // Grab the start of the next tier, or infinity if it's the last tier
+    const nextMinVal = (i + 1 < sortedRanges.length) 
+      ? sortedRanges[i + 1].range[0] 
+      : Infinity;
+
+    // 54.8 will now be caught because it is >= 0 and < 55
+    if (value >= minVal && value < nextMinVal) {
+      return sortedRanges[i].category;
+    }
+  }
+  
+  return "Unknown";
+}

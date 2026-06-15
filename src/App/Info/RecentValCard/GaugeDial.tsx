@@ -73,13 +73,22 @@ const clampedValue = Math.max(rangeMin, Math.min(rangeMax, value));
 
 // Find segment where value belongs
 let needleAngle = needleStartAngle;
+
 for (let i = 0; i < sortedRanges.length; i++) {
-  const [minVal, maxVal] = sortedRanges[i].range;
+  const minVal = sortedRanges[i].range[0];
+  
+  // Use the next segment's minimum value to close floating-point gaps.
+  // If it's the last segment, fallback to its defined max value.
+  const trueMaxVal = (i + 1 < sortedRanges.length) 
+    ? sortedRanges[i + 1].range[0] 
+    : sortedRanges[i].range[1];
+
   const segmentStartAngle = needleStartAngle + (i / sortedRanges.length) * totalNeedleArc;
   const segmentEndAngle = needleStartAngle + ((i + 1) / sortedRanges.length) * totalNeedleArc;
 
-  if (clampedValue >= minVal && clampedValue <= maxVal) {
-    const localRatio = (clampedValue - minVal) / (maxVal - minVal);
+  // Now, 54.8 will be caught securely between 0 and 55
+  if (clampedValue >= minVal && clampedValue <= trueMaxVal) {
+    const localRatio = (clampedValue - minVal) / (trueMaxVal - minVal);
     needleAngle = segmentStartAngle + localRatio * (segmentEndAngle - segmentStartAngle);
     break;
   }

@@ -23,15 +23,22 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
   const [latestTimestamp, setLatestTimestamp] = useState<string | null>(null);
 
   const selected = parsedMeasurements[currentIndex] || null;
-  const match = selected?.ranges.find(r => latestValue >= r.range[0] && latestValue <= r.range[1]);
+  
+  // --- UPDATED GAP-CLOSING LOGIC ---
+  // Sort ranges descending by their minimum value, then find the first range 
+  // where the latestValue is >= that minimum. This securely catches decimal values!
+  const match = selected?.ranges
+    ? [...selected.ranges]
+        .sort((a, b) => b.range[0] - a.range[0])
+        .find(r => latestValue >= r.range[0])
+    : null;
+
   const displayLabel = selected?.alias ?? selected?.measurementName ?? '_';
 
-
-const formattedTimestamp =
-  typeof latestTimestamp === 'string' && latestTimestamp
-    ? formatSmartShort(latestTimestamp)
-    : '';
-
+  const formattedTimestamp =
+    typeof latestTimestamp === 'string' && latestTimestamp
+      ? formatSmartShort(latestTimestamp)
+      : '';
 
   const fetchLatestValue = async (measurement: ParsedMeasurement) => {
     try {
@@ -116,6 +123,7 @@ const formattedTimestamp =
           </div>
 
           <div className="gauge-meta" aria-live="polite">
+            {/* Because 'match' now resolves correctly, this text will read "Good" instead of triggering the fallback translation */}
             <p className="gauge-category">{match?.category || t("LABELS.UNKNOWN")}</p>
 
             <h6 className="gauge-name">
