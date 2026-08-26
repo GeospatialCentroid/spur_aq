@@ -30,7 +30,7 @@ export const apiUrl = (path: string) => {
   const NoCalibrationParam = isNoCalibrationMode ? `${sep}no_cal=t` : ``;
   const isNoBlackoutMode = new URLSearchParams(window.location.search).get('no_blackout') == 't';
   const NoBlackoutParam = isNoBlackoutMode ? `${sep}no_blackout=t` : ``;
-  console.log(new URLSearchParams(window.location.search).get('no_blackout'),"NoBlackoutParam",NoBlackoutParam)
+  //console.log(new URLSearchParams(window.location.search).get('no_blackout'),"NoBlackoutParam",NoBlackoutParam)
   return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}${tzParam}${NoCalibrationParam}${NoBlackoutParam}`;
 };
 

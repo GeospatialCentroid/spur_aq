@@ -54,11 +54,10 @@ const RecentValuesCard: React.FC<RecentValuesCardProps> = ({ stationData }) => {
       const parsedData = JSON.parse(latestEntry?.data || '{}');
       const rawValue = parsedData?.[measurement.measurementName];
       const rawNum = Number(rawValue);
-
+  
       const calibrated = Number.isFinite(rawNum)
         ? calibrateValueForMeasurement(measurement, rawNum, readingTime)
         : 0;
-
       setLatestValue(calibrated);
       setLatestTimestamp(new Date(readingTime).toISOString());
     } catch (err) {

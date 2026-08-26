@@ -19,7 +19,7 @@ export function applyCalibration(raw: number, cal: Calibration | null): number {
   if (!cal) return raw;
   const { slope, offset } = cal;
   if (!Number.isFinite(slope) || !Number.isFinite(offset)) return raw;
-  return slope * raw + offset;
+  return (raw - offset) / slope;
 }
 
 /** Convenience helper for your ParsedMeasurement objects */
